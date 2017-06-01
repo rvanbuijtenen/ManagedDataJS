@@ -1,6 +1,7 @@
 
-//import * as Point from "./pointSchema.js";
-import * as MD4JS from "./datamanagers/lockingDataManager.js";
+//import * as Point from "./schemas/pointSchema.js";
+import * as MD4JS from "./datamanagers/basicDataManager.js";
+import * as interpreter from "./schemaInterpreter/schemaInterpreter.js";
 //import * as LMD4JS from "./loggingDataManager2.js";
 //import * as Machine from "./machineSchema.js";
 //import * as logger from "./loggingDataManager.js";
@@ -10,19 +11,22 @@ let ajv = Ajv({allErrors: true});
 
 class Main { 
     constructor(principal, years, rate) {	
-		
-		let pointSchema = require('./schemas/pointSchema.json');	
-		let Point = new MD4JS.LockingRecordFactory(pointSchema, "logfile.txt");
-		console.log(Point);
-		let aPoint = new Point.point(1,2);
-		console.log(aPoint);
-		aPoint.log("test", "something", "value");
-		aPoint.x = 5;
+		let pointSchema = require('./schemas/mountPointSchema.json');
+		let i = new interpreter.SchemaInterpreter();
+		let data = i.parseSchema(pointSchema);
+		console.log(data);
+		//l	
+		//let Point = new MD4JS.BasicRecordFactory(pointSchema);
+		//console.log(Point);
+		//let aPoint = new Point.point(1,2);
+		//console.log(aPoint);
+		//aPoint.log("test", "something", "value");
+		//aPoint.x = 5;
 
-		aPoint.lock();
+		//aPoint.lock();
 		//aPoint.x = 7;
-		aPoint.unlock();
-		aPoint.x = 9;
+		//aPoint.unlock();
+		//aPoint.x = 9;
 
 		/*console.log(pointSchema);
 		let Point = new MD4JS.BasicRecord(pointSchema);

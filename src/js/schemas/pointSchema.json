@@ -24,7 +24,7 @@
 			"properties": {
 				"x": {"type": "number"},
 				"y": {"type": "number"},
-				"parent": {"$ref": "#/definitions/3d"}
+				"parent": {"$ref": "#/definitions/point3d"}
 			}
 		}
 	}

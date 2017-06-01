@@ -39,7 +39,7 @@ export class BasicRecordHandler {
 
 export class MObject {
 	// initialize the data of this managed object
-	constructor(inits) {
+	constructor() {
 		for(var key in inits) {
 			data[key] = inits[key];	
 		}
@@ -62,7 +62,8 @@ export class MObject {
 let f = function(inits) {
 	
 	let i = new interpreter.SchemaInterpreter();
-	let mobj = new this.MObj(inits);
+	let objData = i.parseSchema(schema);
+	let mobj = new this.MObj(objData);
 	mobj.data = {"x": 0, "y": 0};
 	
 	return new Proxy(mobj, new this.handler());
