@@ -125,6 +125,26 @@ export class SchemaInterpreter {
 		return value;
 	}
 	
+	parseNumber(numberType) {
+		let value = 0;
+		if(numberType.hasOwnProperty('minimum')) {
+			value = numberType['minimum'];
+			if(numberType.hasOwnProperty('exclusiveMinimum') && numberType['exclusiveMinimum'] == true) {
+				value += 1;	
+			}
+		} else if(numberType.hasOwnProperty('maximum')) {
+			value = numberType['maximum'];			
+			if(numberType.hasOwnProperty('exclusiveMaximum') && numberType['exclusiveMaximum'] == true) {
+				value -= 1;	
+			}
+		}
+		
+		if(numberType.hasOwnProperty('multipleOf')) {
+			value += numberType['multipleOf'] - (value % numberType['multipleOf']);
+		}
+		return value;	
+	}
+	
 	parseString(stringType) {
 		console.log(stringType);
 		let str = '';
