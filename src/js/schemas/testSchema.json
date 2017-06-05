@@ -1,0 +1,23 @@
+{
+	"type": "object",
+	"properties": {
+		"a": {"type": "integer"},
+		"b": {"type": "number"},
+		"c": {"type": "string"},
+		"d": {
+			"type": "array",
+			"items": [{"$ref": "#/definitions/arrayType"}]
+		},
+		"e": {"type": "boolean"},
+		"f": {"type": "null"}
+	},
+	"definitions": {
+		"arrayType": {
+			"type": "object",
+			"properties": {
+				"x": {"type": "integer"},
+				"y": {"type": "integer"}
+			}
+		}
+	}
+}

@@ -1,7 +1,7 @@
 
 //import * as Point from "./schemas/pointSchema.js";
 import * as MD4JS from "./datamanagers/basicDataManager.js";
-import * as interpreter from "./schemaInterpreter/schemaInterpreter.js";
+import * as interpreter from "./schemaInterpreter/schemaInterpreter3.js";
 //import * as LMD4JS from "./loggingDataManager2.js";
 //import * as Machine from "./machineSchema.js";
 //import * as logger from "./loggingDataManager.js";
@@ -10,69 +10,79 @@ let Ajv = require('ajv');
 let ajv = Ajv({allErrors: true});
 
 class Main { 
-    constructor(principal, years, rate) {	
+    constructor() {
+		// load schema and create a basicRecordFactory
 		let pointSchema = require('./schemas/mountPointSchema.json');
-		let i = new interpreter.SchemaInterpreter();
-		let data = i.parseSchema(pointSchema);
-		console.log(data);
-		//l	
-		//let Point = new MD4JS.BasicRecordFactory(pointSchema);
-		//console.log(Point);
-		//let aPoint = new Point.point(1,2);
-		//console.log(aPoint);
-		//aPoint.log("test", "something", "value");
-		//aPoint.x = 5;
-
-		//aPoint.lock();
-		//aPoint.x = 7;
-		//aPoint.unlock();
-		//aPoint.x = 9;
-
-		/*console.log(pointSchema);
-		let Point = new MD4JS.BasicRecord(pointSchema);
-		let LoggedPoint = new LMD4JS.LoggedRecord(pointSchema, "point.txt");
-		console.log(LoggedPoint);
-		//console.log(rec);
-		let x2 = new LoggedPoint({"a": 1, "b": 2, "c": "testString", "d": [1,2,3], "e": false, "f": null, "g": 1, "h": {"x": 2, "y": 1, "parent": {"x": 2, "y": 2, "z": 2}}});
+		let br = new MD4JS.BasicRecordFactory(pointSchema);
 	
-		let x = new Point({"a": 1, "b": 2, "c": "testString", "d": [1,2,3], "e": false, "f": null, "g": 1, "h": {"x": 2, "y": 1, "parent": {"x": 2, "y": 2, "z": 2}}});
-		console.log(x);*/
+		let mountPointData = {
+			"/": {
+				"fstype": "btrfs",
+				"readonly": true
+			},
+			"/var": {
+				"fstype": "ext4",
+				"options": [ "nosuid" ]
+			},
+			"/tmp": {
+			},
+			"/var/www": {
+			}
+		}
 		
-		//var aPoint = new rec(5,6.5,"string",[1,2,3],false,null, "test",{"x":3,"y":5});
-		//let loggedRec = new logger.LoggedRecord(rec);
-		//console.log(aPoint);
+		let storageData = {
+			"diskDevice": {
+				"type": "disk",
+				"device": "/dev/sda1"
+			},
+			"diskUUID": {
+				"type": "disk",
+				"label": "8f3ba6f4-5c70-46ec-83af-0d5434953e5f"
+			},
+			"nfs": {
+				"type": "nfs",
+				"server": "my.nfs.server",
+				"remotePath": "/exports/mypath"
+			},
+			"tmpfs": {
+				"type": "tmpfs",
+				"sizeInMB": 64
+			}
+		}
 		
-		/*let mf = new MD4JS.BasicRecord(machineSchema);
-		let m = mf.newMachine();
-		let s1 = mf.newState();
-		let s2 = mf.newState();
-		let t1 = mf.newTransition();
-		let t2 = mf.newTransition();
+		// initialize fstab
+		let fstab = Object.create(Object);
 		
-		m.start = s1;
-		m.states = [s1,s2];
-		s1.transitions.add(t1);
-		s2.transitions.add(t2);*/
+		// create a managed mountPoint for each directory
+		for(var key in mountPointData) {
+			fstab[key] = new br.mountPoint(mountPointData[key]);
+		}
 		
+		// create managed storage object for each directory
+		fstab['/'].storage = new br.diskDevice(storageData['diskDevice']);
+		fstab['/var'].storage = new br.diskUUID(storageData['diskUUID']);
+		fstab['/tmp'].storage = new br.tmpfs(storageData['tmpfs']);
+		fstab['/var/www'].storage = new br.nfs(storageData['nfs']);
 		
-		/*
-		var aPoint = new rec(1,2);
-		console.log(aPoint);
+		// log the managed fstab
+		console.log("after initialization:\n\n");
+		for(key in fstab) {
+			console.log(key + ': ' + fstab[key].toString());
+		}
 		
-		console.log("DEBUG INFO: assigning float to x (type must be integer)");
-		rec.x = 1.2;
+		// test assignment
+		fstab['/tmp'].storage.sizeInMB = 512;
 		
-		console.log("\n\nDEBUG INFO: assigning integer to x (type must be integer)");
-		//rec.x = 1;
-			
-		console.log("\n\nDEBUG INFO: assigning string to y (type must be integer)");
-		rec.y = 'test';
+		// log managed fstab again
+		console.log("\n\n\nafter assignment:\n\n");
+		for(key in fstab) {
+			console.log(key + ': ' + fstab[key].toString());
+		}
 		
-		console.log("\n\nDEBUG INFO: assigning int to y (type must be integer)");
-		//rec.y = 2;
-		
-		console.log("\n\nDEBUG INFO: assigning value of an unknown field to z");
-		rec.z = rec.unknownField;*/
+		// attempt to assign non existing property: throws error
+		console.log("\n\n\nright before assignment to nonExistingProperty:\n\n");
+		console.log(fstab['/var']);
+		fstab['/tmp'].storage.nonExistingProperty = "test";
     }
 }
 

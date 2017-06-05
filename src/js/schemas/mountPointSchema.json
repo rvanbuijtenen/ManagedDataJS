@@ -1,8 +1,8 @@
 {
     "id": "http://some.site.somewhere/entry-schema#",
-    "$schema": "http://json-schema.org/draft-04/schema#",
     "description": "schema for an fstab entry",
     "type": "object",
+	"name": "mountPoint",
     "required": [ "storage" ],
     "properties": {
         "storage": {
@@ -27,17 +27,19 @@
     },
     "definitions": {
         "diskDevice": {
+            "type": "object",
             "properties": {
                 "type": { "enum": [ "disk" ] },
                 "device": {
                     "type": "string",
                     "pattern": "^/dev/[^/]+(/[^/]+)*$"
-                }
+				}
             },
             "required": [ "type", "device" ],
             "additionalProperties": false
         },
         "diskUUID": {
+            "type": "object",
             "properties": {
                 "type": { "enum": [ "disk" ] },
                 "label": {
@@ -49,6 +51,7 @@
             "additionalProperties": false
         },
         "nfs": {
+            "type": "object",
             "properties": {
                 "type": { "enum": [ "nfs" ] },
                 "remotePath": {
@@ -68,6 +71,7 @@
             "additionalProperties": false
         },
         "tmpfs": {
+            "type": "object",
             "properties": {
                 "type": { "enum": [ "tmpfs" ] },
                 "sizeInMB": {
