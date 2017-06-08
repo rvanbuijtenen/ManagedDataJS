@@ -138,6 +138,16 @@ export class MObject {
 				throw new TypeError("field " +propKey+" is enum and "+value+" is not one of "+schema.enum);
 			}
 		}
+
+		if(schema.hasOwnProperty('oneOf')) {
+			console.log('oneOf in bdm');
+			for(let item of schema.oneOf) {
+				console.log(item);
+				if(item.type == value.klass) {
+					return true;
+				}
+			}
+		}
 		
 		if(c == Array) {
 			if(schema.type == 'array') {
@@ -183,6 +193,7 @@ export class MObject {
 			if(value.hasOwnProperty('klass') && schema.type == value.klass) {
 				return true;
 			} else {
+				console.log(propKey, value, schema);
 				throw new TypeError("objects assigned to "+propKey+" must be managed data");
 			}
 		}

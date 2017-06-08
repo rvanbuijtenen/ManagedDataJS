@@ -79,6 +79,7 @@ export class SchemaInterpreter {
 	
 	parseTypeArray(arr) {
 		console.log("parsing type array");
+		console.log(arr);
 		for(var item of arr) {
 			if(item.hasOwnProperty('$ref')) {
 				item['type'] = this.klassPaths[item['$ref']];

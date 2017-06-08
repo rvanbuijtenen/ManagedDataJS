@@ -30,6 +30,10 @@ export class ArrayHandler {
 	}
 
 	static getType(item) {
-		return item.klass;
+		if(item.hasOwnProperty('klass')) {
+			return item.klass;
+		} else if (item.constructor == String) {
+			return 'string';
+		}
 	}
 }

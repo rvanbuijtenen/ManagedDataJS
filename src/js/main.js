@@ -48,7 +48,8 @@ class Main {
 		console.log("to event: " + m.start.transitions_out[0].to.transitions_out[0].event);
 		console.log("from event: " + m.start.transitions_out[0].to.transitions_in[0].event);
 		console.log("new state: " + m.start.transitions_out[0].to.transitions_out[0].to.stateName);
-
+		console.log(m);
+		
 		let mId = m.id;
 		let s1Id = s1.id;
 		let s2Id = s2.id;
@@ -69,7 +70,6 @@ class Main {
 		t4.load(t2Id);
 
 		m2.start = s3;
-		console.log(m2);
 		m2.states.push(s3);
 		m2.states.push(s4);
 
@@ -136,26 +136,41 @@ class Main {
 		fstab['/tmp'].storage = new br.tmpfs(storageData['tmpfs']);
 		fstab['/var/www'].storage = new br.nfs(storageData['nfs']);
 		
-		// log the managed fstab
-		console.log("after initialization:\n\n");
-		for(key in fstab) {
-			console.log(key + ': ' + fstab[key].toString());
-		}
 		
 		// test assignment
 		fstab['/tmp'].storage.sizeInMB = 512;
 		
-		// log managed fstab again
-		console.log("\n\n\nafter assignment:\n\n");
-		for(key in fstab) {
-			console.log(key + ': ' + fstab[key].toString());
-		}
 		
 		// attempt to assign non existing property: throws error
 		console.log("\n\n\nright before assignment to nonExistingProperty:\n\n");
 		console.log(fstab['/var']);
-		fstab['/tmp'].storage.nonExistingProperty = "test";
-		*/
+		
+		let ids = {};
+		let storageIds = {};
+		for(key in fstab) {
+			ids[key] = fstab[key].id;
+			storageIds[key] = fstab[key].storage.id;
+		}
+
+		let newFstab = {};
+
+		for(key in fstab) {
+			newFstab[key] = new br.mountPoint({});
+			newFstab[key].load(ids[key]);
+		}
+
+		newFstab['/'].storage = new br.diskDevice({});
+		newFstab['/var'].storage = new br.diskUUID({});
+		newFstab['/tmp'].storage = new br.tmpfs({});
+		newFstab['/var/www'].storage = new br.nfs({});
+		
+		newFstab['/'].storage.load(storageIds['/'])
+		newFstab['/var'].storage.load(storageIds['/var']);
+		newFstab['/tmp'].storage.load(storageIds['/tmp']);
+		newFstab['/var/www'].storage.load(storageIds['/var/www']);
+
+		console.log(newFstab);
+*/
     }
 }
 
