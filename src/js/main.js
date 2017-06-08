@@ -1,7 +1,7 @@
 
 //import * as Point from "./schemas/pointSchema.js";
-import * as MD4JS from "./datamanagers/basicDataManager.js";
-import * as interpreter from "./schemaInterpreter/schemaInterpreter3.js";
+import * as MD4JS from "./datamanagers/persistenceDataManager.js";
+import * as interpreter from "./schemaInterpreter/schemaInterpreter.js";
 //import * as LMD4JS from "./loggingDataManager2.js";
 //import * as Machine from "./machineSchema.js";
 //import * as logger from "./loggingDataManager.js";
@@ -12,10 +12,82 @@ let ajv = Ajv({allErrors: true});
 class Main { 
     constructor() {
 		// load schema and create a basicRecordFactory
-		let pointSchema = require('./schemas/mountPointSchema.json');
-		let br = new MD4JS.BasicRecordFactory(pointSchema);
-	
-		let mountPointData = {
+		let pointSchema = require('./schemas/testSchema.json');
+		let br = new MD4JS.PersistentRecordFactory(pointSchema);
+		let m = new br.machine({"machineName": "machine1", "states": []});
+		
+		let s1 = new br.state({"stateName": "closed", "transitions_in": [], "transitions_out": []});
+		let s2 = new br.state({"stateName": "opened", "transitions_in": [], "transitions_out": []});
+		
+		let t1 = new br.transition({"event": "open"});
+		let t2 = new br.transition({"event": "close"});
+		
+		m.start = s1;
+		m.states.push(s1);
+		m.states.push(s2);
+
+		console.log(m);
+		console.log(m.states);
+		s1.transitions_in.push(t2);
+		s1.transitions_out.push(t1);
+		
+		s2.transitions_in.push(t1);
+		s2.transitions_out.push(t2);
+
+
+		t1.from = s1;
+		t1.to = s2;
+		
+		t2.from = s2;
+		t2.to = s1;
+		
+		console.log("start state:" + m.start.stateName);
+		console.log("to event: " + m.start.transitions_out[0].event);	
+		console.log("from event: " + m.start.transitions_in[0].event);
+		console.log("new state: " + m.start.transitions_out[0].to.stateName);
+		console.log("to event: " + m.start.transitions_out[0].to.transitions_out[0].event);
+		console.log("from event: " + m.start.transitions_out[0].to.transitions_in[0].event);
+		console.log("new state: " + m.start.transitions_out[0].to.transitions_out[0].to.stateName);
+
+		let mId = m.id;
+		let s1Id = s1.id;
+		let s2Id = s2.id;
+
+		let t1Id = t1.id;
+		let t2Id = t2.id;
+
+		let m2 = br.machine({});
+		let s3 = br.state({});
+		let s4 = br.state({});
+		let t3 = br.transition({});
+		let t4 = br.transition({});
+
+		m2.load(mId);
+		s3.load(s1Id);
+		s4.load(s2Id);
+		t3.load(t1Id);
+		t4.load(t2Id);
+
+		m2.start = s3;
+		console.log(m2);
+		m2.states.push(s3);
+		m2.states.push(s4);
+
+		s3.transitions_in.push(t4);
+		s3.transitions_out.push(t3);
+		
+		s4.transitions_in.push(t3);
+		s4.transitions_out.push(t4);
+
+
+		t3.from = s3;
+		t3.to = s4;
+		
+		t4.from = s4;
+		t4.to = s3;
+
+		console.log(m2);
+		/*let mountPointData = {
 			"/": {
 				"fstype": "btrfs",
 				"readonly": true
@@ -83,6 +155,7 @@ class Main {
 		console.log("\n\n\nright before assignment to nonExistingProperty:\n\n");
 		console.log(fstab['/var']);
 		fstab['/tmp'].storage.nonExistingProperty = "test";
+		*/
     }
 }
 

@@ -29,8 +29,11 @@ export class SchemaInterpreter {
 			this.klassSchemas[definition] = Object.create(Object);
 			this.klassSchemas[definition].schema = definitions[definition];
 			this.klassPaths['#/definitions/'+definition] = definition;
-			this.parseObject(this.klassSchemas[definition].schema, definition);
 			this.klassSchemas[definition].subKlasses = this.currentSubKlasses;
+		}
+
+		for(var definition in definitions) {		
+			this.parseObject(this.klassSchemas[definition].schema, definition);
 		}
 	}
 	
@@ -51,22 +54,37 @@ export class SchemaInterpreter {
 				this.currentSubKlasses.push(this.klassPaths[property['$ref']]);
 				delete property['$ref'];
 			}
+			if(property.hasOwnProperty['enum']) {
+				this.parseTypeArray(property['enum']);
+			}
 		}
 	}
 	
 	parseType(typeObj) {
 		let type = typeObj['type'];
-		if(typeObj.hasOwnProperty('oneOf')) {
-			this.parseOneOf(typeObj['oneOf']);	
+		if(type == 'array') {
+			if(typeObj.hasOwnProperty('items')) {
+				this.parseTypeArray(typeObj.items);	
+			}
+		} else if(typeObj.hasOwnProperty('oneOf')) {
+			this.parseTypeArray(typeObj['oneOf']);	
+		} else if(typeObj.hasOwnProperty('anyOf')) {
+			this.parseTypeArray(typeObj['anyOf']);	
+		} else if(typeObj.hasOwnProperty('allOf')) {
+			this.parseTypeArray(typeObj['allOf']);	
 		} else if(type == 'object'){
 			throw new TypeError("A property referring to an object must have a reference to '#/definitions/<definition>' containing the object definition");	
 		}
 	}
 	
-	parseOneOf(oneOfArr) {
-		for(var item of oneOfArr) {
+	parseTypeArray(arr) {
+		console.log("parsing type array");
+		for(var item of arr) {
 			if(item.hasOwnProperty('$ref')) {
 				item['type'] = this.klassPaths[item['$ref']];
+				console.log(this.klassPaths);
+				console.log(item['$ref']);
+				console.log(this.klassPaths[item['$ref']]);
 				this.currentSubKlasses.push(this.klassPaths[item['$ref']]);
 				delete item['$ref'];
 			} else if(item.hasOwnProperty('type') && item['type'] != 'object'){

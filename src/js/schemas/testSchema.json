@@ -1,22 +1,32 @@
 {
-	"type": "object",
+	"name": "machine",
 	"properties": {
-		"a": {"type": "integer"},
-		"b": {"type": "number"},
-		"c": {"type": "string"},
-		"d": {
+		"machineName": {"type": "string"},
+		"start": {"$ref": "#/definitions/state"},
+		"states": {
 			"type": "array",
-			"items": [{"$ref": "#/definitions/arrayType"}]
-		},
-		"e": {"type": "boolean"},
-		"f": {"type": "null"}
+			"items": [{"$ref": "#/definitions/state"}]
+		}
 	},
 	"definitions": {
-		"arrayType": {
-			"type": "object",
+		"state": {
 			"properties": {
-				"x": {"type": "integer"},
-				"y": {"type": "integer"}
+				"stateName": {"type": "string"},
+				"transitions_in": {
+					"type": "array",
+					"items": [{"$ref": "#/definitions/transition"}]
+				},
+				"transitions_out": {
+					"type": "array",
+					"items": [{"$ref": "#/definitions/transition"}]
+				}
+			}
+		},
+		"transition": {
+			"properties": {
+				"event": {"type": "string"},
+				"from": {"$ref": "#/definitions/state", "inverse": "transitions_out"},
+				"to": {"$ref": "#/definitions/state", "inverse": "transitions_in"}
 			}
 		}
 	}

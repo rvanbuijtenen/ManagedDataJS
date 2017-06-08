@@ -1,4 +1,5 @@
-import * as interpreter from "../schemaInterpreter/schemaInterpreter3.js";
+import * as interpreter from "../schemaInterpreter/schemaInterpreter.js";
+import * as arrayManager from "./arrayDataManager.js";
 
 let Ajv = require('ajv');
 let ajv = Ajv({allErrors: true});
@@ -26,6 +27,7 @@ export class BasicRecordHandler {
 	// invoke the get method of the target object
 	get(target, propKey, receiver) {
 		var propValue = target[propKey];
+		//console.log(propKey);
 		if (typeof propValue != "function"){
 			if(propKey in target) {
 				return Reflect.get(target, propKey, receiver);
@@ -54,17 +56,26 @@ export class BasicRecordHandler {
 
 export class MObject {
 	// initialize the data of this managed object
-	constructor(schema, klass) {
+	constructor(schema, klass, factory) {
 		this.data = Object.create(Object);
 		this.klass = klass;
 		this.schema = schema;
+		console.log(this.schema);
+		console.log(schema);
+		this.factory = factory;
 	}
 	
 	// default set function
 	set(propKey, param) {
 		if(this.schema.schema.properties.hasOwnProperty(propKey)) {
 			if(this.isValidType(propKey, param, this.schema.schema.properties[propKey])) {
-				this.data[propKey] = param;
+				if(this.schema.schema.properties[propKey].type == 'array') {
+					for(let item of param) {
+						this.data[propKey].push(item);
+					}
+				} else {
+					this.data[propKey] = param;
+				}
 			}
 		} else {
 			throw new TypeError("property "+ propKey + " is not defined in schema");	
@@ -77,15 +88,37 @@ export class MObject {
 		if(this.schema.schema.properties.hasOwnProperty(propKey)) {
 			return this.data[propKey];
 		} else {
+			console.log(propKey);
 			throw new TypeError("property "+ propKey + " is not defined in schema");	
 		}
 	}
 	
-	toString() {
+	toString(klassStack) {
 		let str = "{";
 		for(var key in this.data) {
+			console.log(this.data[key]);
 			if(this.data[key].hasOwnProperty('klass')) {
-				str = str + key + ": " + this.data[key].toString();
+				if(klassStack.includes(this.data[key].klass)) {
+				   str = str + key + ": " + this.data[key].klass + "\n";
+				} else {
+					klassStack.push(this.data[key].klass);
+					str = str + key + ": " + this.data[key].toString(klassStack);
+				}
+			} else if(this.data[key].constructor == Array) {
+				console.log(this.data[key]);
+				str = str + key + ": [";
+				for(var item of this.data[key]) {
+					if(item.hasOwnProperty('klass')) {
+						if(klassStack.includes(this.data[key].klass)) {
+							str = str + key + ": " + this.data[key].klass + "\n";
+						} else {
+							klassStack.push(this.data[key].klass);
+							str = str + item.toString(klassStack) + ", ";
+						}
+					} else {
+						str = str + this.data[key] + ", ";		
+					}
+				}
 			} else {
 				str = str + key + ": " + this.data[key] + "\n";	
 			}
@@ -108,6 +141,10 @@ export class MObject {
 		
 		if(c == Array) {
 			if(schema.type == 'array') {
+				if(!this.data.hasOwnProperty(propKey)) {
+					console.log(arrayManager.ManagedArray, propKey);
+					this.data[propKey] = new Proxy([], new arrayManager.ArrayHandler(schema.items));
+				}
 				return true;	
 			}
 			throw new TypeError("field " +propKey+" is of type " + schema.type + " but parameter is of type array");
@@ -142,17 +179,19 @@ export class MObject {
 			}
 			throw new TypeError("field " +propKey+" is of type " + schema.type + " but parameter is of type boolean");
 		} else {
-			console.log(c, value, schema);
-			if(value.hasOwnProperty('klass') && this.schema.subKlasses.includes(value.klass)) {
+			
+			if(value.hasOwnProperty('klass') && schema.type == value.klass) {
 				return true;
-			} else
-			throw new TypeError("objects assigned to "+propKey+" must be managed data");
+			} else {
+				throw new TypeError("objects assigned to "+propKey+" must be managed data");
+			}
 		}
 	}
 }
 
 let f = function(inits, klass) {
-	let mobj = new this.MObj(this.schema.klassSchemas[klass], klass);
+	console.log(klass);
+	let mobj = new this.MObj(this.schema.klassSchemas[klass], klass, this);
 	let mObjProxy = new Proxy(mobj, new this.handler());
 	
 	for(var propKey in inits) {
@@ -170,7 +209,7 @@ export class BasicRecordFactory {
 		
 		let i = new interpreter.SchemaInterpreter();
 		this.schema = i.parseSchema(schema);
-		
+		console.log(this.schema);
 		// assign a factory function for mainKlass
 		this[this.schema.mainKlass] = f;
 		for(var klass in this.schema.klassSchemas) {
