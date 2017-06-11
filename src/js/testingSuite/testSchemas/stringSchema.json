@@ -1,0 +1,15 @@
+{
+	"name": "string",
+	"properties": {
+		"basicString": {"type": "string"},
+		"stringLength": {
+			"type": "string", 
+			"minLength": 2, 
+			"maxLength": 3
+		},
+		"regex": {
+			"type": "string",
+			"pattern": "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$"
+		}
+	}
+}

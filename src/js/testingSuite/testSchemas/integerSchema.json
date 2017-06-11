@@ -1,0 +1,15 @@
+{
+	"name": "integer",
+	"properties": {
+		"integer": { "type": "integer" },
+		"multiple": {
+			"type": "integer",
+    		"multipleOf" : 10
+    	},
+    	"range": {
+    		"type": "integer",
+    		"minimum": 0,
+  			"maximum": 100
+    	}
+	}
+}

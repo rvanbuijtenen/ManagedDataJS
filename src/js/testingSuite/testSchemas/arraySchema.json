@@ -1,0 +1,27 @@
+{
+	"name": "array",
+	"properties": {
+		"arr": {
+			"type": "array"
+		} ,
+		"arrWithItems": {
+			"type": "array",
+			"items": [{"type": "integer"}, {"type": "string"}]
+		},
+		"arrWithRef": {
+			"type": "array",
+			"items": [{"$ref": "#/definitions/point"}]
+		},
+		"arrWithEnum": {
+			"type": "array",
+			"items": [{"enum": ["NW", "NE", "SW", "SE"]}]
+		}
+	},
+	"definitions": {
+		"point": {
+			"properties": {
+				"x": {"type": "integer"}
+			}
+		}
+	}
+}

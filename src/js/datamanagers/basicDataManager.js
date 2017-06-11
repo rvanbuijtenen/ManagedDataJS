@@ -27,7 +27,6 @@ export class BasicRecordHandler {
 	// invoke the get method of the target object
 	get(target, propKey, receiver) {
 		var propValue = target[propKey];
-		//console.log(propKey);
 		if (typeof propValue != "function"){
 			if(propKey in target) {
 				return Reflect.get(target, propKey, receiver);
@@ -60,13 +59,12 @@ export class MObject {
 		this.data = Object.create(Object);
 		this.klass = klass;
 		this.schema = schema;
-		console.log(this.schema);
-		console.log(schema);
 		this.factory = factory;
 	}
 	
 	// default set function
 	set(propKey, param) {
+		console.log(this.schema.schema.properties);
 		if(this.schema.schema.properties.hasOwnProperty(propKey)) {
 			if(this.isValidType(propKey, param, this.schema.schema.properties[propKey])) {
 				if(this.schema.schema.properties[propKey].type == 'array') {
@@ -88,7 +86,6 @@ export class MObject {
 		if(this.schema.schema.properties.hasOwnProperty(propKey)) {
 			return this.data[propKey];
 		} else {
-			console.log(propKey);
 			throw new TypeError("property "+ propKey + " is not defined in schema");	
 		}
 	}
@@ -96,7 +93,6 @@ export class MObject {
 	toString(klassStack) {
 		let str = "{";
 		for(var key in this.data) {
-			console.log(this.data[key]);
 			if(this.data[key].hasOwnProperty('klass')) {
 				if(klassStack.includes(this.data[key].klass)) {
 				   str = str + key + ": " + this.data[key].klass + "\n";
@@ -105,7 +101,7 @@ export class MObject {
 					str = str + key + ": " + this.data[key].toString(klassStack);
 				}
 			} else if(this.data[key].constructor == Array) {
-				console.log(this.data[key]);
+				
 				str = str + key + ": [";
 				for(var item of this.data[key]) {
 					if(item.hasOwnProperty('klass')) {
@@ -140,9 +136,7 @@ export class MObject {
 		}
 
 		if(schema.hasOwnProperty('oneOf')) {
-			console.log('oneOf in bdm');
 			for(let item of schema.oneOf) {
-				console.log(item);
 				if(item.type == value.klass) {
 					return true;
 				}
@@ -152,8 +146,11 @@ export class MObject {
 		if(c == Array) {
 			if(schema.type == 'array') {
 				if(!this.data.hasOwnProperty(propKey)) {
-					console.log(arrayManager.ManagedArray, propKey);
-					this.data[propKey] = new Proxy([], new arrayManager.ArrayHandler(schema.items));
+					if(schema.hasOwnProperty('items')) {
+						this.data[propKey] = new Proxy([], new arrayManager.ArrayHandler(schema.items));
+					} else {
+						this.data[propKey] = new Proxy([], new arrayManager.ArrayHandler([]));
+					}
 				}
 				return true;	
 			}
@@ -165,6 +162,13 @@ export class MObject {
 				}
 			}
 			if(schema['type'] == 'string') {
+				if(schema.hasOwnProperty('minLength') && value.length < schema.minLength) {
+					throw new TypeError("String "+value+" is too short: minLength = " + schema.minLength);
+				} else if (schema.hasOwnProperty('maxLength') && value.length > schema.maxLength) {
+					throw new TypeError("String "+value+" exceeds the maximum length: maxLength = " + schema.maxLength);
+				} else if (schema.hasOwnProperty('pattern') && !value.match(schema.pattern)) {
+					throw new TypeError("String "+value+" does not match " + schema.pattern);	
+				}
 				return true;	
 			}
 			throw new TypeError("field " +propKey+" is of type " + schema.type + " but parameter is of type string");
@@ -174,13 +178,22 @@ export class MObject {
 					return true;	
 				}
 			}
+			if(schema.hasOwnProperty('multipleOf') && (value%schema.multipleOf != 0)) {
+				throw new TypeError('field '+propKey+' must be a multiple of ' + schema.multipleOf);
+			}
+			if(schema.hasOwnProperty('minimum') && value < schema.minimum) {
+				throw new TypeError('field '+propKey+' has a minimum value of '+schema.minimum+', but the passed value is '+ value);
+			}
+			if(schema.hasOwnProperty('maximum') && value > schema.maximum) {
+				throw new TypeError('field '+propKey+' has a maximum value of '+schema.maximum+', but the passed value is '+ value);
+			}
 			if(schema['type'] == 'number') {
 				return true;	
 			} else if(schema['type'] == 'integer') {
 				if(value%1 == 0) {
 					return true;
 				}
-				throw new TypeError("field " +propKey+" is of type " + schema.type + " but parameter is of type integer");
+				throw new TypeError("field " +propKey+" is of type " + schema.type + " but parameter is of type number");
 			}
 			throw new TypeError("field " +propKey+" is of type " + schema.type+ " but parameter is of type number");
 		} else if (typeof(value) === 'boolean') {
@@ -193,7 +206,6 @@ export class MObject {
 			if(value.hasOwnProperty('klass') && schema.type == value.klass) {
 				return true;
 			} else {
-				console.log(propKey, value, schema);
 				throw new TypeError("objects assigned to "+propKey+" must be managed data");
 			}
 		}
@@ -201,7 +213,6 @@ export class MObject {
 }
 
 let f = function(inits, klass) {
-	console.log(klass);
 	let mobj = new this.MObj(this.schema.klassSchemas[klass], klass, this);
 	let mObjProxy = new Proxy(mobj, new this.handler());
 	
@@ -220,7 +231,6 @@ export class BasicRecordFactory {
 		
 		let i = new interpreter.SchemaInterpreter();
 		this.schema = i.parseSchema(schema);
-		console.log(this.schema);
 		// assign a factory function for mainKlass
 		this[this.schema.mainKlass] = f;
 		for(var klass in this.schema.klassSchemas) {

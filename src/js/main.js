@@ -2,6 +2,7 @@
 //import * as Point from "./schemas/pointSchema.js";
 import * as MD4JS from "./datamanagers/persistenceDataManager.js";
 import * as interpreter from "./schemaInterpreter/schemaInterpreter.js";
+import * as testingSuite from "./testingSuite/tester.js";
 //import * as LMD4JS from "./loggingDataManager2.js";
 //import * as Machine from "./machineSchema.js";
 //import * as logger from "./loggingDataManager.js";
@@ -11,8 +12,9 @@ let ajv = Ajv({allErrors: true});
 
 class Main { 
     constructor() {
+    	testingSuite.TestBasicRecord.testAll();
 		// load schema and create a basicRecordFactory
-		let pointSchema = require('./schemas/testSchema.json');
+		/*let pointSchema = require('./schemas/testSchema.json');
 		let br = new MD4JS.PersistentRecordFactory(pointSchema);
 		let m = new br.machine({"machineName": "machine1", "states": []});
 		
@@ -49,7 +51,7 @@ class Main {
 		console.log("from event: " + m.start.transitions_out[0].to.transitions_in[0].event);
 		console.log("new state: " + m.start.transitions_out[0].to.transitions_out[0].to.stateName);
 		console.log(m);
-		
+
 		let mId = m.id;
 		let s1Id = s1.id;
 		let s2Id = s2.id;
@@ -86,7 +88,7 @@ class Main {
 		t4.from = s4;
 		t4.to = s3;
 
-		console.log(m2);
+		console.log(m2);*/
 		/*let mountPointData = {
 			"/": {
 				"fstype": "btrfs",
