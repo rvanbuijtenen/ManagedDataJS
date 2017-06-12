@@ -19,6 +19,9 @@
 				"transitions_out": {
 					"type": "array",
 					"items": [{"$ref": "#/definitions/transition"}]
+				}, "machine": {
+					"$ref": "#",
+					"inverse": "states"
 				}
 			}
 		},

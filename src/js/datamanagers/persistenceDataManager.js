@@ -31,11 +31,12 @@ export class PersistentMObject extends bdm.LoggedMObject {
 	persist() {
 		let persistentObject = Object.create(Function);
 		for(var propKey in this.data) {
-			if(this.data[propKey].hasOwnProperty('klass')) {
+			if(this.data[propKey].hasOwnProperty('klass') || this.data[propKey] instanceof Array) {
 			} else {
 				persistentObject[propKey] = this.data[propKey];
 			}
 		}
+		console.log(persistentObject);
 		localStorage.setItem(this.id, JSON.stringify(persistentObject));
 		return this.id;
 	}
@@ -47,7 +48,7 @@ export class PersistentMObject extends bdm.LoggedMObject {
 		for(var propKey in data) {
 			if(data[propKey].hasOwnProperty('klass')) {
 			} else {
-				console.log({"data in persticence data manager": data[propKey]});
+				console.log({"data in persistence data manager": data[propKey]});
 				this.data[propKey] = data[propKey];
 			}
 		}

@@ -5,7 +5,6 @@ export class LockingHandler extends ldm.LoggingHandler {
 	get(target, propKey, receiver) {
 		if((propKey in target.data) && target.locked == true) 
 			throw new TypeError("target is locked");
-		console.log(target.locked);
 		return super.get(target, propKey, receiver);
 	}
 	
@@ -36,9 +35,8 @@ export class LockingMObject extends ldm.LoggedMObject {
 }
 
 export class LockingRecordFactory extends ldm.LoggedRecordFactory {
-	constructor(schema, logfile) {
-		super(schema, logfile);
-		// within the factory constructor a Handler and MObject class must be assigned.
+	constructor(schema) {
+		super(schema);
 		this.handler = LockingHandler;
 		this.MObj = LockingMObject;
 	}

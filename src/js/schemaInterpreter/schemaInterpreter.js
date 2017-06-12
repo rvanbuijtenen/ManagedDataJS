@@ -36,7 +36,7 @@ export class SchemaInterpreter {
 		mainSchema['properties'] = schema['properties'];
 		this.klassSchemas[schema.name] = Object.create(Object);
 		this.klassSchemas[schema.name].schema = mainSchema;
-		
+		this.klassPaths['#'] = schema.name;
 		/* parse the definitions from the schema, if they exist */
 		if(schema.hasOwnProperty('definitions')) {
 			this.parseDefinitions(schema['definitions']);	

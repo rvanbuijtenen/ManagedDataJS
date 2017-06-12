@@ -88,6 +88,18 @@ export class MObject {
 		this.klass = klass;
 		this.schema = schema;
 		this.factory = factory;
+		this.proxy = {};
+
+		for(let prop in this.schema.schema.properties) {
+			let p = this.schema.schema.properties[prop];
+			if(p.hasOwnProperty('type') && p.type == 'array') {
+				if(p.hasOwnProperty('items')) {
+					this.data[prop] = new Proxy([], new ArrayManager.ArrayHandler(p.items));
+				} else {
+					this.data[prop] = new Proxy([], new ArrayManager.ArrayHandler([]));
+				}
+			}
+		}
 	}
 
 	/*
@@ -104,6 +116,17 @@ export class MObject {
 		}
 
 		let typeDescription = props[propKey];
+
+		if(typeDescription.hasOwnProperty('inverse')) {
+			if(param.hasOwnProperty('klass')) {
+				if(param[typeDescription.inverse] instanceof Array) {
+					console.log(this.proxy, param[typeDescription.inverse]);
+					param[typeDescription.inverse].push(this.proxy);
+				} else {
+					param[typeDescription.inverse] = this.proxy;
+				}
+			}
+		}
 
 		if(typeDescription.hasOwnProperty('enum')) {
 			/*
@@ -146,17 +169,6 @@ export class MObject {
 				if(!TypeValidator.validateArray(param)) {
 					throw new TypeError("field "+propKey+" is of type array but parameter is of type "+typeof(param));
 				} else {
-					/*
-					 * if no managed array has been initialized for this field, create one.
-					 */
-					if(!this.data.hasOwnProperty(propKey)) {
-						if(typeDescription.hasOwnProperty('items')) {
-							this.data[propKey] = new Proxy([], new ArrayManager.ArrayHandler(typeDescription.items));
-						} else {
-							this.data[propKey] = new Proxy([], new ArrayManager.ArrayHandler([]));
-						}
-					}
-
 					/* append each item of the passed array to the managed array*/
 					for(let item of param) {
 						this.data[propKey].push(item);
@@ -279,11 +291,15 @@ class TypeValidator {
  * individually through the proxy handler to ensure the data conforms with the schema and data manager implmenetation.
  */ 
 let f = function(inits, klass) {
-	let mobj = new this.MObj(this.schema.klassSchemas[klass], klass, this);
+	let schema = this.schema.klassSchemas[klass];
+	let mobj = new this.MObj(schema, klass, this);
 	let mObjProxy = new Proxy(mobj, new this.handler());
-		
+
+	/* The MObject needs a pointer to its own proxy for when an inverse field is found */
+	mObjProxy.proxy = mObjProxy;
+
 	for(var propKey in inits) {
-		mObjProxy[propKey] = inits[propKey];	
+		mObjProxy[propKey] = inits[propKey];
 	}
 		
 	return mObjProxy;
