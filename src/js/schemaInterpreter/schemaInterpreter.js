@@ -1,6 +1,12 @@
 export class SchemaInterpreter {
 	/**
-	 * 
+	 * ParseSchema takes as input a schema and then traverses the structure, collecting data for
+	 * the data managers. The schema and definitions are split into separate schemas, each of which
+	 * describes a Klass. The klass schema also contains a list of all klasses contained within the
+	 * fields of the klass.
+	 *
+	 * Each '$ref' keyword is replaced by a Klass name. The basic data manager will then know that a
+	 * field should be an instance of that klass.
 	 */
 	parseSchema(schema) {
 		if(!schema.hasOwnProperty('name')) {
@@ -47,6 +53,11 @@ export class SchemaInterpreter {
 		return {"mainKlass": schema['name'], "klassSchemas": this.klassSchemas};
 	}
 	
+	/**
+	 * parseDefinitions splits the klasses defined in the 'definitions' part of the schema
+	 * into separate schemas and stores these in an object that maps Klass names to the 
+	 * corresponding schema.
+	 */
 	parseDefinitions(definitions) {
 		for(let definition in definitions) {
 			/* append the definition name as a klass name and add the definition as a separate schema */
@@ -66,6 +77,10 @@ export class SchemaInterpreter {
 		}
 	}
 	
+	/**
+	 * An object always contains a 'properties' keyword. ParseObject initializes the subKlass stack,
+	 * sets the current klass and then calls the parseProperties function
+	 */
 	parseObject(object, klass) {
 		/* reinitialize the currentSubKlasses field and set the current klass */
 		this.currentSubKlasses = [];
@@ -75,6 +90,10 @@ export class SchemaInterpreter {
 		this.parseProperties(object['properties']);	
 	}
 	
+	/**
+	 * ParseProperties checks for keywords that are allowed within JSON schema and calls the appropriate
+	 * parse function. If it finds a reference, this reference is replaced by a {'type': klassName} object.
+	 */
 	parseProperties(properties) {
 		for(var propKey in properties) {
 			/* for each property: */
@@ -120,6 +139,10 @@ export class SchemaInterpreter {
 		}
 	}
 	
+	/**
+	 * parseTypeArray parses an arary of types that is contained in the 'items', 'oneOf', 'anyOf' or 'allOf'
+	 * keywords. If it finds a reference this reference is replaced by a {'type': klassName} object.
+	 */
 	parseTypeArray(arr) {
 		for(var item of arr) {
 			if(item.hasOwnProperty('$ref')) {
