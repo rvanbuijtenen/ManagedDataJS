@@ -83,11 +83,10 @@ export class BasicRecordHandler {
  */
 export class MObject {
 	// initialize the data of this managed object
-	constructor(schema, klass, factory) {
+	constructor(schema, klass) {
 		this.data = Object.create(Object);
 		this.klass = klass;
 		this.schema = schema;
-		this.factory = factory;
 		this.proxy = {};
 
 		for(let prop in this.schema.schema.properties) {
@@ -292,7 +291,7 @@ class TypeValidator {
  */ 
 let f = function(inits, klass) {
 	let schema = this.schema.klassSchemas[klass];
-	let mobj = new this.MObj(schema, klass, this);
+	let mobj = new this.MObj(schema, klass);
 	let mObjProxy = new Proxy(mobj, new this.handler());
 
 	/* The MObject needs a pointer to its own proxy for when an inverse field is found */

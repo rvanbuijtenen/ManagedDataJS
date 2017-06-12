@@ -1,0 +1,24 @@
+{
+	"name": "first",
+	"properties": {
+		"second": {
+			"$ref": "#/definitions/second"
+		}
+	},
+	"definitions": {
+		"second": {
+			"properties": {
+				"third": {
+					"$ref": "#/definitions/third",
+				}
+			}
+		},
+		"third": {
+			"properties": {
+				"first": {
+					"$ref": "#",
+				}
+			}
+		}
+	}
+}
