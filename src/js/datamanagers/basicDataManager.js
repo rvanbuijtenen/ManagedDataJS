@@ -1,5 +1,5 @@
 import * as interpreter from "../schemaInterpreter/schemaInterpreter.js";
-import * as arrayManager from "./arrayDataManager.js";
+import * as ArrayManager from "./arrayDataManager.js";
 
 let Ajv = require('ajv');
 let ajv = Ajv({allErrors: true});
@@ -35,7 +35,11 @@ let FactoryHandler = {
  * where operations will be performed on the data field contained in the MObject.
  */
 export class BasicRecordHandler {
-	// invoke the get method of the target object
+	/* 
+	 * if the requested property does not exist in the class MObject itself: 
+	 * invoke the get method of the target object, otherwise return the requested 
+	 * property from the MObject 
+	 */
 	get(target, propKey, receiver) {
 		var propValue = target[propKey];
 		if (typeof propValue != "function"){
@@ -46,7 +50,7 @@ export class BasicRecordHandler {
 			}
 		}
 		else{
-			// return a function that executes the method call on the target
+			/* return a function that executes the method call on the target */
 			return function(){
 				return propValue.apply(target, arguments, propKey);
 			}
@@ -54,7 +58,7 @@ export class BasicRecordHandler {
 
 	}
 	
-	// invoke the set method of the target object
+	/* if the target does not contain the requested property: invoke the set method of the target MObject */
 	set(target, propKey, value, receiver) {
 		if(propKey in target) {
 			return Reflect.set(target, propKey, value, receiver);
@@ -85,157 +89,195 @@ export class MObject {
 		this.schema = schema;
 		this.factory = factory;
 	}
-	
-	// default set function
+
+	/*
+	 * The set() method receives a property key to set and a parameter. The type of the parameter
+	 * is checked against the schema, and if the assignment is allowed the value is set and true is returned.
+	 * If the value does not match the schema, then an error is thrown.
+	 */
 	set(propKey, param) {
-		console.log(this.schema.schema.properties);
-		if(this.schema.schema.properties.hasOwnProperty(propKey)) {
-			if(this.isValidType(propKey, param, this.schema.schema.properties[propKey])) {
-				if(this.schema.schema.properties[propKey].type == 'array') {
+		let props = this.schema.schema.properties;
+
+		/* check if property is defined in schema. If not: throw a typeError */
+		if(!props.hasOwnProperty(propKey)) {
+			throw new TypeError("property "+ propKey + " is not defined in schema");	
+		}
+
+		let typeDescription = props[propKey];
+
+		if(typeDescription.hasOwnProperty('enum')) {
+			/*
+			 * validate enum keyword. An enum can only contain specific instances of a basicType
+			 * such as specific strings or numbers
+			 */
+			if(TypeValidator.validateEnum(typeDescription, param)) {
+				let msg = "A value assigned to "+propKey+" must be one of: [ ";
+				for(let item of typeDescription.enum) {
+					msg = msg + item + ",";
+				}
+				msg = msg.subString(0, msg.length-1);
+				throw new TypeError(msg);
+			}
+			this.data[propKey] = param;
+		} else if(typeDescription.hasOwnProperty('oneOf')) {
+			/*
+			 * validate oneOf keyword. Items of the oneOf keyword must be klasses
+			 */
+			if(TypeValidator.validateEnum(typeDescription, param)) {
+				let msg = "A value assigned to "+propKey+" must be an instance of a managed object of klass: [ ";
+				for(let item of typeDescription.oneOf) {
+					msg = msg + item.type + ",";
+				}
+				msg = msg.subString(0, msg.length-1);
+				throw new TypeError(msg);
+			}
+			this.data[propKey] = param;
+		} else if(typeDescription.hasOwnProperty('type')) {
+			/*
+			 * validate the type keyword. This can refer to a Klass, Array or basicType.
+			 */
+			if(this.schema.subKlasses.includes(typeDescription.type)) {
+				/* the parameter must be an MObject */
+				if(!(param.hasOwnProperty('klass') && this.schema.subKlasses.includes(param.klass))) {
+					throw new TypeError();
+				}
+				this.data[propKey] = param;
+			} else if(typeDescription.type == 'array') {
+				if(!TypeValidator.validateArray(param)) {
+					throw new TypeError("field "+propKey+" is of type array but parameter is of type "+typeof(param));
+				} else {
+					/*
+					 * if no managed array has been initialized for this field, create one.
+					 */
+					if(!this.data.hasOwnProperty(propKey)) {
+						if(typeDescription.hasOwnProperty('items')) {
+							this.data[propKey] = new Proxy([], new ArrayManager.ArrayHandler(typeDescription.items));
+						} else {
+							this.data[propKey] = new Proxy([], new ArrayManager.ArrayHandler([]));
+						}
+					}
+
+					/* append each item of the passed array to the managed array*/
 					for(let item of param) {
 						this.data[propKey].push(item);
 					}
-				} else {
-					this.data[propKey] = param;
 				}
+			} else if(!TypeValidator.validateBasicType(typeDescription, param)) {
+				/*
+				 * At this point the parameter can only be one of the basic types (String, Number, Integer, Boolean)
+				 */
+				throw new TypeError("field "+propKey+" is of type "+typeDescription.type+" but parameter is of type "+typeof(param));
+			} else {
+				/*
+				 * A basic type was sucesfully validated. We now need to check for value constraints for strings, numbers and integers
+				 */ 
+				if(typeDescription.type == 'string') {
+					/* validate string value restrictions */
+					if(typeDescription.hasOwnProperty('minLength') && param.length < typeDescription.minLength) {
+						throw new TypeError("String "+param+" is too short: minLength = "+typeDescription.minLength);
+					}
+					if(typeDescription.hasOwnProperty('maxLength') && param.length > typeDescription.maxLength) {
+						throw new TypeError("String "+param+" exceeds the maximum length: maxLength = "+typeDescription.maxLength);
+					}
+					if(typeDescription.hasOwnProperty('pattern') && !param.match(typeDescription.pattern)) {
+						throw new TypeError("String "+param+" does not match "+typeDescription.pattern);
+					}
+				}
+				
+				if(typeDescription.type == 'number' || typeDescription.type == 'integer') {
+					/* validate number and integer value restrictions */
+					if(typeDescription.hasOwnProperty('multipleOf') && (param%typeDescription.multipleOf != 0)) {
+						throw new TypeError('field '+propKey+' must be a multiple of ' + typeDescription.multipleOf);
+					}
+					if(typeDescription.hasOwnProperty('minimum') && param < typeDescription.minimum) {
+						throw new TypeError('field '+propKey+' has a minimum value of '+typeDescription.minimum+', but the passed value is '+ param);
+					}
+					if(typeDescription.hasOwnProperty('maximum') && param > typeDescription.maximum) {
+						throw new TypeError('field '+propKey+' has a maximum value of '+typeDescription.maximum+', but the passed value is '+ param);
+					}
+				}
+				// integer restrictions
+				this.data[propKey] = param;
 			}
-		} else {
-			throw new TypeError("property "+ propKey + " is not defined in schema");	
 		}
 		return true;
 	}
-		
-	// default get function
+
+	/*
+	 * The get method checks if the given property key exists in the schema. If it does, the value is returned,
+	 * otherwise an error is thrown.
+	 */
 	get(propKey) {
 		if(this.schema.schema.properties.hasOwnProperty(propKey)) {
+			if(!this.data.hasOwnProperty(propKey)) {
+				throw new TypeError("property "+propKey+" exists in schema, but it has not yet been assigned a value");
+			}
 			return this.data[propKey];
 		} else {
 			throw new TypeError("property "+ propKey + " is not defined in schema");	
 		}
 	}
-	
-	toString(klassStack) {
-		let str = "{";
-		for(var key in this.data) {
-			if(this.data[key].hasOwnProperty('klass')) {
-				if(klassStack.includes(this.data[key].klass)) {
-				   str = str + key + ": " + this.data[key].klass + "\n";
-				} else {
-					klassStack.push(this.data[key].klass);
-					str = str + key + ": " + this.data[key].toString(klassStack);
-				}
-			} else if(this.data[key].constructor == Array) {
-				
-				str = str + key + ": [";
-				for(var item of this.data[key]) {
-					if(item.hasOwnProperty('klass')) {
-						if(klassStack.includes(this.data[key].klass)) {
-							str = str + key + ": " + this.data[key].klass + "\n";
-						} else {
-							klassStack.push(this.data[key].klass);
-							str = str + item.toString(klassStack) + ", ";
-						}
-					} else {
-						str = str + this.data[key] + ", ";		
-					}
-				}
-			} else {
-				str = str + key + ": " + this.data[key] + "\n";	
-			}
-		}
-		return str + "}";
-	}
-	
-	isValidType(propKey, value, schema) {
-		let type = '';
-		let c = value.constructor;
-		if(schema.hasOwnProperty("enum")) {
-			if(schema.enum.includes(value)) {
-				return true;	
-			} else if(value.hasOwnProperty("klass") && schema.enum.includes(value.klass)) {
-				return true;
-			} else {
-				throw new TypeError("field " +propKey+" is enum and "+value+" is not one of "+schema.enum);
-			}
-		}
+}
 
-		if(schema.hasOwnProperty('oneOf')) {
-			for(let item of schema.oneOf) {
-				if(item.type == value.klass) {
+class TypeValidator {
+	/* 
+	 * validates the given parameter against the type description. Since an enum can only
+	 * contain specific values of basic types we check whether the parameter is included
+	 * in the enum array.
+	 */
+	static validateEnum(typeDescription, param) {
+		if(typeDescription.enum.includes(param)) {
+			return true;
+		}
+		return false;
+	}
+
+	/*
+	 * validates the given parameter against the type definitions in the oneOf keyword.
+	 */
+	static validateOneOf(typeDescription, param) {
+		let includes = false;
+		if(param.hasOwnProperty('klass')) {
+			for(let t of typeDescription.oneOf) {
+				if(t.type == param.klass) {
 					return true;
 				}
 			}
 		}
-		
-		if(c == Array) {
-			if(schema.type == 'array') {
-				if(!this.data.hasOwnProperty(propKey)) {
-					if(schema.hasOwnProperty('items')) {
-						this.data[propKey] = new Proxy([], new arrayManager.ArrayHandler(schema.items));
-					} else {
-						this.data[propKey] = new Proxy([], new arrayManager.ArrayHandler([]));
-					}
-				}
-				return true;	
-			}
-			throw new TypeError("field " +propKey+" is of type " + schema.type + " but parameter is of type array");
-		} else if (typeof(value) === 'string') {
-			if(schema.hasOwnProperty("enum")) {
-				if(schema.enum.includes(c)) {
-					return true;	
-				}
-			}
-			if(schema['type'] == 'string') {
-				if(schema.hasOwnProperty('minLength') && value.length < schema.minLength) {
-					throw new TypeError("String "+value+" is too short: minLength = " + schema.minLength);
-				} else if (schema.hasOwnProperty('maxLength') && value.length > schema.maxLength) {
-					throw new TypeError("String "+value+" exceeds the maximum length: maxLength = " + schema.maxLength);
-				} else if (schema.hasOwnProperty('pattern') && !value.match(schema.pattern)) {
-					throw new TypeError("String "+value+" does not match " + schema.pattern);	
-				}
-				return true;	
-			}
-			throw new TypeError("field " +propKey+" is of type " + schema.type + " but parameter is of type string");
-		} else if (typeof(value) === 'number') {
-			if(schema.hasOwnProperty("enum")) {
-				if(schema.enum.includes(c)) {
-					return true;	
-				}
-			}
-			if(schema.hasOwnProperty('multipleOf') && (value%schema.multipleOf != 0)) {
-				throw new TypeError('field '+propKey+' must be a multiple of ' + schema.multipleOf);
-			}
-			if(schema.hasOwnProperty('minimum') && value < schema.minimum) {
-				throw new TypeError('field '+propKey+' has a minimum value of '+schema.minimum+', but the passed value is '+ value);
-			}
-			if(schema.hasOwnProperty('maximum') && value > schema.maximum) {
-				throw new TypeError('field '+propKey+' has a maximum value of '+schema.maximum+', but the passed value is '+ value);
-			}
-			if(schema['type'] == 'number') {
-				return true;	
-			} else if(schema['type'] == 'integer') {
-				if(value%1 == 0) {
-					return true;
-				}
-				throw new TypeError("field " +propKey+" is of type " + schema.type + " but parameter is of type number");
-			}
-			throw new TypeError("field " +propKey+" is of type " + schema.type+ " but parameter is of type number");
-		} else if (typeof(value) === 'boolean') {
-			if(schema['type'] == 'boolean') {
-				return true;	
-			}
-			throw new TypeError("field " +propKey+" is of type " + schema.type + " but parameter is of type boolean");
-		} else {
-			
-			if(value.hasOwnProperty('klass') && schema.type == value.klass) {
+		return false;
+	}
+
+	/*
+	 * validates the basicType in the 'type' keyword of the schema against the type of the parameter
+	 */
+	static validateBasicType(typeDescription, param) {
+		if(typeDescription.type == typeof(param)) {
+			return true;
+		} else if (typeDescription.type == 'integer' && typeof(param) == 'number') {
+			if(param%1 == 0) {
 				return true;
-			} else {
-				throw new TypeError("objects assigned to "+propKey+" must be managed data");
 			}
 		}
+		return false;
+	}
+
+	/*
+	 * validates if the parameter is indeed an array
+	 */
+	static validateArray(param) {
+		if(param.constructor == Array) {
+			return true;
+		}
+		return false;
 	}
 }
 
+/**
+ * This function acts as a layer that decouples MObject initalization from data manager definition.
+ * This is achieved by initializing an instance of the MObject and Handler classes set by the last factory
+ * in the prototype chain. It also takes the arguments passed by the constructor. Each argument is then set
+ * individually through the proxy handler to ensure the data conforms with the schema and data manager implmenetation.
+ */ 
 let f = function(inits, klass) {
 	let mobj = new this.MObj(this.schema.klassSchemas[klass], klass, this);
 	let mObjProxy = new Proxy(mobj, new this.handler());

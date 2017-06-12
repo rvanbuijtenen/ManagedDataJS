@@ -14,12 +14,8 @@ export class ArrayHandler {
 					let type = ArrayHandler.getType(arg);
 					for(let item of items) {
 						if(item.hasOwnProperty("enum")) {
-							for(let enumItem of item.enum) {
-								if(enumItem.type == type) {
-									includes = true;
-								} else if (type == 'integer' && enumItem.type == 'number') {
-									includes = true;
-								}
+							if(item.enum.includes(arg)) {
+								includes = true;
 							}
 						} else {
 							if(item.type == type) {
