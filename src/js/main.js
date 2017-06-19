@@ -1,6 +1,6 @@
 
 //import * as Point from "./schemas/pointSchema.js";
-import * as MD4JS from "./datamanagers/persistenceDataManager.js";
+import * as MD4JS from "./datamanagers/basicDataManager.js";
 import * as interpreter from "./schemaInterpreter/schemaInterpreter.js";
 import * as testingSuite from "./testingSuite/tester.js";
 //import * as LMD4JS from "./loggingDataManager2.js";
@@ -12,7 +12,58 @@ let ajv = Ajv({allErrors: true});
 
 class Main { 
     constructor() {
-    	testingSuite.TestBasicRecord.testAll();
+    	let schema = {
+    		"name": "point",
+    		"properties": {
+    			"x": {"type": "integer"},
+    			"y": {"type": "number"},
+    			"name": {
+    				"type": "string",
+    				"minLength": 3,
+    				"maxLength": 5,
+    				"pattern": "/^a+$/"
+    				},
+    			"valid": {"type": "boolean"},
+    			"arr": {
+    				"type": "array",
+    				"items": {"type": "integer"}
+    			},
+    			"arr2": {
+    				"type": "array",
+    				"items": [{"type": "integer"},{"type": "string"}]
+    			},
+    			"en": {
+    				"enum": [
+    					{"type": "integer"},
+    					{"type": "number"},
+    					{"type": "boolean"},
+    					{
+    						"type": "array",
+    						"items": {"type": "integer"}
+    					},
+    					{"enum": ["one", "two", "three"]},
+    					]
+    			}
+    		}
+    	}
+    	let br = new MD4JS.BasicRecordFactory(schema);
+    	let point = new br.point({"x": 1, "y": 4, "name": "aaa", "valid": true, "arr": [1,2,3], "arr2": [1,"test", 2,"otherTest"]});
+    	let otherPoint = new br.point();
+    	otherPoint.x = 2;
+    	otherPoint.y = 3.5;
+    	otherPoint.name = "aaaaa";
+    	otherPoint.valid = false;
+
+    	console.log(point);
+    	console.log(otherPoint);
+
+    	point.en = "one";
+    	point.en = 1;
+    	point.en = 1.2;
+    	point.en = false;
+    	point.en = [1,2,3];
+    	point.en = ["error"];
+    	/*testingSuite.TestBasicRecord.testAll();
 		// load schema and create a basicRecordFactory
 		let pointSchema = require('./schemas/testSchema.json');
 		let br = new MD4JS.PersistentRecordFactory(pointSchema);

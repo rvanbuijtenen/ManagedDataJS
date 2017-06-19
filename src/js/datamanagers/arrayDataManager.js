@@ -1,3 +1,5 @@
+import * as bdm from "./basicDataManager.js"
+
 /*
  * The ArrayHandler acts as a protective layer between javascripts Array class
  * and ManagedData. This is neccesary to preserve array.push(item) syntax while performing

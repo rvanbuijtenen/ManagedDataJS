@@ -144,19 +144,36 @@ export class SchemaInterpreter {
 	 * keywords. If it finds a reference this reference is replaced by a {'type': klassName} object.
 	 */
 	parseTypeArray(arr) {
-		for(var item of arr) {
-			if(item.hasOwnProperty('$ref')) {
+		if(arr instanceof Array) {
+			for(var item of arr) {
+				if(item.hasOwnProperty('$ref')) {
+					/* if we find a reference in the type array: replace this reference by a klass */
+					item['type'] = this.klassPaths[item['$ref']];
+					this.currentSubKlasses.push(this.klassPaths[item['$ref']]);
+					delete item['$ref'];
+				} else if(item.hasOwnProperty('type') && item['type'] != 'object'){
+					/* if we find a type: parse this type */
+					this.parseType(item);	
+				} else if(item.hasOwnProperty('format')){
+					/* TO DO: format */
+				} else if (typeof(item) == Object) {
+					/* if the item is an object, we throw an error since an object must have a reference to a definition */
+					throw new TypeError("oneOf containing objects must consist of basic types, or have a reference to '#/definitions/<definition>' containing the object definition");
+				}
+			}
+		} else {
+			if(arr.hasOwnProperty('$ref')) {
 				/* if we find a reference in the type array: replace this reference by a klass */
-				item['type'] = this.klassPaths[item['$ref']];
-				this.currentSubKlasses.push(this.klassPaths[item['$ref']]);
-				delete item['$ref'];
-			} else if(item.hasOwnProperty('type') && item['type'] != 'object'){
+				arr['type'] = this.klassPaths[arr['$ref']];
+				this.currentSubKlasses.push(this.klassPaths[arr['$ref']]);
+				delete arr['$ref'];
+			} else if(arr.hasOwnProperty('type') && arr['type'] != 'object'){
 				/* if we find a type: parse this type */
-				this.parseType(item);	
-			} else if(item.hasOwnProperty('format')){
+				this.parseType(arr);	
+			} else if(arr.hasOwnProperty('format')){
 				/* TO DO: format */
-			} else if (typeof(item) == Object) {
-				/* if the item is an object, we throw an error since an object must have a reference to a definition */
+			} else if (typeof(arr) == Object) {
+				/* if the arr is an object, we throw an error since an object must have a reference to a definition */
 				throw new TypeError("oneOf containing objects must consist of basic types, or have a reference to '#/definitions/<definition>' containing the object definition");
 			}
 		}

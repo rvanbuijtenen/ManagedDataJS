@@ -20,6 +20,10 @@ let FactoryHandler = {
 			// return a function that executes the method call on the target
 			return function(){
 				//arguments.unshift(propKey);
+				if(arguments.length == 0) {
+					arguments[0] = {};
+					arguments.length++;
+				}
 				arguments[arguments.length] = propKey;
 				arguments.length++;
 				return propValue.apply(target, arguments, propKey);
@@ -43,11 +47,11 @@ export class BasicRecordHandler {
 	get(target, propKey, receiver) {
 		var propValue = target[propKey];
 		if (typeof propValue != "function"){
-			if(propKey in target) {
+			/*if(propKey in target) {
 				return Reflect.get(target, propKey, receiver);
-			} else {		
-				return target.get(propKey);
-			}
+			} else {*/		
+				return target.__get(propKey);
+			//}
 		}
 		else{
 			/* return a function that executes the method call on the target */
@@ -60,11 +64,11 @@ export class BasicRecordHandler {
 	
 	/* if the target does not contain the requested property: invoke the set method of the target MObject */
 	set(target, propKey, value, receiver) {
-		if(propKey in target) {
+		/*if(propKey in target) {
 			return Reflect.set(target, propKey, value, receiver);
-		} else {		
-			return target.set(propKey, value);
-		}
+		} else {*/		
+			return target.__set(propKey, value);
+		//}
 	}
 }
 
@@ -81,207 +85,38 @@ export class BasicRecordHandler {
  *
  * ToDo: check required fields in constructor.
  */
+import * as field from "../fields/MField.js";
 export class MObject {
-	// initialize the data of this managed object
-	constructor(schema, klass) {
-		this.data = Object.create(Object);
-		this.klass = klass;
-		this.schema = schema;
+	constructor(schema, klass, subKlasses) {
+		this.data = {};
 		this.proxy = {};
-
-		for(let prop in this.schema.schema.properties) {
-			let p = this.schema.schema.properties[prop];
-			if(p.hasOwnProperty('type') && p.type == 'array') {
-				if(p.hasOwnProperty('items')) {
-					this.data[prop] = new Proxy([], new ArrayManager.ArrayHandler(p.items));
-				} else {
-					this.data[prop] = new Proxy([], new ArrayManager.ArrayHandler([]));
-				}
-			}
+		console.log(schema);
+		for(let propKey in schema.properties) {
+			this.data[propKey] = field.MFieldFactory.MField(
+									schema.properties[propKey], 
+									subKlasses
+								);
 		}
 	}
 
-	/*
-	 * The set() method receives a property key to set and a parameter. The type of the parameter
-	 * is checked against the schema, and if the assignment is allowed the value is set and true is returned.
-	 * If the value does not match the schema, then an error is thrown.
-	 */
-	set(propKey, param) {
-		let props = this.schema.schema.properties;
-
-		/* check if property is defined in schema. If not: throw a typeError */
-		if(!props.hasOwnProperty(propKey)) {
-			throw new TypeError("property "+ propKey + " is not defined in schema");	
+	__get(propKey) {
+		if(this.data.hasOwnProperty(propKey)) {
+			return this.data[propKey].getValue();
+		} else {
+			throw new TypeError("property "+propKey+" is not defined in schema");
 		}
+	}
 
-		let typeDescription = props[propKey];
-
-		if(typeDescription.hasOwnProperty('inverse')) {
-			if(param.hasOwnProperty('klass')) {
-				if(param[typeDescription.inverse] instanceof Array) {
-					console.log(this.proxy, param[typeDescription.inverse]);
-					param[typeDescription.inverse].push(this.proxy);
-				} else {
-					param[typeDescription.inverse] = this.proxy;
-				}
-			}
-		}
-
-		if(typeDescription.hasOwnProperty('enum')) {
-			/*
-			 * validate enum keyword. An enum can only contain specific instances of a basicType
-			 * such as specific strings or numbers
-			 */
-			if(TypeValidator.validateEnum(typeDescription, param)) {
-				let msg = "A value assigned to "+propKey+" must be one of: [ ";
-				for(let item of typeDescription.enum) {
-					msg = msg + item + ",";
-				}
-				msg = msg.subString(0, msg.length-1);
-				throw new TypeError(msg);
-			}
-			this.data[propKey] = param;
-		} else if(typeDescription.hasOwnProperty('oneOf')) {
-			/*
-			 * validate oneOf keyword. Items of the oneOf keyword must be klasses
-			 */
-			if(TypeValidator.validateEnum(typeDescription, param)) {
-				let msg = "A value assigned to "+propKey+" must be an instance of a managed object of klass: [ ";
-				for(let item of typeDescription.oneOf) {
-					msg = msg + item.type + ",";
-				}
-				msg = msg.subString(0, msg.length-1);
-				throw new TypeError(msg);
-			}
-			this.data[propKey] = param;
-		} else if(typeDescription.hasOwnProperty('type')) {
-			/*
-			 * validate the type keyword. This can refer to a Klass, Array or basicType.
-			 */
-			if(this.schema.subKlasses.includes(typeDescription.type)) {
-				/* the parameter must be an MObject */
-				if(!(param.hasOwnProperty('klass') && this.schema.subKlasses.includes(param.klass))) {
-					throw new TypeError();
-				}
-				this.data[propKey] = param;
-			} else if(typeDescription.type == 'array') {
-				if(!TypeValidator.validateArray(param)) {
-					throw new TypeError("field "+propKey+" is of type array but parameter is of type "+typeof(param));
-				} else {
-					/* append each item of the passed array to the managed array*/
-					for(let item of param) {
-						this.data[propKey].push(item);
-					}
-				}
-			} else if(!TypeValidator.validateBasicType(typeDescription, param)) {
-				/*
-				 * At this point the parameter can only be one of the basic types (String, Number, Integer, Boolean)
-				 */
-				throw new TypeError("field "+propKey+" is of type "+typeDescription.type+" but parameter is of type "+typeof(param));
-			} else {
-				/*
-				 * A basic type was sucesfully validated. We now need to check for value constraints for strings, numbers and integers
-				 */ 
-				if(typeDescription.type == 'string') {
-					/* validate string value restrictions */
-					if(typeDescription.hasOwnProperty('minLength') && param.length < typeDescription.minLength) {
-						throw new TypeError("String "+param+" is too short: minLength = "+typeDescription.minLength);
-					}
-					if(typeDescription.hasOwnProperty('maxLength') && param.length > typeDescription.maxLength) {
-						throw new TypeError("String "+param+" exceeds the maximum length: maxLength = "+typeDescription.maxLength);
-					}
-					if(typeDescription.hasOwnProperty('pattern') && !param.match(typeDescription.pattern)) {
-						throw new TypeError("String "+param+" does not match "+typeDescription.pattern);
-					}
-				}
-				
-				if(typeDescription.type == 'number' || typeDescription.type == 'integer') {
-					/* validate number and integer value restrictions */
-					if(typeDescription.hasOwnProperty('multipleOf') && (param%typeDescription.multipleOf != 0)) {
-						throw new TypeError('field '+propKey+' must be a multiple of ' + typeDescription.multipleOf);
-					}
-					if(typeDescription.hasOwnProperty('minimum') && param < typeDescription.minimum) {
-						throw new TypeError('field '+propKey+' has a minimum value of '+typeDescription.minimum+', but the passed value is '+ param);
-					}
-					if(typeDescription.hasOwnProperty('maximum') && param > typeDescription.maximum) {
-						throw new TypeError('field '+propKey+' has a maximum value of '+typeDescription.maximum+', but the passed value is '+ param);
-					}
-				}
-				// integer restrictions
-				this.data[propKey] = param;
-			}
+	__set(propKey, value) {
+		if(this.data.hasOwnProperty(propKey)) {
+			this.data[propKey].setValue(value);
+		} else {
+			throw new TypeError("property "+propKey+" is not defined in schema");
 		}
 		return true;
 	}
-
-	/*
-	 * The get method checks if the given property key exists in the schema. If it does, the value is returned,
-	 * otherwise an error is thrown.
-	 */
-	get(propKey) {
-		if(this.schema.schema.properties.hasOwnProperty(propKey)) {
-			if(!this.data.hasOwnProperty(propKey)) {
-				throw new TypeError("property "+propKey+" exists in schema, but it has not yet been assigned a value");
-			}
-			return this.data[propKey];
-		} else {
-			throw new TypeError("property "+ propKey + " is not defined in schema");	
-		}
-	}
 }
 
-class TypeValidator {
-	/* 
-	 * validates the given parameter against the type description. Since an enum can only
-	 * contain specific values of basic types we check whether the parameter is included
-	 * in the enum array.
-	 */
-	static validateEnum(typeDescription, param) {
-		if(typeDescription.enum.includes(param)) {
-			return true;
-		}
-		return false;
-	}
-
-	/*
-	 * validates the given parameter against the type definitions in the oneOf keyword.
-	 */
-	static validateOneOf(typeDescription, param) {
-		let includes = false;
-		if(param.hasOwnProperty('klass')) {
-			for(let t of typeDescription.oneOf) {
-				if(t.type == param.klass) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/*
-	 * validates the basicType in the 'type' keyword of the schema against the type of the parameter
-	 */
-	static validateBasicType(typeDescription, param) {
-		if(typeDescription.type == typeof(param)) {
-			return true;
-		} else if (typeDescription.type == 'integer' && typeof(param) == 'number') {
-			if(param%1 == 0) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/*
-	 * validates if the parameter is indeed an array
-	 */
-	static validateArray(param) {
-		if(param.constructor == Array) {
-			return true;
-		}
-		return false;
-	}
-}
 
 /**
  * This function acts as a layer that decouples MObject initalization from data manager definition.
@@ -290,12 +125,15 @@ class TypeValidator {
  * individually through the proxy handler to ensure the data conforms with the schema and data manager implmenetation.
  */ 
 let f = function(inits, klass) {
-	let schema = this.schema.klassSchemas[klass];
-	let mobj = new this.MObj(schema, klass);
+	console.log(this.schema);
+	let schema = this.schema.klassSchemas[klass].schema;
+	let subKlasses = this.schema.klassSchemas[klass].subKlasses;
+	console.log(schema);
+	let mobj = new this.MObj(schema, klass, subKlasses, this.otherInits);
 	let mObjProxy = new Proxy(mobj, new this.handler());
 
 	/* The MObject needs a pointer to its own proxy for when an inverse field is found */
-	mObjProxy.proxy = mObjProxy;
+	//mObjProxy.proxy = mObjProxy;
 
 	for(var propKey in inits) {
 		mObjProxy[propKey] = inits[propKey];
@@ -321,6 +159,7 @@ export class BasicRecordFactory {
 		/* set handler and MObject class */
 		this.handler = BasicRecordHandler;
 		this.MObj = MObject;
+		this.otherInits = {};
 		
 		let i = new interpreter.SchemaInterpreter();
 		this.schema = i.parseSchema(schema);
