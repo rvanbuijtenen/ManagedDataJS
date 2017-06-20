@@ -20,23 +20,48 @@ export class MField {
 }
 
 export class MObjectMField extends MField {
-	constructor(schema) {
-		super(schema, {});
+	constructor(schema, superKlass, superSchema) {
+		super(schema, {"klass": schema.klass});
+
+		if(superKlass !== undefined && superSchema !==  undefined) {
+			
+			if(!(superKlass instanceof MField)) {
+				this.superKlass = MFieldFactory.MField(superSchema)
+				this.superKlass.setValue(superKlass);
+			} else {
+				this.superKlass = superKlass;
+			}
+		}
+		this.type = "MObject";
 	}
 
-	
+	setValue(value) {
+		super.setValue(value);
+		if(this.schema.hasOwnProperty('inverse')) {
+			if("getKlass" in value && value.getKlass() == this.getKlass()) {
+				if(value[this.schema.inverse] instanceof ArrayMField) {
+					
+					value[this.schema.inverse].push(this.superKlass);
+				} else {
+					value[this.schema.inverse] = this.superKlass;
+				}
+			}
+		}
+	}
+
 	getKlass() {
 		return this.schema.klass;
 	}
 
 	validate(value) {
-		if(!value.hasOwnProperty("klass")) {
+		if(! "getKlass" in value) {
 			throw new TypeError("Object must be of klass "+this.schema.klass+" but value is not managed data");
 		} else {
-			if(!value.klass == this.schema.klass) {
-				throw new TypeError("Object must be of klass "+this.schema.klass+"but value is of klass "+value.klass);
+			if(!value.getKlass() == this.schema.klass) {
+				throw new TypeError("Object must be of klass "+this.schema.klass+"but value is of klass "+value.getKlass());
 			}
 		}
+		return true;
 	}
 }
 
@@ -75,9 +100,9 @@ export class MultiMField extends MField {
 				this.items.final.push(field);
 			} else if(type == "MObject") {
 				if(!this.items.hasOwnProperty("object")) {
-					this.items.obhect = [];
+					this.items.object = [];
 				}
-				this.items.object.push(field.getKlass());
+				this.items.object.push(field);
 			} else {
 				this.items[type] = field;
 			}
@@ -85,43 +110,67 @@ export class MultiMField extends MField {
 	}
 
 	validate(value) {
-		console.log("validating multi");
-		console.log(value);
 		let type = typeof(value);
 		let klass = "";
 
 		if(type == "object") {
 			if(value instanceof Array) {
 				type = "array";
-			} else if (value.hasOwnProperty("klass")) {
+			} else if ("getKlass" in value) {
 				type = "object";
-				klass = value.klass;
+				klass = value.getKlass();
 			}
 		}
-		console.log(type);
-		console.log(this.items[type]);
 		if(this.items.hasOwnProperty(type)) {
-			this.items[type].validate(value);
+			if(type == "object") {
+				for(let obj of this.items[type]) {
+					if(obj.getKlass() == klass) {
+						return true;
+					}
+				}
+			} else {
+				this.items[type].validate(value);
+			}
 		} else if (this.items.hasOwnProperty("multi")) {
 			this.items.multi.validate(value);
 		} else if (this.items.hasOwnProperty("final")) {
 			for(let item of this.items.final) {
-				console.log(item.getValue(), value);
 				if(item.getValue() == value) {
 					return true;
 				}
 			}
-			console.log(this);
 			throw new TypeError("Invalid final value of enum");
 		}
 		return true;
+	}
+}
+
+let arrayHandler = {
+	get(target, propKey, receiver) {
+		if(propKey in target) {
+			var propValue = target[propKey];
+			if (typeof propValue != "function"){
+				return propValue;
+			}
+			else{
+				// return a function that executes the method call on the target
+				return function(){
+					return propValue.apply(target, arguments, propKey);
+				}
+			}
+		} else {
+			return function(){
+				return propValue.value.apply(target, arguments, propKey);
+			}
+		}
+
 	}
 }
 export class ArrayMField extends MField {
 	constructor(schema) {
 		super(schema, []);
 		this.type = schema.type;
-
+		//this.proxy = new Proxy(this, arrayHandler);
 		if(schema.hasOwnProperty("items")) {
 			if(schema.items instanceof Array) {
 				this.items = schema.items;
@@ -129,6 +178,7 @@ export class ArrayMField extends MField {
 				this.items = [schema.items];
 			}
 		}
+		this[Symbol.iterator] = this.getIterator;
 	}
 
 	validate(value) {
@@ -144,15 +194,39 @@ export class ArrayMField extends MField {
 				try{ 
 					field.validate(item);
 				} catch(err) {
-					console.log(field);
-					console.log(this.items);
-					console.log(err.message);
 					throw new TypeError("Item assigned to array is of an invalid type");
 				}
 				length++;
 			}	
 		}
 		return true;
+	}
+
+	push(...values) {
+		if(!this.validate(values)) {
+			throw new TypeError("error in push");
+		} else {
+
+		}
+		for(let value of values) {
+			this.value.push(value);
+		}
+	}
+
+	getIterator() {
+		return this.getValues()[Symbol.iterator]();
+	}
+
+	getValues() {
+		let arr = [];
+		for(let value of this.value) {
+			arr.push(value.getValue());
+		}
+		return arr;
+	}
+
+	getValue() {
+		return this;
 	}
 }
 
@@ -164,7 +238,6 @@ export class StringMField extends MField {
 
 	validate(value) {
 		if(!typeof(value) === "string") {
-			console.log(typeof(value));
 			throw new TypeError("Value "+value+" should be a string but its type is "+typeof(value));
 		}
 
@@ -235,8 +308,7 @@ export class IntegerMField extends NumberMField {
 }
 
 export class MFieldFactory {
-	static MField(schema, subKlasses) {
-		console.log(schema);
+	static MField(schema, superKlass, superSchema) {
 		if(schema.hasOwnProperty("type")) {
 			let type = schema.type;
 			if(type == "integer") {
@@ -248,9 +320,9 @@ export class MFieldFactory {
 			} else if (type == "boolean") {
 				return new BooleanMField(schema);
 			} else if (type == "array") {
-				return new ArrayMField(schema, subKlasses);
+				return new ArrayMField(schema);
 			} else if (type == "object") {
-				return new MObjectMField(schema);
+				return new MObjectMField(schema, superKlass, superSchema);
 			}
 		} else if (schema.hasOwnProperty("enum") || schema.hasOwnProperty("oneOf")) {
 			return new MultiMField(schema);

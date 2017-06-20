@@ -1,5 +1,6 @@
 
 //import * as Point from "./schemas/pointSchema.js";
+import * as stateMachine from "./datamanagers/stateMachine/stateMachineDataManager.js";
 import * as MD4JS from "./datamanagers/basicDataManager.js";
 import * as interpreter from "./schemaInterpreter/schemaInterpreter.js";
 import * as testingSuite from "./testingSuite/tester.js";
@@ -12,7 +13,25 @@ let ajv = Ajv({allErrors: true});
 
 class Main { 
     constructor() {
-    	let schema = {
+    	let doorsManager = new stateMachine.MachineDataManager();
+
+    	console.log("____________________________________________________________");
+    	console.log("Machine after initialization:");
+    	doorsManager.printMachine();
+    	console.log("____________________________________________________________");
+
+    	console.log("Executing state transitions:");
+    	doorsManager.change("open");
+    	doorsManager.change("close");
+    	doorsManager.change("open");
+    	console.log("____________________________________________________________");
+
+    	console.log("Machine after executing transitions:");
+    	doorsManager.printMachine();
+    	console.log("____________________________________________________________");
+
+
+    	/*let schema = {
     		"name": "point",
     		"properties": {
     			"x": {"type": "integer"},
@@ -30,7 +49,14 @@ class Main {
     			},
     			"arr2": {
     				"type": "array",
-    				"items": [{"type": "integer"},{"type": "string"}]
+    				"items": [
+    					{"type": "integer"},
+    					{"type": "string"}, 
+    					{
+		    				"type": "object",
+		    				"$ref": "#/definitions/object"
+		    			}
+		    		]
     			},
     			"en": {
     				"enum": [
@@ -41,13 +67,28 @@ class Main {
     						"type": "array",
     						"items": {"type": "integer"}
     					},
+    					{
+		    				"type": "object",
+		    				"$ref": "#/definitions/object"
+		    			},
     					{"enum": ["one", "two", "three"]},
     					]
+    			},
+    			"obj": {
+    				"type": "object",
+    				"$ref": "#/definitions/object"
+    			}
+    		},
+    		"definitions": {
+    			"object": {
+    				"properties": {
+    					"x": {"type": "integer"}
+    				}
     			}
     		}
     	}
     	let br = new MD4JS.BasicRecordFactory(schema);
-    	let point = new br.point({"x": 1, "y": 4, "name": "aaa", "valid": true, "arr": [1,2,3], "arr2": [1,"test", 2,"otherTest"]});
+    	let point = new br.point({"x": 1, "y": 4, "name": "aaa", "valid": true, "arr": [1,2,3], "arr2": [1,"test", new br.object({"x": 6}), 2,"otherTest", new br.object({"x": 5})]});
     	let otherPoint = new br.point();
     	otherPoint.x = 2;
     	otherPoint.y = 3.5;
@@ -62,7 +103,15 @@ class Main {
     	point.en = 1.2;
     	point.en = false;
     	point.en = [1,2,3];
-    	point.en = ["error"];
+    	point.en = new br.object({"x": 6});
+    	point.obj = new br.object();
+    	
+    	point.obj.x = 2;
+    	
+    	//point.en.x = 8;
+    	//point.arr2 = [1, "test", new br.object({"x": 2})];
+    	point.obj.x = "error";
+    	console.log(point.obj);*/
     	/*testingSuite.TestBasicRecord.testAll();
 		// load schema and create a basicRecordFactory
 		let pointSchema = require('./schemas/testSchema.json');

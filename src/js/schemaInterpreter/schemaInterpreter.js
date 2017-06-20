@@ -105,7 +105,8 @@ export class SchemaInterpreter {
 			if(property.hasOwnProperty('$ref')) {
 				/* if we find a reference: set the klass name as a type and remove the 
 				 * reference from the schema */
-				property['type'] = this.klassPaths[property['$ref']];
+				property['klass'] = this.klassPaths[property['$ref']];
+				property['type'] = 'object';
 				this.currentSubKlasses.push(this.klassPaths[property['$ref']]);
 				delete property['$ref'];
 			}
@@ -148,7 +149,8 @@ export class SchemaInterpreter {
 			for(var item of arr) {
 				if(item.hasOwnProperty('$ref')) {
 					/* if we find a reference in the type array: replace this reference by a klass */
-					item['type'] = this.klassPaths[item['$ref']];
+					item['klass'] = this.klassPaths[item['$ref']];
+					item['type'] = 'object';
 					this.currentSubKlasses.push(this.klassPaths[item['$ref']]);
 					delete item['$ref'];
 				} else if(item.hasOwnProperty('type') && item['type'] != 'object'){
@@ -164,7 +166,8 @@ export class SchemaInterpreter {
 		} else {
 			if(arr.hasOwnProperty('$ref')) {
 				/* if we find a reference in the type array: replace this reference by a klass */
-				arr['type'] = this.klassPaths[arr['$ref']];
+				arr['klass'] = this.klassPaths[arr['$ref']];
+				arr['type'] = 'object';
 				this.currentSubKlasses.push(this.klassPaths[arr['$ref']]);
 				delete arr['$ref'];
 			} else if(arr.hasOwnProperty('type') && arr['type'] != 'object'){

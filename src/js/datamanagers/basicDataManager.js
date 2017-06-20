@@ -90,13 +90,31 @@ export class MObject {
 	constructor(schema, klass, subKlasses) {
 		this.data = {};
 		this.proxy = {};
-		console.log(schema);
-		for(let propKey in schema.properties) {
+		this.klass = klass;
+		this.schema = schema;
+		
+	}
+
+	init() {
+		let ownSchema = {
+			"type": "object",
+			"klass": this.klass
+		}
+		for(let propKey in this.schema.properties) {
 			this.data[propKey] = field.MFieldFactory.MField(
-									schema.properties[propKey], 
-									subKlasses
+									this.schema.properties[propKey],
+									this.proxy,
+									ownSchema
 								);
 		}
+	}
+
+	setThisProxy(proxy) {
+		this.proxy = proxy;
+	}
+
+	getKlass() {
+		return this.klass;
 	}
 
 	__get(propKey) {
@@ -125,15 +143,14 @@ export class MObject {
  * individually through the proxy handler to ensure the data conforms with the schema and data manager implmenetation.
  */ 
 let f = function(inits, klass) {
-	console.log(this.schema);
 	let schema = this.schema.klassSchemas[klass].schema;
 	let subKlasses = this.schema.klassSchemas[klass].subKlasses;
-	console.log(schema);
 	let mobj = new this.MObj(schema, klass, subKlasses, this.otherInits);
 	let mObjProxy = new Proxy(mobj, new this.handler());
 
 	/* The MObject needs a pointer to its own proxy for when an inverse field is found */
-	//mObjProxy.proxy = mObjProxy;
+	mObjProxy.setThisProxy(mObjProxy);
+	mObjProxy.init();
 
 	for(var propKey in inits) {
 		mObjProxy[propKey] = inits[propKey];
