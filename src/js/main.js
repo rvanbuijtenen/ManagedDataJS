@@ -17,17 +17,23 @@ class Main {
 
     	console.log("____________________________________________________________");
     	console.log("Machine after initialization:");
+
     	doorsManager.printMachine();
+
     	console.log("____________________________________________________________");
 
     	console.log("Executing state transitions:");
+
     	doorsManager.change("open");
     	doorsManager.change("close");
     	doorsManager.change("open");
+
     	console.log("____________________________________________________________");
 
     	console.log("Machine after executing transitions:");
+
     	doorsManager.printMachine();
+    	
     	console.log("____________________________________________________________");
 
 
