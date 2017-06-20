@@ -1,0 +1,58 @@
+{
+	"name": "graph",
+	"properties": {
+		"lines": {
+			"type": "array",
+			"items": {"$ref": "#/definitions/line"}
+		}
+	},
+	"definitions": {
+		"line": {
+			"properties": {
+				"points": {
+					"type": "array",
+					"items": {"oneOf": [
+						{"$ref": "#/definitions/linearPoint"}, 
+						{"$ref": "#/definitions/quadtraticPoint"}, 
+						{"$ref": "#/definitions/bezierPoint"}
+					]}
+				},
+				"start": {"$ref": "#/definitions/point"},
+				"color": {"enum": ["black", "green", "blue", "red"]},
+				"width": {
+					"type": "integer",
+					"minimum": 1,
+					"maximum": 10
+				},
+				"belongs_to": {"$ref": "#", "inverse": "lines"}
+			}
+		},
+		"point": {
+			"properties": {
+				"x": {"type": "number"},
+				"y": {"type": "number"}
+			}
+		},
+		"linearPoint": {
+			"properties": {
+				"end": {"$ref": "#/definitions/point"},
+				"belongs_to": {"$ref": "#/definitions/line", "inverse": "points"}
+			}
+		},
+		"quadraticPoint": {
+			"properties": {
+				"cp": {"$ref": "#/definitions/point"},
+				"end": {"$ref": "#/definitions/point"},
+				"belongs_to": {"$ref": "#/definitions/line", "inverse": "points"}
+			}
+		},
+		"bezierPoint": {
+			"properties": {
+				"cp1": {"$ref": "#/definitions/point"},
+				"cp2": {"$ref": "#/definitions/point"},
+				"end": {"$ref": "#/definitions/point"},
+				"belongs_to": {"$ref": "#/definitions/line", "inverse": "points"}
+			}
+		}
+	}
+}

@@ -213,6 +213,14 @@ export class ArrayMField extends MField {
 		}
 	}
 
+	find(idx) {
+		if(idx > this.value.length || idx < 0) { 
+			throw new TypeError("index "+idx+" is out of bounds");
+		} else {
+			return this.value[idx].getValue();
+		}
+	}
+
 	getIterator() {
 		return this.getValues()[Symbol.iterator]();
 	}

@@ -1,28 +1,10 @@
-import * as bdm from "../basicDataManager.js";
+import * as bdm from "../../framework/basicDataManager/basicDataManager.js";
 
-export class MachineDataManager {
-	constructor() {
-		let schema = require("./machineSchema.json")
-		let mf = new bdm.BasicRecordFactory(schema);
+export class StateMachineManager extends bdm.BasicDataManager {
+	constructor(factory, schema) {
+		super(factory, schema);
 
-		this.machine = new mf.machine({"name": "machine1"});
-		
-		let stateOpened = new mf.state({"name": "opened", "belongs_to": this.machine});
-		let stateClosed = new mf.state({"name": "closed", "belongs_to": this.machine});
-
-		let transOpen = new mf.transition(
-			{"event": "open", 
-			"from": stateClosed, 
-			"to": stateOpened}
-		);
-
-		let transClose = new mf.transition(
-			{"event": "close",
-			"from": stateOpened,
-			"to": stateClosed}
-		);
-
-		this.machine.start = stateClosed;
+		this.machine = new this.factory.machine();
 	}
 
 	change(event) {

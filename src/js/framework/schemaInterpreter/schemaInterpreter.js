@@ -47,7 +47,6 @@ export class SchemaInterpreter {
 
 		/* append the found sub klasses to the main schema */
 		this.klassSchemas[schema.name].subKlasses = this.currentSubKlasses;
-		
 		/* return an object containing the name of the main klass and a klassSchemas field
 		 * containing schema definitions for all klasses that were defined within the schema */
 		return {"mainKlass": schema['name'], "klassSchemas": this.klassSchemas};
@@ -135,7 +134,7 @@ export class SchemaInterpreter {
 			this.parseTypeArray(typeObj['anyOf']);	
 		} else if(typeObj.hasOwnProperty('allOf')) {
 			this.parseTypeArray(typeObj['allOf']);	
-		} else if(type == 'object'){
+		} else if(type == 'object' && !typeObj.hasOwnProperty("klass")){
 			throw new TypeError("A property referring to an object must have a reference to '#/definitions/<definition>' containing the object definition");	
 		}
 	}
@@ -156,9 +155,11 @@ export class SchemaInterpreter {
 				} else if(item.hasOwnProperty('type') && item['type'] != 'object'){
 					/* if we find a type: parse this type */
 					this.parseType(item);	
-				} else if(item.hasOwnProperty('format')){
-					/* TO DO: format */
-				} else if (typeof(item) == Object) {
+				} else if(item.hasOwnProperty("oneOf")){
+					this.parseTypeArray(item.oneOf);
+				} else if (item.hasOwnProperty("enum")) {
+					this.parseTypeArray(item.enum);
+				} else if (typeof(item) == Object && !item.hasOwnProperty("klass")) {
 					/* if the item is an object, we throw an error since an object must have a reference to a definition */
 					throw new TypeError("oneOf containing objects must consist of basic types, or have a reference to '#/definitions/<definition>' containing the object definition");
 				}
@@ -173,9 +174,11 @@ export class SchemaInterpreter {
 			} else if(arr.hasOwnProperty('type') && arr['type'] != 'object'){
 				/* if we find a type: parse this type */
 				this.parseType(arr);	
-			} else if(arr.hasOwnProperty('format')){
-				/* TO DO: format */
-			} else if (typeof(arr) == Object) {
+			}  else if(arr.hasOwnProperty("oneOf")){
+				this.parseTypeArray(arr.oneOf);
+			} else if (arr.hasOwnProperty("enum")) {
+				this.parseTypeArray(arr.enum);
+			} else if (typeof(arr) == Object && !arr.hasOwnProperty("klass")) {
 				/* if the arr is an object, we throw an error since an object must have a reference to a definition */
 				throw new TypeError("oneOf containing objects must consist of basic types, or have a reference to '#/definitions/<definition>' containing the object definition");
 			}
