@@ -145,30 +145,10 @@ export class MultiMField extends MField {
 	}
 }
 
-let arrayHandler = {
-	get(target, propKey, receiver) {
-		if(propKey in target) {
-			var propValue = target[propKey];
-			if (typeof propValue != "function"){
-				return propValue;
-			}
-			else{
-				// return a function that executes the method call on the target
-				return function(){
-					return propValue.apply(target, arguments, propKey);
-				}
-			}
-		} else {
-			return function(){
-				return propValue.value.apply(target, arguments, propKey);
-			}
-		}
-
-	}
-}
 export class ArrayMField extends MField {
-	constructor(schema) {
+	constructor(schema, superKlass) {
 		super(schema, []);
+		this.superKlass = superKlass;
 		this.type = schema.type;
 		//this.proxy = new Proxy(this, arrayHandler);
 		if(schema.hasOwnProperty("items")) {
@@ -211,6 +191,7 @@ export class ArrayMField extends MField {
 		for(let value of values) {
 			this.value.push(value);
 		}
+		this.superKlass.notifyArrayChanged(this);
 	}
 
 	find(idx) {
@@ -328,7 +309,8 @@ export class MFieldFactory {
 			} else if (type == "boolean") {
 				return new BooleanMField(schema);
 			} else if (type == "array") {
-				return new ArrayMField(schema);
+				console.log("\n\nschema:", schema);
+				return new ArrayMField(schema, superKlass);
 			} else if (type == "object") {
 				return new MObjectMField(schema, superKlass, superSchema);
 			}

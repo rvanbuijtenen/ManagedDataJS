@@ -15,7 +15,9 @@ import * as basicFactory from "./framework/basicDataManager/basicRecordFactory.j
 import * as loggingFactory from "./framework/loggingDataManager/loggingFactory.js";
 import * as lockingFactory from "./framework/lockingDataManager/lockingFactory.js";
 import * as graphManager from "./implementations/graph/graphManager.js";
-import * as g from "../caseStudies/graph.js";
+import * as persistentFactory from "./caseStudies/graph/persistentManagedGraph/persistentFactory.js";
+import * as g from "./caseStudies/graph/jsgraph/graph.js";
+import * as persistentGraphManager from "./caseStudies/graph/persistentManagedGraph/persistentGraphManager.js";
 
 class Main { 
     constructor() {
@@ -109,6 +111,9 @@ class Main {
 
     	console.log("MD4JS graph took " + (t2-t1) + "ms.");
     	console.log("Regular JS graph took " + (t4-t3) + "ms.");
+
+        let gm2 = new persistentGraphManager.PersistentGraphManager(persistentFactory.PersistentFactory, graphSchema);
+        gm2.addLine("red", 2, [0,0], [1,1], [2,2], [3,4], [4,8]);
     }
 }
 

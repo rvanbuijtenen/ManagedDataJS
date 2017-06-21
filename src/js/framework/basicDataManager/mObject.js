@@ -100,4 +100,24 @@ export class MObject {
 		}
 		return true;
 	}
+
+	/**
+	 * By default the modification methods of managed arrays bypasses
+	 * the set trap. Because of this, arrays notify their superKlass when they change.
+	 * This way an MObject can still implement its functionality whenever an array field
+	 * is modified by extending this function.
+	 */
+	notifyArrayChanged(array) {
+		let propKey = undefined;
+		for(let key in this.data) {
+			if(this.data[key].type == "array" && this.data[key] == array) {
+				propKey = key;
+			}
+		}
+		if(propKey == undefined) {
+			throw new TypeError("something went wrong");
+		}
+
+		return propKey;
+	}
 }
