@@ -15,6 +15,7 @@ import * as basicFactory from "./framework/basicDataManager/basicRecordFactory.j
 import * as loggingFactory from "./framework/loggingDataManager/loggingFactory.js";
 import * as lockingFactory from "./framework/lockingDataManager/lockingFactory.js";
 import * as graphManager from "./implementations/graph/graphManager.js";
+import * as g from "../caseStudies/graph.js";
 
 class Main { 
     constructor() {
@@ -82,7 +83,9 @@ class Main {
 		canvas.style.border   = "1px solid";
     	document.getElementById('canvas').appendChild(canvas);
 
+    	let t1 = new Date().getTime();
     	let graphSchema = require("./implementations/graph/graphSchema.json");
+
     	let gm = new graphManager.GraphManager(basicFactory.BasicRecordFactory, graphSchema);
 
     	gm.addLine("red", 2, [0,0], [1,1], [2,2], [3,4], [4,8]);
@@ -90,7 +93,22 @@ class Main {
     	gm.addLine("green", 10, [0,0], [0,8,4,8,4,0])
     	gm.addLine("black", 4, [0,10], [0,0,1,4],[2,6],[4,10,4,0,2,0])
 
-    	gm.draw(canvas);	
+    	gm.draw(canvas);
+    	let t2 = new Date().getTime();
+    	canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+
+    	let t3 = new Date().getTime();
+    	let graph = new g.Graph();
+
+    	graph.addLine("red", 2, [0,0], [1,1], [2,2], [3,4], [4,8]);
+    	graph.addLine("blue", 5, [0,0], [4,0,4,8]);
+    	graph.addLine("green", 10, [0,0], [0,8,4,8,4,0])
+    	graph.addLine("black", 4, [0,10], [0,0,1,4],[2,6],[4,10,4,0,2,0])	
+    	graph.draw(canvas);
+    	let t4 = new Date().getTime();
+
+    	console.log("MD4JS graph took " + (t2-t1) + "ms.");
+    	console.log("Regular JS graph took " + (t4-t3) + "ms.");
     }
 }
 
