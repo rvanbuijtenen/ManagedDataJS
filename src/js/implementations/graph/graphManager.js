@@ -47,17 +47,25 @@ export class GraphManager extends bdm.BasicDataManager {
 		let max_y = 0;
 		for(let line of this.graph.lines) {
 			for(let point of line.points) {
-				if(point.end.x < min_x) {
-					min_x = point.end.x;
+				min_x = point.end.x < min_x ? point.end.x : min_x;
+				max_x = point.end.x > max_x ? point.end.x : max_x;
+				min_y = point.end.y < min_y ? point.end.y : min_y;
+				max_y = point.end.y > max_y ? point.end.y : max_y;
+				if(point.getKlass() == 'quadraticPoint') {
+					min_x = point.cp.x < min_x ? point.cp.x : min_x;
+					max_x = point.cp.x > max_x ? point.cp.x : max_x;
+					min_y = point.cp.y < min_y ? point.cp.y : min_y;
+					max_y = point.cp.y > max_y ? point.cp.y : max_y;		
 				}
-				if(point.end.y < min_y) {
-					min_y = point.end.y;
-				}
-				if(point.end.x > max_x) {
-					max_x = point.end.x;
-				}
-				if(point.end.y > max_y) {
-					max_y = point.end.y;
+				if(point.getKlass() == 'bezierPoint') {
+					min_x = point.cp1.x < min_x ? point.cp1.x : min_x;
+					max_x = point.cp1.x > max_x ? point.cp1.x : max_x;
+					min_y = point.cp1.y < min_y ? point.cp1.y : min_y;
+					max_y = point.cp1.y > max_y ? point.cp1.y : max_y;
+					min_x = point.cp2.x < min_x ? point.cp2.x : min_x;
+					max_x = point.cp2.x > max_x ? point.cp2.x : max_x;
+					min_y = point.cp2.y < min_y ? point.cp2.y : min_y;
+					max_y = point.cp2.y > max_y ? point.cp2.y : max_y;		
 				}
 			}
 		}
@@ -69,6 +77,7 @@ export class GraphManager extends bdm.BasicDataManager {
 		for(let line of this.graph.lines) {
 			context.beginPath();
 			context.moveTo(line.start.x*scale_x, canvas.height - line.start.y*scale_y);
+
 			for(let point of line.points) {
 				if(point.getKlass() == "linearPoint") {
 					context.lineTo(point.end.x*scale_x, canvas.height - point.end.y*scale_y);

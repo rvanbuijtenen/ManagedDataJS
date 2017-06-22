@@ -1,8 +1,8 @@
 import * as mObject from "../basicDataManager/mObject.js";
 
 export class LockingMObject extends mObject.MObject {
-	constructor(schema, klass, subKlasses) {
-		super(schema, klass, subKlasses);
+	constructor(schema, klass, subKlasses, otherInits) {
+		super(schema, klass, subKlasses, otherInits);
 		this.locked = false;
 	}
 

@@ -54,12 +54,14 @@ export class BasicRecordHandler {
  * ToDo: check required fields in constructor.
  */
 export class MObject {
-	constructor(schema, klass, subKlasses) {
+	constructor(schema, klass, subKlasses, otherInits) {
 		this.data = {};
 		this.proxy = {};
 		this.klass = klass;
 		this.schema = schema;
-		
+		for(let propKey in otherInits) {
+			this[propKey] = otherInits[propKey];
+		}	
 	}
 
 	init() {

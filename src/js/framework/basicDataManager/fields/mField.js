@@ -169,7 +169,6 @@ export class ArrayMField extends MField {
 		if(this.hasOwnProperty("items")) {
 			let length = 0;
 			for(let item of value) {
-
 				let field = MFieldFactory.MField(this.items[length%this.items.length]);
 				try{ 
 					field.validate(item);
@@ -185,11 +184,13 @@ export class ArrayMField extends MField {
 	push(...values) {
 		if(!this.validate(values)) {
 			throw new TypeError("error in push");
-		} else {
-
 		}
 		for(let value of values) {
-			this.value.push(value);
+			if(value instanceof MField) {
+				this.value.push(value.getValue());
+			} else {
+				this.value.push(value);
+			}
 		}
 		this.superKlass.notifyArrayChanged(this);
 	}
@@ -209,7 +210,8 @@ export class ArrayMField extends MField {
 	getValues() {
 		let arr = [];
 		for(let value of this.value) {
-			arr.push(value.getValue());
+				arr.push(value);
+			
 		}
 		return arr;
 	}
@@ -309,7 +311,6 @@ export class MFieldFactory {
 			} else if (type == "boolean") {
 				return new BooleanMField(schema);
 			} else if (type == "array") {
-				console.log("\n\nschema:", schema);
 				return new ArrayMField(schema, superKlass);
 			} else if (type == "object") {
 				return new MObjectMField(schema, superKlass, superSchema);

@@ -27,7 +27,7 @@ class Main {
     	 */
     	let schema = require("./implementations/stateMachine/machineSchema.json");
     	let doorsManager = new doorsMachine.Doors(basicFactory.BasicRecordFactory, schema);
-
+        console.log(doorsManager);
     	console.log("Doors Machine Example")
     	console.log("____________________________________________________________");
     	console.log("Machine after initialization:");
@@ -81,7 +81,7 @@ class Main {
 		canvas.width  = 1224;
 		canvas.height = 768;
 		canvas.style.zIndex   = 8;
-		canvas.style.position = "absolute";
+		canvas.style.position = "relative";
 		canvas.style.border   = "1px solid";
     	document.getElementById('canvas').appendChild(canvas);
 
@@ -112,8 +112,46 @@ class Main {
     	console.log("MD4JS graph took " + (t2-t1) + "ms.");
     	console.log("Regular JS graph took " + (t4-t3) + "ms.");
 
+        let gm6 = {};
+        if(localStorage.length == 0) {
         let gm2 = new persistentGraphManager.PersistentGraphManager(persistentFactory.PersistentFactory, graphSchema);
         gm2.addLine("red", 2, [0,0], [1,1], [2,2], [3,4], [4,8]);
+        console.log(gm2.graph);
+
+        let gm3 = new persistentGraphManager.PersistentGraphManager(persistentFactory.PersistentFactory, graphSchema);
+        gm3.addLine("blue", 5, [0,0], [4,0,4,8]);
+        let gm4 = new persistentGraphManager.PersistentGraphManager(persistentFactory.PersistentFactory, graphSchema);
+        gm4.addLine("green", 10, [0,0], [0,8,4,8,4,0]);
+
+        let gm5 = new persistentGraphManager.PersistentGraphManager(persistentFactory.PersistentFactory, graphSchema);
+        gm5.addLine("black", 4, [0,10], [0,0,1,4],[2,6],[4,10,4,0,2,0])   
+
+        gm6 = new persistentGraphManager.PersistentGraphManager(persistentFactory.PersistentFactory, graphSchema);
+        gm6.addLine("red", 2, [0,0], [1,1], [2,2], [3,4], [4,8]);
+        gm6.addLine("blue", 5, [0,0], [4,0,4,8]);
+        gm6.addLine("green", 10, [0,0], [0,8,4,8,4,0])
+        gm6.addLine("black", 4, [0,10], [0,0,1,4],[2,6],[4,10,4,0,2,0])  
+        } else {
+            gm6 = new persistentGraphManager.PersistentGraphManager(persistentFactory.PersistentFactory, graphSchema);
+        }
+        canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+
+        let loadFunction = function(event) {
+            let id = event.target.innerHTML;
+                canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+                let tt1 = new Date().getTime();
+                gm6.loadGraph(id, []);;
+                gm6.draw(canvas);
+                let tt2 = new Date().getTime();
+                console.log("loading graph took: ", tt2 - tt1, " ms");
+            }
+        let storedGraph = gm6.getStoredGraphs();
+        for(graph of storedGraph) {
+            let button = document.createElement('button');
+            button.innerHTML = graph;
+            button.onclick = loadFunction;
+            document.getElementById('canvas').appendChild(button);
+        }
     }
 }
 
