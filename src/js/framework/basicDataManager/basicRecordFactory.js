@@ -12,16 +12,23 @@ let FactoryHandler = {
 			// return a function that executes the method call on the target
 			return function(){
 				//arguments.unshift(propKey);
-				if(arguments.length == 0) {
-					arguments[0] = {};
-					arguments.length++;
-				}
-				arguments[arguments.length] = propKey;
-				arguments.length++;
+				[].unshift.call(arguments, propKey);
 				return propValue.apply(target, arguments, propKey);
 			}
 		}
 	}
+}
+
+let mix = (superclass) => new MixinBuilder(superclass);
+
+class MixinBuilder {  
+  constructor(superclass) {
+    this.superclass = superclass;
+  }
+
+  with(...mixins) { 
+    return mixins.reduce((c, mixin) => mixin(c), this.superclass);
+  }
 }
 
 /**
@@ -30,19 +37,26 @@ let FactoryHandler = {
  * in the prototype chain. It also takes the arguments passed by the constructor. Each argument is then set
  * individually through the proxy handler to ensure the data conforms with the schema and data manager implmenetation.
  */ 
-let f = function(inits, klass) {
+let f = function(klass, inits, ...otherArgs) {
+	console.log(otherArgs);
+	console.log("inits, klass:",inits, klass);
+	console.log(this.schema.klassSchemas);
 	let schema = this.schema.klassSchemas[klass].schema;
 	let subKlasses = this.schema.klassSchemas[klass].subKlasses;
-	let mobj = new this.MObj(schema, klass, subKlasses, this.otherInits);
+
+	let mobjClass = {};
+	if(this.mixins.length > 0) {
+        mobjClass = (class extends mix(this.MObj).with(...this.mixins){});
+    } else {
+        mobjClass = (class extends this.MObj {});
+    }
+	let mobj = new mobjClass(schema, klass, subKlasses, ...otherArgs);
 	let mObjProxy = new Proxy(mobj, new this.handler());
 
 	/* The MObject needs a pointer to its own proxy for when an inverse field is found */
+	console.log("proxy: ", mObjProxy);
 	mObjProxy.setThisProxy(mObjProxy);
-	mObjProxy.init();
-
-	for(var propKey in inits) {
-		mObjProxy[propKey] = inits[propKey];
-	}
+	mObjProxy.init(inits);
 		
 	return mObjProxy;
 }
@@ -60,11 +74,17 @@ let f = function(inits, klass) {
  * that constructs a new MObject.
  */
 export class BasicRecordFactory {
-	constructor(schema) {
+	constructor(schema, ...mixins) {
 		/* set handler and MObject class */
 		this.handler = mObject.BasicRecordHandler;
 		this.MObj = mObject.MObject;
-		this.otherInits = {};
+
+        this.schema = schema;
+        if(mixins.length > 0 && mixins[0] != undefined) {
+            this.mixins = mixins;
+        } else {
+            this.mixins = [];
+        }
 		
 		let i = new interpreter.SchemaInterpreter();
 		this.schema = i.parseSchema(schema);

@@ -6,9 +6,13 @@ import * as factory from "./basicRecordFactory.js";
  * constructor function assigned to the property with that same klass name.
  */
 export class BasicDataManager {
-	constructor(factory, schema) {
-		this.factory = new factory(schema);
-		console.log(this.factory);
+	constructor() {
+
+	}
+
+	factory(schema, ...mixins) {
+		console.log(mixins.length);
+		return new factory.BasicRecordFactory(schema, ...mixins);
 	}
 }
 

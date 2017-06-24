@@ -1,12 +1,13 @@
 import * as mObject from "../basicDataManager/mObject.js";
 
-export class LockingMObject extends mObject.MObject {
-	constructor(schema, klass, subKlasses, otherInits) {
-		super(schema, klass, subKlasses, otherInits);
+export let LockingMObject = (superclass) => class extends superclass {
+	constructor(schema, klass, subKlasses) {
+		super(schema, klass, subKlasses);
 		this.locked = false;
 	}
 
 	__set(propKey, value) {
+		console.log("_________________________");
 		if(this.locked == true) {
 			throw new TypeError("object is locked");
 		}

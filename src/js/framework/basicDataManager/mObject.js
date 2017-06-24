@@ -13,6 +13,7 @@ export class BasicRecordHandler {
 	 */
 	get(target, propKey, receiver) {
 		var propValue = target[propKey];
+		console.log(propKey, propValue);
 		if (typeof propValue != "function"){
 
 			/*if(propKey in target) {
@@ -54,27 +55,29 @@ export class BasicRecordHandler {
  * ToDo: check required fields in constructor.
  */
 export class MObject {
-	constructor(schema, klass, subKlasses, otherInits) {
+	constructor(schema, klass, subKlasses) {
 		this.data = {};
 		this.proxy = {};
 		this.klass = klass;
 		this.schema = schema;
-		for(let propKey in otherInits) {
-			this[propKey] = otherInits[propKey];
-		}	
 	}
 
-	init() {
+	init(inits) {
 		let ownSchema = {
 			"type": "object",
 			"klass": this.klass
 		}
+		console.log(this.proxy);
 		for(let propKey in this.schema.properties) {
 			this.data[propKey] = field.MFieldFactory.MField(
 									this.schema.properties[propKey],
 									this.proxy,
 									ownSchema
 								);
+		}
+
+		for(let propKey in inits) {
+			this.__set(propKey, inits[propKey]);
 		}
 	}
 
@@ -98,6 +101,7 @@ export class MObject {
 		if(this.data.hasOwnProperty(propKey)) {
 			this.data[propKey].setValue(value);
 		} else {
+			console.log(this.schema, this.data);
 			throw new TypeError("property "+propKey+" is not defined in schema");
 		}
 		return true;

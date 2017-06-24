@@ -1,22 +1,24 @@
 import * as mObject from "../../../framework/basicDataManager/mObject.js";
-const uuidv4 = require("uuid/v4");
+import * as mField from "../../../framework/basicDataManager/fields/mField.js";
 
-export class PersistentMObject extends mObject.MObject {
-	constructor(schema, klass, subKlasses, otherInits) {
-		super(schema, klass, subKlasses, otherInits);
-		this.id = uuidv4();
+export let PersistentMObject = (superclass) => class extends superclass {
+	constructor(schema, klass, subKlasses, factory, id) {
+		super(schema, klass, subKlasses);
+		this.factory = factory;
+		console.log(id);
+		console.log(localStorage.getItem(id));
+		this.id = id;
+		console.log("id= ", this.id);
+		this.isLoading = false;
 	}
 
 	__set(propKey, value) {
 		let result = super.__set(propKey, value);	
-		this.save();
 		return result;
 	}
 
 	notifyArrayChanged(array) {
 		let propKey = super.notifyArrayChanged(array);
-		console.log(propKey);
-		this.save();
 		return propKey;
 	}
 
@@ -24,89 +26,134 @@ export class PersistentMObject extends mObject.MObject {
 		return this.id;
 	}
 
-	save() {
-		let saveItem = {};
-		for(let propKey in this.data) {
-			saveItem[propKey] = this.serializeProperty(this.data[propKey].getValue());
-			if(propKey == "lines") {
-			}
+	save(time) {
+		// get current time and set time if not defined
+		let now = new Date().getTime();
+		if(time == undefined) {
+			time = now;
 		}
 
+		// check if this item has been saved already
+		let loadedItem = JSON.parse(localStorage.getItem(this.id));
+		if(loadedItem && loadedItem.updated_at >= time) {
+			return;
+		}
+
+		// initialize saveItem and serialize each property
+		let saveItem = {};
+
+		for(let prop in this.data) {
+			saveItem[prop] = this.serializeProperty(this.data[prop]); 
+		}
+		saveItem.updated_at = now;
 		localStorage.setItem(this.id, JSON.stringify(saveItem));
-		// save
+
+		// go over each property and if its managed data, call that items save function
+		for(let prop in this.data) {
+			this.saveProperty(this.data[prop], time);
+		}
 	}
 
 	serializeProperty(prop) {
-		if(typeof(prop) == "object" && prop != null) {
-			if("getKlass" in prop) {
-				return this.serializeMObject(prop);
-			} else if("type" in prop && prop.type == "array") {
-				return this.serializeArray(prop);
+		if(prop.getType() == "MObject") {
+			console.log("mObject");
+			return this.serializeMObject(prop.getValue());
+		} else if (prop.getType() == "array") {
+			console.log("array");
+			return this.serializeArray(prop);
+		} else {
+			console.log("primitive");
+			return prop.getValue();
+		}
+	}
+
+	serializeMObject(obj) {
+		return {"id": obj.getId(), "klass": obj.getKlass()};
+	}
+
+	serializeArray(arr) {
+		let serializedArr = [];
+		for(let item of arr) {
+			serializedArr.push(this.serializeArrayItem(item));
+		}
+		return serializedArr;
+	}
+
+	serializeArrayItem(item) {
+		if(item instanceof mObject.MObject) {
+			return this.serializeMObject(item);
+		} else if (item instanceof mField.ArrayMField) {
+			return this.serializeArray(item);
+		} else {
+			return item;
+		}
+	}
+
+	saveProperty(prop, time) {
+		if(prop.getType() == "MObject") {
+			prop.getValue().save(time);
+		} else if (prop.getType() == "array") {
+			this.saveArray(prop, time);
+		}
+	}
+
+	saveArray(prop, time) {
+		for(let item of prop) {
+			this.saveArrayItem(item, time);
+		}
+	}
+
+	saveArrayItem(item, time) {
+		if(item instanceof mObject.MObject) {
+			item.save(time);
+		} else if (item instanceof mField.ArrayMField) {
+			this.saveArray(item, time);
+		}
+	}
+
+	load(objects) {
+		if(objects == undefined) {
+			objects = [];
+		}
+		objects.push(this);
+
+		let loadedItem = JSON.parse(localStorage.getItem(this.id));
+		console.log(loadedItem);
+
+		for(let propKey in loadedItem) {
+			if(propKey != "updated_at") {
+				this.proxy[propKey] = this.loadProperty(loadedItem[propKey], objects);
 			}
+		}
+	}
+
+	loadProperty(prop, objects) {
+		if(prop.hasOwnProperty("klass")) {
+			return this.loadMObject(prop, objects);
+		} else if (prop instanceof Array) {
+			return this.loadArray(prop, objects);
 		} else {
 			return prop;
 		}
 	}
 
-	serializeMObject(obj) {
-		return {"klass": obj.getKlass(), "id": obj.getId()}
-	}
-
-	serializeArray(arr) {
-		let serializedArray = [];
-		for(let item of arr) {
-			serializedArray.push(this.serializeProperty(item));
-		}
-		return serializedArray;
-	}
-
-	load(id, objects) {
-		objects.push(this.proxy);
-		let data = JSON.parse(localStorage.getItem(id));
-		let properties = this.schema.properties;
-		for(let propKey in data) {
-				if(properties[propKey].hasOwnProperty("inverse")) {
-					continue;
-				}
-				let property = this.loadProperty(data[propKey], objects);
-			
-			//if(property != null) {
-				this.__set(propKey,property);
-			//}
-		}
-
-		localStorage.removeItem(this.id);
-		this.id = id;
-	}
-
-	loadProperty(prop, objects) {
-		if (prop instanceof Array) {
-			return this.loadArray(prop, objects);
-		}
-		if(prop.hasOwnProperty("klass")) {
-			return this.loadMObject(prop, objects);
-			/*let p = this.loadMObject(prop);
-			console.log("loaded prop:", p);
-			return p;
-			return prop;*/
-		}
-		return prop;
-	}
-
 	loadArray(arr, objects) {
-		let loadArray = [];
+		let loadedArray = [];
 		for(let item of arr) {
-			let i = this.loadProperty(item, objects);
-			if(i != null) {
-				loadArray.push(i);
+			if(item instanceof Array) {
+				loadedArray.push(this.loadArray(arr, objects));
+			} else if (item.hasOwnProperty("klass")) {
+				loadedArray.push(this.loadMObject(item, objects));
+			} else {
+				loadedArray.push(prop);
 			}
 		}
-		return loadArray;
+		return loadedArray;
 	}
 
 	loadMObject(obj, objects) {
 		for(let o of objects) {
-			if(obj.id == o.getId()) {
+			if(o.getId() == obj.id) {
 				return o;
 			}
 		}
@@ -121,12 +168,12 @@ export class PersistentMObject extends mObject.MObject {
 		if(inverseKey != "") {
 			let init = {};
 			init[inverseKey] = this.proxy;
-			let newObj = new this.factory[obj.klass](init)
-			newObj.load(obj.id, objects);
+			let newObj = new this.factory[obj.klass](init, this.factory, obj.id)
+			newObj.load(objects);
 			return newObj;
 		}
-		let newObj = new this.factory[obj.klass]();
-		newObj.load(obj.id, objects);
+		let newObj = new this.factory[obj.klass]({}, this.factory, obj.id);
+		newObj.load(objects);
 		return newObj;
 	}
 }

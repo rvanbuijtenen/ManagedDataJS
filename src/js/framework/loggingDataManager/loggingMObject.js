@@ -1,8 +1,8 @@
 import * as bdm from "../basicDataManager/mObject.js";
 
-export class LoggingMObject extends bdm.MObject {
-	constructor(schema, klass, subKlasses, otherInits) {
-		super(schema, klass, subKlasses, otherInits);
+export let LoggingMObject = (superclass) => class extends superclass {
+	constructor(schema, klass, subKlasses) {
+		super(schema, klass, subKlasses);
 		console.log("\nbuilding LoggedMObject of klass "+klass+"with schema:");
 		console.log(schema);
 	}

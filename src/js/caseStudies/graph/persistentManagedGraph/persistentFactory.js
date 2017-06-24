@@ -4,8 +4,6 @@ import * as basicFactory from "../../../framework/basicDataManager/basicRecordFa
 export class PersistentFactory extends basicFactory.BasicRecordFactory {
 	constructor(schema) {
 		super(schema);
-
-		this.MObj = persistentObject.PersistentMObject;
 		this.otherInits.factory = this;
 	}
 }

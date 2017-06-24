@@ -73,7 +73,8 @@ th {
 }
 
 td {
-    text-align: right;
+    vertical-align: top;
+    text-align: left;
     padding: 0 .5rem;
 }
 
@@ -157,4 +158,9 @@ button:active {
 
 button:focus {
     outline:0;
+}
+
+#container {
+    width: 80%;
+    margin:auto;
 }

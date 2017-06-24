@@ -54,7 +54,9 @@ export class MObjectMField extends MField {
 	}
 
 	validate(value) {
-		if(! "getKlass" in value) {
+		console.log()
+		if(!("getKlass" in value) && !(value instanceof MField)) {
+			console.log(value, this.schema);
 			throw new TypeError("Object must be of klass "+this.schema.klass+" but value is not managed data");
 		} else {
 			if(!value.getKlass() == this.schema.klass) {
@@ -173,6 +175,8 @@ export class ArrayMField extends MField {
 				try{ 
 					field.validate(item);
 				} catch(err) {
+
+					console.log(item, value);
 					throw new TypeError("Item assigned to array is of an invalid type");
 				}
 				length++;
