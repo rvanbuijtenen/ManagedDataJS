@@ -11,7 +11,6 @@ export class BasicDataManager {
 	}
 
 	factory(schema, ...mixins) {
-		console.log(mixins.length);
 		return new factory.BasicRecordFactory(schema, ...mixins);
 	}
 }

@@ -54,7 +54,6 @@ export class MObjectMField extends MField {
 	}
 
 	validate(value) {
-		console.log()
 		if(!("getKlass" in value) && !(value instanceof MField)) {
 			console.log(value, this.schema);
 			throw new TypeError("Object must be of klass "+this.schema.klass+" but value is not managed data");
@@ -298,8 +297,6 @@ export class IntegerMField extends NumberMField {
 		}
 		return true;
 	}
-
-
 }
 
 export class MFieldFactory {

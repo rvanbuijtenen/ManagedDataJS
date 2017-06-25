@@ -1,5 +1,5 @@
-import * as runGraph from "../../../implementations/graph/runGraph.js";
-import * as persistentMObject from "./persistentMObject.js";
+import * as runGraph from "./runGraph.js";
+import * as persistentMObject from "../../framework/persistentDataManager/persistentMObject.js";
 
 export class RunPersistentGraph extends runGraph.RunGraph {
 	constructor(description) {		
@@ -107,7 +107,6 @@ export class RunPersistentGraph extends runGraph.RunGraph {
 		if(!savedGraphs.includes(this.graph.getId())) {
 			savedGraphs.push(this.graph.getId());
 		}
-		console.log("saved graphs: ", savedGraphs);
 		localStorage.setItem("savedGraphs", JSON.stringify(savedGraphs));
 		this.graph.save();
 		this.updateGraphSelect(this.graph.getId());
@@ -123,7 +122,6 @@ export class RunPersistentGraph extends runGraph.RunGraph {
 	createGraph(graphName, width, color, lineData) {
 		if(graphName != this.graphName) {
 			this.graphName = graphName;
-			console.log(graphName);
 			this.graph = this.factory.graph({},this.factory, graphName);
 		}
 		if(lineData.length == 0) {

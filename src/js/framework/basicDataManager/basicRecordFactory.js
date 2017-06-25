@@ -27,6 +27,7 @@ class MixinBuilder {
   }
 
   with(...mixins) { 
+  	console.log(mixins);
     return mixins.reduce((c, mixin) => mixin(c), this.superclass);
   }
 }
@@ -38,9 +39,6 @@ class MixinBuilder {
  * individually through the proxy handler to ensure the data conforms with the schema and data manager implmenetation.
  */ 
 let f = function(klass, inits, ...otherArgs) {
-	console.log(otherArgs);
-	console.log("inits, klass:",inits, klass);
-	console.log(this.schema.klassSchemas);
 	let schema = this.schema.klassSchemas[klass].schema;
 	let subKlasses = this.schema.klassSchemas[klass].subKlasses;
 
@@ -54,7 +52,6 @@ let f = function(klass, inits, ...otherArgs) {
 	let mObjProxy = new Proxy(mobj, new this.handler());
 
 	/* The MObject needs a pointer to its own proxy for when an inverse field is found */
-	console.log("proxy: ", mObjProxy);
 	mObjProxy.setThisProxy(mObjProxy);
 	mObjProxy.init(inits);
 		

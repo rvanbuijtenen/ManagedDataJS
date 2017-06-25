@@ -1,14 +1,11 @@
-import * as mObject from "../../../framework/basicDataManager/mObject.js";
-import * as mField from "../../../framework/basicDataManager/fields/mField.js";
+import * as mObject from "../basicDataManager/mObject.js";
+import * as mField from "../basicDataManager/fields/mField.js";
 
 export let PersistentMObject = (superclass) => class extends superclass {
-	constructor(schema, klass, subKlasses, factory, id) {
-		super(schema, klass, subKlasses);
+	constructor(schema, klass, subKlasses, factory, id, ...otherArgs) {
+		super(schema, klass, subKlasses, ...otherArgs);
 		this.factory = factory;
-		console.log(id);
-		console.log(localStorage.getItem(id));
 		this.id = id;
-		console.log("id= ", this.id);
 		this.isLoading = false;
 	}
 
@@ -56,13 +53,10 @@ export let PersistentMObject = (superclass) => class extends superclass {
 
 	serializeProperty(prop) {
 		if(prop.getType() == "MObject") {
-			console.log("mObject");
 			return this.serializeMObject(prop.getValue());
 		} else if (prop.getType() == "array") {
-			console.log("array");
 			return this.serializeArray(prop);
 		} else {
-			console.log("primitive");
 			return prop.getValue();
 		}
 	}
@@ -118,7 +112,6 @@ export let PersistentMObject = (superclass) => class extends superclass {
 		objects.push(this);
 
 		let loadedItem = JSON.parse(localStorage.getItem(this.id));
-		console.log(loadedItem);
 
 		for(let propKey in loadedItem) {
 			if(propKey != "updated_at") {
