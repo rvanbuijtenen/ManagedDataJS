@@ -7,7 +7,7 @@ import * as runPersistentLoggingLocking from "./implementations/graph/runPersist
 import * as doors from "./implementations/stateMachine/runDoors.js";
 import * as loggingDoors from "./implementations/stateMachine/runLoggingDoors.js";
 import * as lockingDoors from "./implementations/stateMachine/runLockingDoors.js";
-import * as loggingPersistentGmailValidator from "./implementations/stateMachine/runLoggingPersistentGmailValidator.js";
+import * as loggingGmailValidator from "./implementations/stateMachine/runLoggingGmailValidator.js";
 
 
 // http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
@@ -42,6 +42,6 @@ document.getElementById('lockingDoors').addEventListener('click', () => {
     let graph = new lockingDoors.RunLockingDoors();
 });
 
-document.getElementById('loggingLockingPersistentDoors').addEventListener('click', () => {
-    let graph = new loggingPersistentGmailValidator.RunLoggingPersistentGmailValidator();
+document.getElementById('loggingGmailValidator').addEventListener('click', () => {
+    let graph = new loggingGmailValidator.RunLoggingGmailValidator();
 });

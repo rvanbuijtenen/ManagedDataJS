@@ -4,7 +4,8 @@
 		"lines": {
 			"type": "array",
 			"items": {"$ref": "#/definitions/line"}
-		}
+		},
+		"name": {"type": "string"}
 	},
 	"definitions": {
 		"line": {
