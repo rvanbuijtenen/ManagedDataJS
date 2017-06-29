@@ -27,7 +27,6 @@ class MixinBuilder {
   }
 
   with(...mixins) { 
-  	console.log(mixins);
     return mixins.reduce((c, mixin) => mixin(c), this.superclass);
   }
 }

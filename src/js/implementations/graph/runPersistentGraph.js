@@ -23,24 +23,57 @@ export class RunPersistentGraph {
 
 		/* initialize the UI */
         $("#content").load("src/js/implementations/graph/views/persistentGraph.html", function() {
+        	let saves = JSON.parse(localStorage.getItem("savedGraphs"));
+        	if(saves != null) {
+        		for(let save of saves) {
+        			let opt = document.createElement("option");
+					opt.value = save;
+					opt.innerHTML = save;
+					$("#savedGraphs").append(opt);	
+				}
+        	}
+        	
         	$("#draw").click(function() {
         		let points = "["+$("#line").val()+"]";
     			let parsedPoints = JSON.parse(points);
         		let width = parseInt($("#width").val());
         		let color = $("#color").val();
         		let name = $("#name").val();
-        		console.log(width, color, parsedPoints, name);
+        		if(name != graph.name) {
+        			graph = graphProgram.makePersistentGraph(manager, name);
+        		}
 				graphProgram.addPersistentLine(graph, manager, width, color, parsedPoints);
 				graphProgram.draw(graph, $("#canvas")[0]);
 			});
 
 			$("#save").click(function() {
-				console.log("saving graph with id "+graph.getId());
+				let item = localStorage.getItem("savedGraphs");
+				let savedGraphs = [];
+				if(item != null) {
+					savedGraphs = JSON.parse(item);
+				}
+
+				if(!savedGraphs.includes(graph.getId())) {
+					savedGraphs.push(graph.getId());
+
+					let opt = document.createElement("option");
+					opt.value = graph.getId();
+					opt.innerHTML = graph.getId();
+					$("#savedGraphs").append(opt);
+				}
+				localStorage.setItem("savedGraphs",JSON.stringify(savedGraphs));
+				
+
+				graph.save();
 			});
 
 			$("#load").click(function() {
 				let graphId = $("#savedGraphs").val();
-				console.log("loading graph with id ",graphId);
+				graph = manager.graph({"name": graphId}, manager, graphId);
+				graph.load();
+				graphProgram.draw(graph, $("#canvas")[0]);
+
+				$("#name")[0].value = graph.name;
 			});
         });	 		
 	}

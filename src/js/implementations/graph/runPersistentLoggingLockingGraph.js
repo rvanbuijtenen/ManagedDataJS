@@ -34,14 +34,12 @@ export class RunPersistentLoggingLockingGraph {
         	}
         	
         	$("#draw").click(function() {
-        		console.log(graph.isLocked());
         		let points = "["+$("#line").val()+"]";
     			let parsedPoints = JSON.parse(points);
         		let width = parseInt($("#width").val());
         		let color = $("#color").val();
         		let name = $("#name").val();
         		if(name != graph.name) {
-        			console.log("making new graph");
         			graph = graphProgram.makePersistentGraph(manager, name);
         		}
 				graphProgram.addPersistentLine(graph, manager, width, color, parsedPoints);
@@ -49,7 +47,6 @@ export class RunPersistentLoggingLockingGraph {
 			});
 
 			$("#save").click(function() {
-				console.log("saving graph with id "+graph.getId());
 				let item = localStorage.getItem("savedGraphs");
 				let savedGraphs = [];
 				if(item != null) {
@@ -77,12 +74,9 @@ export class RunPersistentLoggingLockingGraph {
 				graphProgram.draw(graph, $("#canvas")[0]);
 
 				$("#name")[0].value = graph.name;
-
-				console.log("loading graph with id ",graphId);
 			});
 
 			$("#lock").click(function() {
-				console.log("locking graph", graph.name);
 				graph.lock();
 			});
 
