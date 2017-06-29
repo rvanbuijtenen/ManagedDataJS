@@ -40,7 +40,6 @@ export class MObjectMField extends MField {
 		if(this.schema.hasOwnProperty('inverse')) {
 			if("getKlass" in value && value.getKlass() == this.getKlass()) {
 				if(value[this.schema.inverse] instanceof ArrayMField) {
-					
 					value[this.schema.inverse].push(this.superKlass);
 				} else {
 					value[this.schema.inverse] = this.superKlass;
@@ -185,6 +184,7 @@ export class ArrayMField extends MField {
 	}
 
 	push(...values) {
+		this.superKlass.notifyBeforeArrayChanged(this, values);
 		if(!this.validate(values)) {
 			throw new TypeError("error in push");
 		}

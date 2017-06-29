@@ -179,11 +179,9 @@ export let execute = function(machine, events, print) {
 		}
 		if(succes == false) {
 			print("State " + machine.start.name + " has no outgoing transitions with event " + event);
-			machine.start = start;
 			return false;
 		}
 	}
-	machine.start = start;
 	return true;
 }
 

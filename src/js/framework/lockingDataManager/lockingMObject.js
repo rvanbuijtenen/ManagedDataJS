@@ -17,9 +17,20 @@ export let LockingMObject = (superclass) => class extends superclass {
 		return super.__get(propKey);
 	}
 
+	notifyBeforeArrayChanged(array, value) {
+		if(this.isLocked()) {
+			throw new TypeError("object is locked");
+		}
+		return true;
+	}
+
 
 	lock() {
 		this.locked = true;
+	}
+
+	isLocked() {
+		return this.locked;
 	}
 
 	unlock() {

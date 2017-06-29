@@ -124,4 +124,8 @@ export class MObject {
 
 		return propKey;
 	}
+
+	notifyBeforeArrayChanged(array, value) {
+		return true;
+	}
 }

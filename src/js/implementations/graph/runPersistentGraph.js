@@ -28,9 +28,19 @@ export class RunPersistentGraph {
     			let parsedPoints = JSON.parse(points);
         		let width = parseInt($("#width").val());
         		let color = $("#color").val();
+        		let name = $("#name").val();
         		console.log(width, color, parsedPoints, name);
-				graphProgram.addLine(graph, manager, width, color, parsedPoints);
+				graphProgram.addPersistentLine(graph, manager, width, color, parsedPoints);
 				graphProgram.draw(graph, $("#canvas")[0]);
+			});
+
+			$("#save").click(function() {
+				console.log("saving graph with id "+graph.getId());
+			});
+
+			$("#load").click(function() {
+				let graphId = $("#savedGraphs").val();
+				console.log("loading graph with id ",graphId);
 			});
         });	 		
 	}

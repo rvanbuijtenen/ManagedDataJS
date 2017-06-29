@@ -21,12 +21,14 @@ export let LoggingMObject = (superclass) => class extends superclass {
 	}
 
 	__get(propKey) {
+		//console.log(propKey, this);
 		let result;
 		try {
 			result = super.__get(propKey);
 			console.log("getting property "+propKey+" of klass "+this.klass);
 		} catch (err) {
 			console.log("A "+err.type+" occured: "+err.message);
+			console.log(err.stack);
 			console.log("An error occured with message: "+err.message+". See console for more detailed information");
 			throw new Error(err.message);
 		}

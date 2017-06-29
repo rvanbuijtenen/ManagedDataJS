@@ -24,6 +24,7 @@ export let PersistentMObject = (superclass) => class extends superclass {
 	}
 
 	save(time) {
+		console.log("saving: ", time);
 		// get current time and set time if not defined
 		let now = new Date().getTime();
 		if(time == undefined) {
@@ -109,6 +110,7 @@ export let PersistentMObject = (superclass) => class extends superclass {
 		if(objects == undefined) {
 			objects = [];
 		}
+		console.log(objects);
 		objects.push(this);
 
 		let loadedItem = JSON.parse(localStorage.getItem(this.id));
