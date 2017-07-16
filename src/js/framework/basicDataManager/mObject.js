@@ -1,4 +1,4 @@
-import * as field from "./fields/mField.js";
+import {MFieldFactory} from "./fields/MFieldFactory.js";
 
 /**
  * BasicRecordHandler checks wheter a property exists in the MObject klass. If it does: that
@@ -68,10 +68,9 @@ export class MObject {
 		}
 
 		for(let propKey in this.schema.properties) {
-			this.data[propKey] = field.MFieldFactory.MField(
+			this.data[propKey] = MFieldFactory(
 									this.schema.properties[propKey],
-									this.proxy,
-									ownSchema
+									this.proxy
 								);
 		}
 
@@ -103,6 +102,14 @@ export class MObject {
 			throw new TypeError("property "+propKey+" is not defined in schema");
 		}
 		return true;
+	}
+
+	__getType(propKey) {
+		if(this.data.hasOwnProperty(propKey)) {
+			return this.data[propKey].getType()
+		} else {
+			throw new TypeError("property "+propKey+" is not defined in schema")
+		}
 	}
 
 	/**

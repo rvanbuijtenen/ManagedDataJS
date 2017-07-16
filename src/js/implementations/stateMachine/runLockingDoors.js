@@ -24,6 +24,7 @@ export class RunLockingDoors {
         	$("#execute").click(function() {
 			 	console.log("click event");
 		        let value = $("#events").val().split(",");
+		        stateMachine.execute(doors, value, print)
 				stateMachine.printMachine(doors, print);
 			});
 

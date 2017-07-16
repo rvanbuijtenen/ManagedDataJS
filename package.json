@@ -7,7 +7,7 @@
     "babel": "babel --presets es2015 src/js/main.js -o build/main.bundle.js",
     "start": "http-server -p 8081",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "webpack": "webpack"
+    "webpack": "webpack --watch"
   },
   "repository": {
     "type": "git",

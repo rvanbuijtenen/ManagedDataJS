@@ -11,12 +11,15 @@ export let makePersistentGraph = function(manager, graphid) {
 }
 
 export let draw = function(graph, canvas) {
+	console.log(graph)
 	let min_x = 10000000;
 	let min_y = 10000000;
 	let max_x = 0;
 	let max_y = 0;
 	for(let line of graph.lines) {
+		console.log(graph.lines, line)
 		for(let point of line.points) {
+			console.log(line.points, point)
 			min_x = point.end.x < min_x ? point.end.x : min_x;
 			max_x = point.end.x > max_x ? point.end.x : max_x;
 			min_y = point.end.y < min_y ? point.end.y : min_y;
@@ -42,7 +45,6 @@ export let draw = function(graph, canvas) {
 
 	let scale_x = canvas.width/(max_x - min_x);
 	let scale_y = canvas.height/(max_y-min_y);
-	console.log(max_x, min_x, max_y, min_y, scale_x, scale_y);
 
 	let context = canvas.getContext("2d");
 	context.clearRect(0,0,canvas.width,canvas.height);
@@ -50,7 +52,6 @@ export let draw = function(graph, canvas) {
 	for(let line of graph.lines) {
 		context.beginPath();
 		context.moveTo(line.start.x*scale_x, canvas.height - line.start.y*scale_y);
-		console.log(line.start.x, line.start.y);
 		for(let point of line.points) {
 			if(point.getKlass() == "linearPoint") {
 				console.log("linear point");
@@ -114,9 +115,10 @@ export let addPersistentLine = function(graph, manager, width, color, lineData) 
 	if(lineData.length == 0) {
 		return;
 	}
+	console.log(graph.lines)
 	
 	let graphId = graph.getId();
-	let lineId = graphId + "l" + graph.lines.getValues().length;
+	let lineId = graphId + "l" + graph.lines.length;
 
 	let start = manager.point({"x": lineData[0][0], "y": lineData[0][1]}, manager, lineId+"start");
 	let line = manager.line({"color": color, "width": width, "start": start,"belongs_to": graph}, manager, lineId);
