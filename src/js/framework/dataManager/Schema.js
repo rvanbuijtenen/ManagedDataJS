@@ -119,7 +119,9 @@ export function parseSchema(schema) {
 	/* Create a new instance of Schema */
 	let s = new Schema()
 
-	/* Initialize the paths */
+	/* Initialize paths: an object that maps a definition path to a klass name. 
+	 * the path '#' refers to the main schema.
+	 * paths of the form '#/definitions/<klassName>' refers to a definition */
 	let paths = {}
 	paths["#"] = schema.name
 
@@ -181,6 +183,7 @@ function parseKlass(klassSchema, klassName, paths) {
  * @param {String} type - The type of the property
  * @param {Object} paths - An object that maps schema paths to the corresponding klass name
  * @return {Object} A parsed property
+ * @throws {TypeError} - If the schema contains an invalid keyword then an error is thrown
  */
 function parseProperty(property, type, paths) {
 	/* Shallow copy the given property to a new object so we don't modify the existing schema */
