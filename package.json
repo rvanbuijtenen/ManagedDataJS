@@ -24,6 +24,7 @@
     "babel-core": "^6.24.1",
     "babel-loader": "^7.0.0",
     "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
     "http-server": "^0.10.0",
     "import-fresh": "^2.0.0",
     "randexp": "^0.4.5",

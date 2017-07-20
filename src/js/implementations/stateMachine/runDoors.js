@@ -1,6 +1,5 @@
-import * as bdm from "../../framework/basicDataManager/basicDataManager";
-import * as logging from "../../framework/loggingDataManager/loggingMObject.js";
-import * as stateMachine from "./stateMachine.js";
+import {DataManager} from "../../framework/dataManager/DataManager";
+import {makeDoors, execute, printMachine} from "./stateMachine";
 
 export class RunDoors {
 	constructor(description) {
@@ -10,10 +9,10 @@ export class RunDoors {
 		});
 		/* load schema and create basic data manager */
 		let schema = require("./machineSchema.json");
-		let manager = new bdm.BasicDataManager(schema);
+		let manager = new DataManager(schema);
 
 		/* create the doors machine */
-		let doors = stateMachine.makeDoors(manager);
+		let doors = makeDoors(manager);
 
 		let print = function(string) {
 			$("#output").append("<p>"+string+"</p>");
@@ -23,8 +22,8 @@ export class RunDoors {
         $("#content").load("src/js/implementations/stateMachine/views/doors.html", function() {
         	$("#execute").click(function() {
 		        let value = $("#events").val().split(",");
-				stateMachine.execute(doors, value, print);
-				stateMachine.printMachine(doors, print);
+				execute(doors, value, print);
+				printMachine(doors, print);
 			});
         });	 		
 	}

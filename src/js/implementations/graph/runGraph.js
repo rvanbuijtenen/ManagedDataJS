@@ -1,5 +1,5 @@
-import * as bdm from "../../framework/basicDataManager/basicDataManager.js";
-import * as graphProgram from "./graph.js";
+import {DataManager} from "../../framework/dataManager/DataManager";
+import {makeGraph, addLine, draw} from "./graph";
 
 export class RunGraph {
 	constructor() {
@@ -9,10 +9,10 @@ export class RunGraph {
 		});
 		/* load schema and create basic data manager */
 		let schema = require("./graphSchema.json");
-		let manager = new bdm.BasicDataManager(schema);
+		let manager = new DataManager(schema);
 
 		/* create the doors machine */
-		let graph = graphProgram.makeGraph(manager, "");
+		let graph = makeGraph(manager, "");
 
 		let print = function(string) {
 			$("#output").append("<p>"+string+"</p>");
@@ -25,9 +25,8 @@ export class RunGraph {
     			let parsedPoints = JSON.parse(points);
         		let width = parseInt($("#width").val());
         		let color = $("#color").val();
-        		console.log(width, color, parsedPoints, name);
-				graphProgram.addLine(graph, manager, width, color, parsedPoints);
-				graphProgram.draw(graph, $("#canvas")[0]);
+				addLine(graph, manager, width, color, parsedPoints);
+				draw(graph, $("#canvas")[0]);
 			});
         });	 		
 	}

@@ -1,6 +1,6 @@
-import * as logging from "../../framework/loggingDataManager/loggingMObject.js";
-import * as bdm from "../../framework/basicDataManager/basicDataManager.js";
-import * as graphProgram from "./graph.js";
+import {Logging} from "../../framework/mixins/Logging";
+import {DataManager} from "../../framework/dataManager/DataManager";
+import {makeGraph, addLine, draw} from "./graph.js";
 
 export class RunLoggingGraph {
 	constructor() {
@@ -10,10 +10,10 @@ export class RunLoggingGraph {
 		});
 		/* load schema and create basic data manager */
 		let schema = require("./graphSchema.json");
-		let manager = new bdm.BasicDataManager(schema, logging.LoggingMObject);
+		let manager = new DataManager(schema, Logging);
 
 		/* create the doors machine */
-		let graph = graphProgram.makeGraph(manager, "");
+		let graph = makeGraph(manager, "");
 
 		let print = function(string) {
 			$("#output").append("<p>"+string+"</p>");
@@ -27,8 +27,8 @@ export class RunLoggingGraph {
         		let width = parseInt($("#width").val());
         		let color = $("#color").val();
         		console.log(width, color, parsedPoints, name);
-				graphProgram.addLine(graph, manager, width, color, parsedPoints);
-				graphProgram.draw(graph, $("#canvas")[0]);
+				addLine(graph, manager, width, color, parsedPoints);
+				draw(graph, $("#canvas")[0]);
 			});
         });	 		
 	}

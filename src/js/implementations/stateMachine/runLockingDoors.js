@@ -1,6 +1,6 @@
-import * as bdm from "../../framework/basicDataManager/basicDataManager";
-import * as locking from "../../framework/lockingDataManager/lockingMObject.js";
-import * as stateMachine from "./stateMachine.js";
+import {DataManager} from "../../framework/dataManager/DataManager";
+import {Locking} from "../../framework/mixins/Locking";
+import {makeDoors, execute, printMachine} from "./stateMachine";
 
 export class RunLockingDoors {
 	constructor(description) {
@@ -10,7 +10,7 @@ export class RunLockingDoors {
 		});
 		/* load schema and create basic data manager */
 		let schema = require("./machineSchema.json");
-		let manager = new bdm.BasicDataManager(schema, locking.LockingMObject);
+		let manager = new DataManager(schema, Locking);
 
 		/* create the doors machine */
 		let doors = stateMachine.makeDoors(manager);
@@ -24,8 +24,8 @@ export class RunLockingDoors {
         	$("#execute").click(function() {
 			 	console.log("click event");
 		        let value = $("#events").val().split(",");
-		        stateMachine.execute(doors, value, print)
-				stateMachine.printMachine(doors, print);
+		        execute(doors, value, print)
+				printMachine(doors, print);
 			});
 
 			$("#lock").click(function() {

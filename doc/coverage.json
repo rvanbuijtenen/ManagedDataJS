@@ -1,0 +1,68 @@
+{
+  "coverage": "88.79%",
+  "expectCount": 116,
+  "actualCount": 103,
+  "files": {
+    "framework/basicDataManager/fields/MFieldMulti.js": {
+      "expectCount": 51,
+      "actualCount": 48,
+      "undocumentLines": [
+        478,
+        113,
+        523
+      ]
+    },
+    "framework/basicDataManager/fields/MFieldSingle.js": {
+      "expectCount": 26,
+      "actualCount": 26,
+      "undocumentLines": []
+    },
+    "framework/basicDataManager/DataManager.js": {
+      "expectCount": 6,
+      "actualCount": 4,
+      "undocumentLines": [
+        150,
+        155
+      ]
+    },
+    "framework/mixins/lockingMObject.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "framework/mixins/loggingMObject.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "framework/basicDataManager/fields/MFieldFactory.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "framework/basicDataManager/MObject.js": {
+      "expectCount": 16,
+      "actualCount": 16,
+      "undocumentLines": []
+    },
+    "framework/mixins/persistentMObject.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "framework/basicDataManager/schemaInterpreter.js": {
+      "expectCount": 13,
+      "actualCount": 5,
+      "undocumentLines": [
+        5,
+        90,
+        33,
+        29,
+        27,
+        24,
+        1,
+        129
+      ]
+    }
+  }
+}

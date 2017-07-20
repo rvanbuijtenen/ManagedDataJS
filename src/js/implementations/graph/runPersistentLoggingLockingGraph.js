@@ -1,8 +1,8 @@
-import * as persistence from "../../framework/persistentDataManager/persistentMObject.js";
-import * as logging from "../../framework/loggingDataManager/loggingMObject.js";
-import * as locking from "../../framework/lockingDataManager/lockingMObject.js";
-import * as bdm from "../../framework/basicDataManager/basicDataManager.js";
-import * as graphProgram from "./graph.js";
+import {Persistence} from "../../framework/mixins/Persistence";
+import {Logging} from "../../framework/mixins/Logging";
+import {Locking} from "../../framework/mixins/Locking";
+import {DataManager}from "../../framework/dataManager/DataManager.js";
+import {makePersistentGraph, addPersistentLine, draw} from "./graph.js";
 
 export class RunPersistentLoggingLockingGraph {
 	constructor() {
@@ -12,10 +12,10 @@ export class RunPersistentLoggingLockingGraph {
 		});
 		/* load schema and create basic data manager */
 		let schema = require("./graphSchema.json");
-		let manager = new bdm.BasicDataManager(schema, logging.LoggingMObject, locking.LockingMObject, persistence.PersistentMObject);
+		let manager = new DataManager(schema, Logging, Locking, Persistence);
 
 		/* create the doors machine */
-		let graph = graphProgram.makePersistentGraph(manager, "");
+		let graph = makePersistentGraph(manager, "");
 
 		let print = function(string) {
 			$("#output").add("<p>"+string+"</p>");
@@ -40,10 +40,10 @@ export class RunPersistentLoggingLockingGraph {
         		let color = $("#color").val();
         		let name = $("#name").val();
         		if(name != graph.name) {
-        			graph = graphProgram.makePersistentGraph(manager, name);
+        			graph = makePersistentGraph(manager, name);
         		}
-				graphProgram.addPersistentLine(graph, manager, width, color, parsedPoints);
-				graphProgram.draw(graph, $("#canvas")[0]);
+				addPersistentLine(graph, manager, width, color, parsedPoints);
+				draw(graph, $("#canvas")[0]);
 			});
 
 			$("#save").click(function() {
@@ -69,11 +69,12 @@ export class RunPersistentLoggingLockingGraph {
 
 			$("#load").click(function() {
 				let graphId = $("#savedGraphs").val();
-				graph = manager.graph({"name": graphId}, manager, graphId);
+				graph = manager.Graph({}, manager, graphId);
 				graph.load();
-				graphProgram.draw(graph, $("#canvas")[0]);
+				draw(graph, $("#canvas")[0]);
 
 				$("#name")[0].value = graph.name;
+				console.log(graph)
 			});
 
 			$("#lock").click(function() {

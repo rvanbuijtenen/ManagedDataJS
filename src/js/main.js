@@ -9,8 +9,7 @@ import * as loggingDoors from "./implementations/stateMachine/runLoggingDoors.js
 import * as lockingDoors from "./implementations/stateMachine/runLockingDoors.js";
 import * as loggingGmailValidator from "./implementations/stateMachine/runLoggingGmailValidator.js";
 
-import {MFieldFactory} from "./framework/basicDataManager/fields/MFieldFactory"
-
+import {parseSchema} from "./framework/dataManager/Schema"
 
 // http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
 
@@ -29,6 +28,7 @@ document.getElementById('graph').addEventListener('click', () => {
 
 document.getElementById('persistentLoggingLockingGraph').addEventListener('click', () => {
     let graph = new runPersistentLoggingLocking.RunPersistentLoggingLockingGraph();
+
 });
 
 
@@ -49,5 +49,6 @@ document.getElementById('loggingGmailValidator').addEventListener('click', () =>
 });
 
 document.getElementById('test').addEventListener('click', () => {
-	
+	let schema = require("./implementations/graph/graphSchema")
+    parseSchema(schema, "")
 });

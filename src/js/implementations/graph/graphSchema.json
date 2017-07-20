@@ -1,58 +1,58 @@
 {
-	"name": "graph",
+	"name": "Graph",
 	"properties": {
 		"lines": {
 			"type": "array",
-			"items": {"$ref": "#/definitions/line"}
+			"items": {"type": "object", "$ref": "#/definitions/Line"}
 		},
 		"name": {"type": "string"}
 	},
 	"definitions": {
-		"line": {
+		"Line": {
 			"properties": {
 				"points": {
 					"type": "array",
 					"items": {"oneOf": [
-						{"$ref": "#/definitions/linearPoint"}, 
-						{"$ref": "#/definitions/quadtraticPoint"}, 
-						{"$ref": "#/definitions/bezierPoint"}
+						{"type": "object", "$ref": "#/definitions/LinearPoint"}, 
+						{"type": "object", "$ref": "#/definitions/QuadraticPoint"}, 
+						{"type": "object", "$ref": "#/definitions/BezierPoint"}
 					]}
 				},
-				"start": {"$ref": "#/definitions/point"},
+				"start": {"type": "object", "$ref": "#/definitions/Point"},
 				"color": {"enum": ["black", "green", "blue", "red"]},
 				"width": {
 					"type": "integer",
 					"minimum": 1,
 					"maximum": 10
 				},
-				"belongs_to": {"$ref": "#", "inverse": "lines"}
+				"belongs_to": {"type": "object", "$ref": "#", "inverse": "lines"}
 			}
 		},
-		"point": {
+		"Point": {
 			"properties": {
 				"x": {"type": "number"},
 				"y": {"type": "number"}
 			}
 		},
-		"linearPoint": {
+		"LinearPoint": {
 			"properties": {
-				"end": {"$ref": "#/definitions/point"},
-				"belongs_to": {"$ref": "#/definitions/line", "inverse": "points"}
+				"end": {"type": "object", "$ref": "#/definitions/Point"},
+				"belongs_to": {"type": "object", "$ref": "#/definitions/Line", "inverse": "points"}
 			}
 		},
-		"quadraticPoint": {
+		"QuadraticPoint": {
 			"properties": {
-				"cp": {"$ref": "#/definitions/point"},
-				"end": {"$ref": "#/definitions/point"},
-				"belongs_to": {"$ref": "#/definitions/line", "inverse": "points"}
+				"cp": {"type": "object", "$ref": "#/definitions/Point"},
+				"end": {"type": "object", "$ref": "#/definitions/Point"},
+				"belongs_to": {"type": "object", "$ref": "#/definitions/Line", "inverse": "points"}
 			}
 		},
-		"bezierPoint": {
+		"BezierPoint": {
 			"properties": {
-				"cp1": {"$ref": "#/definitions/point"},
-				"cp2": {"$ref": "#/definitions/point"},
-				"end": {"$ref": "#/definitions/point"},
-				"belongs_to": {"$ref": "#/definitions/line", "inverse": "points"}
+				"cp1": {"type": "object", "$ref": "#/definitions/Point"},
+				"cp2": {"type": "object", "$ref": "#/definitions/Point"},
+				"end": {"type": "object", "$ref": "#/definitions/Point"},
+				"belongs_to": {"type": "object", "$ref": "#/definitions/Line", "inverse": "points"}
 			}
 		}
 	}

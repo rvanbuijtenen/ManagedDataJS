@@ -1,11 +1,11 @@
 export let makeGraph = function(manager, graphid) {
-	let graph = new manager.graph({"name": graphid});
+	let graph = new manager.Graph({"name": graphid});
 
 	return graph;
 }
 
 export let makePersistentGraph = function(manager, graphid) {
-	let graph = new manager.graph({"name": graphid}, manager, graphid);
+	let graph = new manager.Graph({"name": graphid}, manager, graphid);
 
 	return graph;
 }
@@ -17,9 +17,7 @@ export let draw = function(graph, canvas) {
 	let max_x = 0;
 	let max_y = 0;
 	for(let line of graph.lines) {
-		console.log(graph.lines, line)
 		for(let point of line.points) {
-			console.log(line.points, point)
 			min_x = point.end.x < min_x ? point.end.x : min_x;
 			max_x = point.end.x > max_x ? point.end.x : max_x;
 			min_y = point.end.y < min_y ? point.end.y : min_y;
@@ -83,26 +81,26 @@ export let addLine = function(graph, manager, width, color, lineData) {
 		return;
 	}
 	
-	let start = manager.point({"x": lineData[0][0], "y": lineData[0][1]});
-	let line = manager.line({"color": color, "width": width, "start": start,"belongs_to": graph});
+	let start = manager.Point({"x": lineData[0][0], "y": lineData[0][1]});
+	let line = manager.Line({"color": color, "width": width, "start": start,"belongs_to": graph});
 	lineData.unshift();
 	
 	for(let point of lineData) {
 		switch(point.length) {
 			case 2:
-				let end = manager.point({"x": point[0], "y": point[1]});
-				let lp = manager.linearPoint({"end": end, "belongs_to": line});
+				let end = manager.Point({"x": point[0], "y": point[1]});
+				let lp = manager.LinearPoint({"end": end, "belongs_to": line});
 				break;
 			case 4:
-				let cp = manager.point({"x": point[0], "y": point[1]})
-				end = manager.point({"x": point[2], "y": point[3]});
-				let qp = manager.quadraticPoint({"end": end, "cp": cp, "belongs_to": line});
+				let cp = manager.Point({"x": point[0], "y": point[1]})
+				end = manager.Point({"x": point[2], "y": point[3]});
+				let qp = manager.QuadraticPoint({"end": end, "cp": cp, "belongs_to": line});
 				break;
 			case 6:
-				let cp1 = manager.point({"x": point[0], "y": point[1]})
-				let cp2 = manager.point({"x": point[2], "y": point[3]});
-				end = manager.point({"x": point[4], "y": point[5]});
-				let bp = manager.bezierPoint({"end": end, "cp1": cp1, "cp2": cp2, "belongs_to": line});
+				let cp1 = manager.Point({"x": point[0], "y": point[1]})
+				let cp2 = manager.Point({"x": point[2], "y": point[3]});
+				end = manager.Point({"x": point[4], "y": point[5]});
+				let bp = manager.BezierPoint({"end": end, "cp1": cp1, "cp2": cp2, "belongs_to": line});
 				break;
 			default:
 				throw new TypeError("invalid number of arguments for new line. It must contain 2,4 or 6 numbers");
@@ -120,8 +118,8 @@ export let addPersistentLine = function(graph, manager, width, color, lineData) 
 	let graphId = graph.getId();
 	let lineId = graphId + "l" + graph.lines.length;
 
-	let start = manager.point({"x": lineData[0][0], "y": lineData[0][1]}, manager, lineId+"start");
-	let line = manager.line({"color": color, "width": width, "start": start,"belongs_to": graph}, manager, lineId);
+	let start = manager.Point({"x": lineData[0][0], "y": lineData[0][1]}, manager, lineId+"start");
+	let line = manager.Line({"color": color, "width": width, "start": start,"belongs_to": graph}, manager, lineId);
 	lineData.unshift();
 
 	let pointIdx = 0;
@@ -130,21 +128,21 @@ export let addPersistentLine = function(graph, manager, width, color, lineData) 
 		switch(point.length) {
 			case 2:
 				let pointId = getPointId(lineId, pointIdx);
-				let end = manager.point({"x": point[0], "y": point[1]}, manager, getEndId(pointId, 0));
-				let lp = manager.linearPoint({"end": end, "belongs_to": line}, manager, pointId);
+				let end = manager.Point({"x": point[0], "y": point[1]}, manager, getEndId(pointId, 0));
+				let lp = manager.LinearPoint({"end": end, "belongs_to": line}, manager, pointId);
 				break;
 			case 4:
 				pointId = getPointId(lineId, pointIdx);
-				let cp = manager.point({"x": point[0], "y": point[1]}, manager, getEndId(pointId, 0));
-				end = manager.point({"x": point[2], "y": point[3]}, manager, getEndId(pointId, 1));
-				let qp = manager.quadraticPoint({"end": end, "cp": cp, "belongs_to": line}, manager, pointId);
+				let cp = manager.Point({"x": point[0], "y": point[1]}, manager, getEndId(pointId, 0));
+				end = manager.Point({"x": point[2], "y": point[3]}, manager, getEndId(pointId, 1));
+				let qp = manager.QuadraticPoint({"end": end, "cp": cp, "belongs_to": line}, manager, pointId);
 				break;
 			case 6:
 				pointId = getPointId(lineId, pointIdx);
-				let cp1 = manager.point({"x": point[0], "y": point[1]}, manager, getEndId(pointId, 0));
-				let cp2 = manager.point({"x": point[2], "y": point[3]}, manager, getEndId(pointId, 1));
-				end = manager.point({"x": point[4], "y": point[5]}, manager, getEndId(pointId, 2));
-				let bp = manager.bezierPoint({"end": end, "cp1": cp1, "cp2": cp2, "belongs_to": line}, manager, pointId);
+				let cp1 = manager.Point({"x": point[0], "y": point[1]}, manager, getEndId(pointId, 0));
+				let cp2 = manager.Point({"x": point[2], "y": point[3]}, manager, getEndId(pointId, 1));
+				end = manager.Point({"x": point[4], "y": point[5]}, manager, getEndId(pointId, 2));
+				let bp = manager.BezierPoint({"end": end, "cp1": cp1, "cp2": cp2, "belongs_to": line}, manager, pointId);
 				break;
 			default:
 				throw new TypeError("invalid number of arguments for new line. It must contain 2,4 or 6 numbers");

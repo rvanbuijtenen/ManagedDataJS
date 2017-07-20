@@ -1,0 +1,4208 @@
+[
+  {
+    "__docId__": 0,
+    "kind": "file",
+    "name": "framework/basicDataManager/DataManager.js",
+    "content": "import {MObject, MObjectHandler} from \"./MObject\";\nimport {parseSchema} from \"./schemaInterpreter\";\n\n/**\n * The BasicHandler implements a trap for the get method. It checks whether the\n * property is a function, and if it is it inserts the klass name of the object\n * into the arguments for the function. We do this because any function invoked\n * on the data manager is a constructor function that must know which klass it is constructing\n */\nlet BasicHandler = {\n\t/**\n\t * @param {Object} target - The target object.\n\t * @param {String, Symbol} propKey - The name of the property to get.\n\t * @param {Object} receiver - Either the proxy or an object that inherits from the proxy.\n\t *\n\t * @return {*} Either the value of the requested property or a function that executes the requested \n\t * property after inserting the property key as its first argument\n\t */\n\tget(target, propKey, receiver){\n\t\t/* if an attribute was accessed, simply return the value */\n\t\tvar propValue = target[propKey];\n\t\tif (typeof propValue != \"function\"){\n\t\t\treturn propValue;\n\t\t}\n\t\telse{\n\t\t\t/* return a function that inserts the property key into the arguements and then executes the \n\t\t\t * method call on the target */\n\t\t\treturn function(){\n\t\t\t\t//arguments.unshift(propKey);\n\t\t\t\t[].unshift.call(arguments, propKey);\n\t\t\t\treturn propValue.apply(target, arguments, propKey);\n\t\t\t}\n\t\t}\n\t}\n}\n\n/**\n * mix is an anonymous function that returns a new MixinBuilder for the superclass\n *\n * @param {Class} superclass - an ES6 class definition that should be extended with mixins\n * @return {MixinBuilder} An instance of MixinBuilder for the given superclass\n */\nlet mix = (superclass) => new MixinBuilder(superclass);\n\n/**\n * MixinBuilder is a class that dynamically constructs a prototype chain for the superclass\n * given to its constructor.\n */\nclass MixinBuilder {  \n\n\t/**\n\t * @param {Class} superclass - an ES6 class definition that should be extended with mixins\n\t */\n\tconstructor(superclass) {\n\t\t/**\n\t\t * @type {Class}\n\t\t */\n\t\tthis.superclass = superclass;\n\t}\n\n\t/**\n\t * with takes an arbitrary number of mixins as argument. A mixin is defined as follows:\n\t *\n\t * (superclass) => class extends superclass {}\n\t *\n\t * This definition results in an anonymous class that extends the given superclass. This way\n\t * we can reduce an array of mixins starting with this mixinBuilder's  superclass.\n\t *\n\t * @param {Function} mixin1,mixin...,mixinN - an arbitrary number of mixins that the superclass should be extended with\n\t *\n\t * @return {Class} this mixinBuilders superclass extended with all given mixins\n\t */\n\twith(...mixins) {\n\t\treturn mixins.reduce((c, mixin) => mixin(c), this.superclass);\n\t}\n}\n\n/**\n * The factory function constructs a new instance of an MObject with the appropriate\n * mixins applied to it.\n *\n * @param {String} klass - A string representing the klass of the managed object.\n * @param {Object} inits - An object containing initial values for the managed object\n * @param {*} [otherArg1,otherArg...,otherArgN] - Any other parameters passed to the factory are \n * considered other arguments. These other arguments are passed to the constructor of the managed object \n * and are meant to be used by mixins. Each mixin can then extract its required extra parameters from the otherArgs\n *\n * @return {MObject} A proxied managed object that matches the schema and implements all mixin functionality\n */ \nlet factory = function(klass, inits, ...otherArgs) {\n\tlet schema = this.schema.klassSchemas[klass].schema;\n\tlet subKlasses = this.schema.klassSchemas[klass].subKlasses;\n\n\tlet mobjClass = {};\n\tif(this.mixins.length > 0) {\n        mobjClass = (class extends mix(MObject).with(...this.mixins){});\n    } else {\n        mobjClass = (class extends MObject {});\n    }\n\n\tlet mobj = new mobjClass(schema, klass, subKlasses, ...otherArgs);\n\tlet mObjProxy = new Proxy(mobj, new MObjectHandler());\n\n\t/* The MObject needs a pointer to its own proxy for when an inverse field is found */\n\tmObjProxy.setThisProxy(mObjProxy);\n\tmObjProxy.init(inits);\n\t\t\n\treturn mObjProxy;\n}\n\n/**\n * The DataManager consists of a constructor that receives a schema and optionally a number of mixins as input.\n *\n * The schema is parsed and for each klass a factory function is assigned to this[klassName]\n *\n * Finally a proxy is wrapped around this instance of the basicRecord factory that\n * ensures factory.klassName(inits, args) call is forwarded to the factory function as\n * factory(klassName, inits, args)\n */\nexport class DataManager {\n\t/**\n\t * @param {Object} schema - A raw JSON schema describing the objects that should be constructed by this data manager\n\t * @param {Function} [mixin1,mixin...,mixinN] - an arbitrary number of mixins that should be used to extend managed\n\t * objects constructed by the basic data manager\n\t */\n\tconstructor(schema, ...mixins) {\n        /**\n         * An array of mixins for the managed objects created by this data manager\n         * @type {Array}\n         */\n        this.mixins = []\n\n        /* set mixins for the factory function. If the basic data manager did not receive\n         * any mixins we set it to an empty array */\n        if(mixins.length > 0 && mixins[0] != undefined) {\n            this.mixins = mixins;\n        }\n\t\t\n\t\t/* create a new schema interpreter and parse the sceham */\n\t\tlet i = new interpreter.SchemaInterpreter();\n\n\t\t/**\n\t\t * @type {Schema}\n\t\t */\n\t\tthis.schema = i.parseSchema(schema);\n\n\t\t/* \n\t\t * @type {Function}\n\t\t */\n\t\tthis[this.schema.mainKlass] = factory;\n\t\tfor(var klass in this.schema.klassSchemas) {\n\t\t\t/*\n\t\t\t * @type {Function} \n\t\t\t */\n\t\t\tthis[klass] = factory;\n\t\t}\n\n\t\t/* wrap the dataManager behind a proxy */\n\t\treturn new Proxy(this, BasicHandler);\n\t}\n}\n\n",
+    "static": true,
+    "longname": "framework/basicDataManager/DataManager.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 1,
+    "kind": "variable",
+    "name": "BasicHandler",
+    "memberof": "framework/basicDataManager/DataManager.js",
+    "static": true,
+    "longname": "framework/basicDataManager/DataManager.js~BasicHandler",
+    "access": null,
+    "export": false,
+    "importPath": "ManagedDataJS/framework/basicDataManager/DataManager.js",
+    "importStyle": null,
+    "description": "The BasicHandler implements a trap for the get method. It checks whether the\nproperty is a function, and if it is it inserts the klass name of the object\ninto the arguments for the function. We do this because any function invoked\non the data manager is a constructor function that must know which klass it is constructing",
+    "lineNumber": 10,
+    "type": {
+      "types": [
+        "{\"get\": function}"
+      ]
+    }
+  },
+  {
+    "__docId__": 2,
+    "kind": "function",
+    "name": "mix",
+    "memberof": "framework/basicDataManager/DataManager.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "framework/basicDataManager/DataManager.js~mix",
+    "access": null,
+    "export": false,
+    "importPath": "ManagedDataJS/framework/basicDataManager/DataManager.js",
+    "importStyle": null,
+    "description": "mix is an anonymous function that returns a new MixinBuilder for the superclass",
+    "lineNumber": 43,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Class"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "superclass",
+        "description": "an ES6 class definition that should be extended with mixins"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "MixinBuilder"
+      ],
+      "spread": false,
+      "description": "An instance of MixinBuilder for the given superclass"
+    }
+  },
+  {
+    "__docId__": 3,
+    "kind": "class",
+    "name": "MixinBuilder",
+    "memberof": "framework/basicDataManager/DataManager.js",
+    "static": true,
+    "longname": "framework/basicDataManager/DataManager.js~MixinBuilder",
+    "access": null,
+    "export": false,
+    "importPath": "ManagedDataJS/framework/basicDataManager/DataManager.js",
+    "importStyle": null,
+    "description": "MixinBuilder is a class that dynamically constructs a prototype chain for the superclass\ngiven to its constructor.",
+    "lineNumber": 49,
+    "interface": false
+  },
+  {
+    "__docId__": 4,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/DataManager.js~MixinBuilder",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/DataManager.js~MixinBuilder#constructor",
+    "access": null,
+    "description": "",
+    "lineNumber": 54,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Class"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "superclass",
+        "description": "an ES6 class definition that should be extended with mixins"
+      }
+    ]
+  },
+  {
+    "__docId__": 5,
+    "kind": "member",
+    "name": "superclass",
+    "memberof": "framework/basicDataManager/DataManager.js~MixinBuilder",
+    "static": false,
+    "longname": "framework/basicDataManager/DataManager.js~MixinBuilder#superclass",
+    "access": null,
+    "description": "",
+    "lineNumber": 58,
+    "type": {
+      "nullable": null,
+      "types": [
+        "Class"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 6,
+    "kind": "method",
+    "name": "with",
+    "memberof": "framework/basicDataManager/DataManager.js~MixinBuilder",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/DataManager.js~MixinBuilder#with",
+    "access": null,
+    "description": "with takes an arbitrary number of mixins as argument. A mixin is defined as follows:\n\n(superclass) => class extends superclass {}\n\nThis definition results in an anonymous class that extends the given superclass. This way\nwe can reduce an array of mixins starting with this mixinBuilder's  superclass.",
+    "lineNumber": 73,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "mixin1,mixin...,mixinN",
+        "description": "an arbitrary number of mixins that the superclass should be extended with"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Class"
+      ],
+      "spread": false,
+      "description": "this mixinBuilders superclass extended with all given mixins"
+    }
+  },
+  {
+    "__docId__": 7,
+    "kind": "function",
+    "name": "factory",
+    "memberof": "framework/basicDataManager/DataManager.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "framework/basicDataManager/DataManager.js~factory",
+    "access": null,
+    "export": false,
+    "importPath": "ManagedDataJS/framework/basicDataManager/DataManager.js",
+    "importStyle": null,
+    "description": "The factory function constructs a new instance of an MObject with the appropriate\nmixins applied to it.",
+    "lineNumber": 90,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "String"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "klass",
+        "description": "A string representing the klass of the managed object."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "inits",
+        "description": "An object containing initial values for the managed object"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "otherArg1,otherArg...,otherArgN",
+        "description": "Any other parameters passed to the factory are \nconsidered other arguments. These other arguments are passed to the constructor of the managed object \nand are meant to be used by mixins. Each mixin can then extract its required extra parameters from the otherArgs"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "MObject"
+      ],
+      "spread": false,
+      "description": "A proxied managed object that matches the schema and implements all mixin functionality"
+    }
+  },
+  {
+    "__docId__": 8,
+    "kind": "class",
+    "name": "DataManager",
+    "memberof": "framework/basicDataManager/DataManager.js",
+    "static": true,
+    "longname": "framework/basicDataManager/DataManager.js~DataManager",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/DataManager.js",
+    "importStyle": "{DataManager}",
+    "description": "The DataManager consists of a constructor that receives a schema and optionally a number of mixins as input.\n\nThe schema is parsed and for each klass a factory function is assigned to this[klassName]\n\nFinally a proxy is wrapped around this instance of the basicRecord factory that\nensures factory.klassName(inits, args) call is forwarded to the factory function as\nfactory(klassName, inits, args)",
+    "lineNumber": 120,
+    "interface": false
+  },
+  {
+    "__docId__": 9,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/DataManager.js~DataManager",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/DataManager.js~DataManager#constructor",
+    "access": null,
+    "description": "",
+    "lineNumber": 126,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "schema",
+        "description": "A raw JSON schema describing the objects that should be constructed by this data manager"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "mixin1,mixin...,mixinN",
+        "description": "an arbitrary number of mixins that should be used to extend managed\nobjects constructed by the basic data manager"
+      }
+    ]
+  },
+  {
+    "__docId__": 10,
+    "kind": "member",
+    "name": "mixins",
+    "memberof": "framework/basicDataManager/DataManager.js~DataManager",
+    "static": false,
+    "longname": "framework/basicDataManager/DataManager.js~DataManager#mixins",
+    "access": null,
+    "description": "An array of mixins for the managed objects created by this data manager",
+    "lineNumber": 131,
+    "type": {
+      "nullable": null,
+      "types": [
+        "Array"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 11,
+    "kind": "member",
+    "name": "mixins",
+    "memberof": "framework/basicDataManager/DataManager.js~DataManager",
+    "static": false,
+    "longname": "framework/basicDataManager/DataManager.js~DataManager#mixins",
+    "access": null,
+    "description": null,
+    "lineNumber": 136,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 12,
+    "kind": "member",
+    "name": "schema",
+    "memberof": "framework/basicDataManager/DataManager.js~DataManager",
+    "static": false,
+    "longname": "framework/basicDataManager/DataManager.js~DataManager#schema",
+    "access": null,
+    "description": "",
+    "lineNumber": 145,
+    "type": {
+      "nullable": null,
+      "types": [
+        "Schema"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 13,
+    "kind": "member",
+    "name": "[.schema.mainKlass]",
+    "memberof": "framework/basicDataManager/DataManager.js~DataManager",
+    "static": false,
+    "longname": "framework/basicDataManager/DataManager.js~DataManager#[.schema.mainKlass]",
+    "access": null,
+    "description": null,
+    "lineNumber": 150,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 14,
+    "kind": "member",
+    "name": "[klass]",
+    "memberof": "framework/basicDataManager/DataManager.js~DataManager",
+    "static": false,
+    "longname": "framework/basicDataManager/DataManager.js~DataManager#[klass]",
+    "access": null,
+    "description": null,
+    "lineNumber": 155,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 15,
+    "kind": "file",
+    "name": "framework/basicDataManager/MObject.js",
+    "content": "import {MFieldFactory} from \"./fields/MFieldFactory.js\";\n\n/**\n * MObjectHandler provides a get and a set trap for the proxy that is wrapped around a\n * managed object. The set trap simply invokes our custom set() function on the MObject.\n * get first checks whether the requested property in the object is a function. If it is\n * we execute that function. Otherwise, the requested property key is forwarded to our custom\n * get() function in the MObject\n */\nexport class MObjectHandler {\n\t/**\n\t * @param {Object} target - The target object.\n\t * @param {String, Symbol} propKey - The name of the property to get.\n\t * @param {Object} receiver - Either the proxy or an object that inherits from the proxy.\n\t *\n\t * @return {*} Either the value of the requested property or a function that executes the requested property\n\t */\n\tget(target, propKey, receiver) {\n\t\tvar propValue = target[propKey];\n\t\tif (typeof propValue != \"function\"){\t\t\n\t\t\t/* if the property is not a function: return MObject.__get(propKey) */\n\t\t\treturn target.get(propKey);\n\t\t}\n\t\telse{\n\t\t\t/* return a function that executes the method call on the target */\n\t\t\treturn function(){\n\t\t\t\treturn propValue.apply(target, arguments, propKey);\n\t\t\t}\n\t\t}\n\n\t}\n\n\t/**\n\t * @param {Object} target - The target object.\n\t * @param {String, Symbol} propKey - The name of the property to set.\n\t * @param {*} value - The value to set the property to\n\t * @param {Object} receiver - Either the proxy or an object that inherits from the proxy.\n\t *\n\t * @return {Boolean} true if setting the value was succesful. If setting the value failed an \n\t * exception is thrown ny the managed object\n\t */\n\tset(target, propKey, value, receiver) {\n\t\t/* invoke MObject.__set(propKey, value) */\n\t\treturn target.set(propKey, value);\n\t}\n}\n\n/**\n * MObject implements the basic functionality for managed data:\n * \n * It provides a set() and get() method for managed fields that will be invoked by the proxy\n * wrapped around this object. Managed fields are stored in the 'data' property of an MObject.\n *\n * Furthermore, it provides a notifyArrayChanged() callback that will be invoekd whenever an\n * ArrayMField changes its state.\n */\nexport class MObject {\n\t/**\n\t * Constructor function for a managed object\n\t *\n\t * @param {Object} schema - A schema describing the data property of this managed object\n\t * @param {String} klass - A string representing the klass name of tihs managed object\n\t */\n\tconstructor(schema, klass) {\n\t\t/**\n\t\t * @type {Object}\n\t\t */\n\t\tthis.data = {};\n\t\t/**\n\t\t * this.proxy may only contain a pointer to the proxy wrapped around this instance of MObject\n\t\t * @type {Object}\n\t\t */\n\t\tthis.proxy = {};\n\t\t/**\n\t\t * @type {String}\n\t\t */\n\t\tthis.klass = klass;\n\n\t\t/**\n\t\t * @type {Schema}\n\t\t */\n\t\tthis.schema = schema;\n\t}\n\n\t/**\n\t * Init function that initializes the data property with managed fields and sets an initial\n\t * value if this was provided in the inits parameter\n\t *\n\t * @param {Object} inits - An object containing the initial values for this MObject\n\t */\n\tinit(inits) {\n\t\tlet ownSchema = {\n\t\t\t\"type\": \"object\",\n\t\t\t\"klass\": this.klass\n\t\t}\n\n\t\tfor(let propKey in this.schema.properties) {\n\t\t\tthis.data[propKey] = MFieldFactory(\n\t\t\t\t\t\t\t\t\tthis.schema.properties[propKey],\n\t\t\t\t\t\t\t\t\tthis.proxy\n\t\t\t\t\t\t\t\t);\n\t\t}\n\n\t\tfor(let propKey in inits) {\n\t\t\tthis.__set(propKey, inits[propKey]);\n\t\t}\n\t}\n\n\t/**\n\t * @param {Object} proxy - The proxy wrapped around this MObject\n\t */\n\tsetThisProxy(proxy) {\n\t\tif(!proxy === this) {\n\t\t\tthrow new TypeError(\"the given proxy must be this object's proxy!\")\n\t\t}\n\t\tthis.proxy = proxy;\n\t}\n\n\t/**\n\t * @return {String} A string representing the klass that this MObject implements\n\t */\n\tgetKlass() {\n\t\treturn this.klass;\n\t}\n\n\t/**\n\t * @param {String, Symbol} propKey - The property key of the managed field that we want to access\n\t */\n\tget(propKey) {\n\t\tif(this.data.hasOwnProperty(propKey)) {\n\t\t\treturn this.data[propKey].getValue();\n\t\t} else {\n\t\t\tthrow new TypeError(\"property \"+propKey+\" is not defined in schema\");\n\t\t}\n\t}\n\n\t/**\n\t * @param {String, Symbol} propKey - The property key of the managed field that we want to access\n\t * @param {*} value - The value that we want to set the managed field to\n\t *\n\t * @return {Boolean} True if setting was succesfull\n\t */\n\tset(propKey, value) {\n\t\tif(this.data.hasOwnProperty(propKey)) {\n\t\t\tthis.data[propKey].setValue(value);\n\t\t} else {\n\t\t\tthrow new TypeError(\"property \"+propKey+\" is not defined in schema\");\n\t\t}\n\t\treturn true;\n\t}\n\n\t/**\n\t * @param {Symbol, String} propKey - The property key of the field that we want to get the type of\n\t *\n\t * @return {String} The type of the field stored in data[propKey]\n\t */\n\t__getType(propKey) {\n\t\tif(this.data.hasOwnProperty(propKey)) {\n\t\t\treturn this.data[propKey].getType()\n\t\t} else {\n\t\t\tthrow new TypeError(\"property \"+propKey+\" is not defined in schema\")\n\t\t}\n\t}\n\n\t/**\n\t * By default the modification methods of managed arrays bypasses\n\t * the set trap. Because of this, arrays notify their superKlass when they change.\n\t * This way an MObject can still implement its functionality whenever an array field\n\t * is modified by extending this function.\n\t *\n\t * @param {ArrayMField} array - The array that was modified\n\t * \n\t * @return {Symbol} - The property key that points to the changed array\n\t */\n\tnotifyArrayChanged(array) {\n\t\tlet propKey = undefined;\n\t\tfor(let key in this.data) {\n\t\t\tif(this.data[key].getType() == \"array\" && this.data[key] == array) {\n\t\t\t\tpropKey = key;\n\t\t\t}\n\t\t}\n\t\tif(propKey == undefined) {\n\t\t\tthrow new TypeError(\"something went wrong\");\n\t\t}\n\n\t\treturn propKey;\n\t}\n\n\t/**\n\t * @return {String} A string representing the managed object\n\t */\n\ttoString() {\n\t\treturn \"[managedObject \"+this.klass+\"]\"\n\t}\n}",
+    "static": true,
+    "longname": "framework/basicDataManager/MObject.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 16,
+    "kind": "class",
+    "name": "MObjectHandler",
+    "memberof": "framework/basicDataManager/MObject.js",
+    "static": true,
+    "longname": "framework/basicDataManager/MObject.js~MObjectHandler",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/MObject.js",
+    "importStyle": "{MObjectHandler}",
+    "description": "MObjectHandler provides a get and a set trap for the proxy that is wrapped around a\nmanaged object. The set trap simply invokes our custom set() function on the MObject.\nget first checks whether the requested property in the object is a function. If it is\nwe execute that function. Otherwise, the requested property key is forwarded to our custom\nget() function in the MObject",
+    "lineNumber": 10,
+    "interface": false
+  },
+  {
+    "__docId__": 17,
+    "kind": "method",
+    "name": "get",
+    "memberof": "framework/basicDataManager/MObject.js~MObjectHandler",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObjectHandler#get",
+    "access": null,
+    "description": "",
+    "lineNumber": 18,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "target",
+        "description": "The target object."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "String, Symbol"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "propKey",
+        "description": "The name of the property to get."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "receiver",
+        "description": "Either the proxy or an object that inherits from the proxy."
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "*"
+      ],
+      "spread": false,
+      "description": "Either the value of the requested property or a function that executes the requested property"
+    }
+  },
+  {
+    "__docId__": 18,
+    "kind": "method",
+    "name": "set",
+    "memberof": "framework/basicDataManager/MObject.js~MObjectHandler",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObjectHandler#set",
+    "access": null,
+    "description": "",
+    "lineNumber": 42,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "target",
+        "description": "The target object."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "String, Symbol"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "propKey",
+        "description": "The name of the property to set."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value to set the property to"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "receiver",
+        "description": "Either the proxy or an object that inherits from the proxy."
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Boolean"
+      ],
+      "spread": false,
+      "description": "true if setting the value was succesful. If setting the value failed an \nexception is thrown ny the managed object"
+    }
+  },
+  {
+    "__docId__": 19,
+    "kind": "class",
+    "name": "MObject",
+    "memberof": "framework/basicDataManager/MObject.js",
+    "static": true,
+    "longname": "framework/basicDataManager/MObject.js~MObject",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/MObject.js",
+    "importStyle": "{MObject}",
+    "description": "MObject implements the basic functionality for managed data:\n\nIt provides a set() and get() method for managed fields that will be invoked by the proxy\nwrapped around this object. Managed fields are stored in the 'data' property of an MObject.\n\nFurthermore, it provides a notifyArrayChanged() callback that will be invoekd whenever an\nArrayMField changes its state.",
+    "lineNumber": 57,
+    "interface": false
+  },
+  {
+    "__docId__": 20,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#constructor",
+    "access": null,
+    "description": "Constructor function for a managed object",
+    "lineNumber": 64,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "schema",
+        "description": "A schema describing the data property of this managed object"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "String"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "klass",
+        "description": "A string representing the klass name of tihs managed object"
+      }
+    ]
+  },
+  {
+    "__docId__": 21,
+    "kind": "member",
+    "name": "data",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#data",
+    "access": null,
+    "description": "",
+    "lineNumber": 68,
+    "type": {
+      "nullable": null,
+      "types": [
+        "Object"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 22,
+    "kind": "member",
+    "name": "proxy",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#proxy",
+    "access": null,
+    "description": "this.proxy may only contain a pointer to the proxy wrapped around this instance of MObject",
+    "lineNumber": 73,
+    "type": {
+      "nullable": null,
+      "types": [
+        "Object"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 23,
+    "kind": "member",
+    "name": "klass",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#klass",
+    "access": null,
+    "description": "",
+    "lineNumber": 77,
+    "type": {
+      "nullable": null,
+      "types": [
+        "String"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 24,
+    "kind": "member",
+    "name": "schema",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#schema",
+    "access": null,
+    "description": "",
+    "lineNumber": 82,
+    "type": {
+      "nullable": null,
+      "types": [
+        "Schema"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 25,
+    "kind": "method",
+    "name": "init",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#init",
+    "access": null,
+    "description": "Init function that initializes the data property with managed fields and sets an initial\nvalue if this was provided in the inits parameter",
+    "lineNumber": 91,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "inits",
+        "description": "An object containing the initial values for this MObject"
+      }
+    ]
+  },
+  {
+    "__docId__": 26,
+    "kind": "method",
+    "name": "setThisProxy",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#setThisProxy",
+    "access": null,
+    "description": "",
+    "lineNumber": 112,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "proxy",
+        "description": "The proxy wrapped around this MObject"
+      }
+    ]
+  },
+  {
+    "__docId__": 27,
+    "kind": "member",
+    "name": "proxy",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#proxy",
+    "access": null,
+    "description": null,
+    "lineNumber": 116,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 28,
+    "kind": "method",
+    "name": "getKlass",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#getKlass",
+    "access": null,
+    "description": "",
+    "lineNumber": 122,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "String"
+      ],
+      "spread": false,
+      "description": "A string representing the klass that this MObject implements"
+    }
+  },
+  {
+    "__docId__": 29,
+    "kind": "method",
+    "name": "get",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#get",
+    "access": null,
+    "description": "",
+    "lineNumber": 129,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "String, Symbol"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "propKey",
+        "description": "The property key of the managed field that we want to access"
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 30,
+    "kind": "method",
+    "name": "set",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#set",
+    "access": null,
+    "description": "",
+    "lineNumber": 143,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "String, Symbol"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "propKey",
+        "description": "The property key of the managed field that we want to access"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value that we want to set the managed field to"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Boolean"
+      ],
+      "spread": false,
+      "description": "True if setting was succesfull"
+    }
+  },
+  {
+    "__docId__": 31,
+    "kind": "method",
+    "name": "__getType",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#__getType",
+    "access": null,
+    "description": "",
+    "lineNumber": 157,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Symbol, String"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "propKey",
+        "description": "The property key of the field that we want to get the type of"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "String"
+      ],
+      "spread": false,
+      "description": "The type of the field stored in data[propKey]"
+    }
+  },
+  {
+    "__docId__": 32,
+    "kind": "method",
+    "name": "notifyArrayChanged",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#notifyArrayChanged",
+    "access": null,
+    "description": "By default the modification methods of managed arrays bypasses\nthe set trap. Because of this, arrays notify their superKlass when they change.\nThis way an MObject can still implement its functionality whenever an array field\nis modified by extending this function.",
+    "lineNumber": 175,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "ArrayMField"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "array",
+        "description": "The array that was modified"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Symbol"
+      ],
+      "spread": false,
+      "description": "The property key that points to the changed array"
+    }
+  },
+  {
+    "__docId__": 33,
+    "kind": "method",
+    "name": "toString",
+    "memberof": "framework/basicDataManager/MObject.js~MObject",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/MObject.js~MObject#toString",
+    "access": null,
+    "description": "",
+    "lineNumber": 192,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "String"
+      ],
+      "spread": false,
+      "description": "A string representing the managed object"
+    }
+  },
+  {
+    "__docId__": 34,
+    "kind": "file",
+    "name": "framework/basicDataManager/fields/MFieldFactory.js",
+    "content": "import {IntegerMField, NumberMField, StringMField, BooleanMField, MObjectMField} from \"./MFieldSingle\"\nimport {ArrayHandler, ArrayMField, EnumMField, OneOfMField} from \"./MFieldMulti\"\n\n/**\n * MField is a factory function that returns one of the following managed fields\n * based on the given schema:\n * \t\tIntegerMField\n *\t\tNumberMField\n *\t\tStringMField\n *\t\tBooleanMField\n *\t\tMObjectMField\n *\t\tArrayMField\n *\t\tEnumMField\n *\t\tOneOfMField\n *\n * This function abstracts the MField implementation away from the user\n * as all outside functionality is provided by the base MField class\n * Note that there is one exception: The array MField, which has some additionional\n * Behaviour.\n *\n * @param {Object} schema - A (partial) JSON schema that describes the field that should be constructed\n * @param {MObject} superKlass - The MObject that this field belongs to\n *\n * @return {MField} An MField that ensures its value property matches the given schema\n */\nexport function MFieldFactory(schema, superKlass) {\n\tif(schema.hasOwnProperty(\"enum\")) {\n\t\treturn new EnumMField(schema)\n\t}\n\n\tif(schema.hasOwnProperty(\"oneOf\")) {\n\t\tconsole.log(\"building oneOf field\")\n\t\treturn new OneOfMField(schema, superKlass)\n\t}\n\n\tif(schema.hasOwnProperty(\"type\")) {\n\t\tswitch(schema.type) {\n\t\t\tcase \"integer\": {\n\t\t\t\treturn new IntegerMField(schema)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"number\": {\n\t\t\t\treturn new NumberMField(schema)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"string\": {\n\t\t\t\treturn new StringMField(schema)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"boolean\": {\n\t\t\t\treturn new BooleanMField(schema)\n\t\t\t\tbreak \n\t\t\t}\n\t\t\tcase \"object\": {\n\t\t\t\treturn new MObjectMField(schema, superKlass)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"array\": {\n\t\t\t\treturn new Proxy(new ArrayMField(schema, superKlass), new ArrayHandler())\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n}",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldFactory.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 35,
+    "kind": "function",
+    "name": "MFieldFactory",
+    "memberof": "framework/basicDataManager/fields/MFieldFactory.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldFactory.js~MFieldFactory",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/fields/MFieldFactory.js",
+    "importStyle": "{MFieldFactory}",
+    "description": "MField is a factory function that returns one of the following managed fields\nbased on the given schema:\n\t\tIntegerMField\n\tNumberMField\n\tStringMField\n\tBooleanMField\n\tMObjectMField\n\tArrayMField\n\tEnumMField\n\tOneOfMField\n\nThis function abstracts the MField implementation away from the user\nas all outside functionality is provided by the base MField class\nNote that there is one exception: The array MField, which has some additionional\nBehaviour.",
+    "lineNumber": 26,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "schema",
+        "description": "A (partial) JSON schema that describes the field that should be constructed"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "MObject"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "superKlass",
+        "description": "The MObject that this field belongs to"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "MField"
+      ],
+      "spread": false,
+      "description": "An MField that ensures its value property matches the given schema"
+    }
+  },
+  {
+    "__docId__": 36,
+    "kind": "file",
+    "name": "framework/basicDataManager/fields/MFieldMulti.js",
+    "content": "import {MField} from \"./MFieldSingle\"\nimport {MFieldFactory} from \"./MFieldFactory\"\n\n/**\n * The ArrayHandler ensures that ArrayMfield[idx] returns ArrayMField.value[idx] when idx is an integer\n */\nexport class ArrayHandler {\n\t/**\n\t * @param {Object} target - The target object.\n\t * @param {String, Symbol} propKey - The name of the property to get.\n\t * @param {Object} receiver - Either the proxy or an object that inherits from the proxy.\n\t *\n\t * @return {*} Either the value stored at the requested index or the result of Reflect.get()\n\t */\n\tget(target, propKey, receiver) {\n\t\tif(typeof(propKey) == \"number\") {\n\t\t\treturn target.get(propKey)\n\t\t} else {\n\t\t\treturn Reflect.get(target, propKey, receiver)\n\t\t}\n\t}\n}\n\n/**\n * The array MField implementation is a bit different from other MField implementations.\n * An ArrayMField must act like a regular JavaScript array and therefore it forwards all\n * original ArrayMethods to the array stored within the value field and applies validation\n * where neccesary. When the array has been modified, the arrayHasChanged() callback is\n * invoked on the MObject it belongs to.\n *\n *\n * the ArrayMField always returns regular javascript values or managed objects.\n * the ArrayMField always takes regular javascript values as input.\n * the ArrayMField.value only contains objects that are instances of MFields.\n */\nexport class ArrayMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t * @param {MObject} superKlass - The MObject that this field belongs to\n\t */ \t\n\tconstructor(schema, superKlass) {\n\t\tsuper(\"array\", schema, [])\n\n\t\t/**\n\t\t * The MObject that this ArrayMField belongs to\n\t\t * @type {MObject}\n\t\t */\n\t\tthis.superKlass = superKlass\n\n\t\t/**\n\t\t * If we have a list of items, this parameter keeps track of which item\n\t\t * we need to use to validate the next element\n\t\t * @type {number}\n\t\t */\n\t\tthis.itemsIdx = 0\n\n\t\t/**\n\t\t * The length of the array stored in this.value\n\t\t * @type {number}\n\t\t */\n\t\tthis.length = 0\n\n\t\t/**\n\t\t * Override this[Symbol.iterator]\n\t\t */\n\t\tthis[Symbol.iterator] = this.iterator\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tconcat(...values) {\n\t\tfor(let value of values) {\n\t\t\tif(value instanceof Array) {\n\t\t\t\tthis.push(...value)\n\t\t\t} else {\n\t\t\t\tthis.push(value)\n\t\t\t}\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tcopyWithin(target, start, end) {\n\t\treturn this.value.copyWithin(target, start, end)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tentries() {\n\t\treturn this.getValues().entries()\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tevery(callback, thisarg) {\n\t\treturn this.getValues().every(callback, thisarg)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfill(value, start, end) {\n\t\tlet newArr = this.getValues().fill(value)\n\t\tlet {valid, error, fields} = this.validate(newArr)\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = fields\n\t\t\treturn newArr\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfilter(callback, thisarg) {\n\t\treturn this.getValues().filter(callback, thisarg)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfind(callback, thisarg) {\n\t\treturn this.getValues().find(callback, thisarg)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfindIndex(callback, thisarg) {\n\t\treturn this.getValues().findIndex(callback, thisarg)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tforEach(callback, thisarg) {\n\t\tlet arr = this.getValues()\n\t\tarr.forEach(callback, thisarg)\n\n\t\tlet {valid, error, fields} = this.validate(arr)\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = fields\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tincludes(searchElement, fromIndex) {\n\t\tif(fromIndex == undefined) {\n\t\t\treturn this.getValues().includes(searchElement)\n\t\t} else {\n\t\t\treturn this.getValues().includes(searchElement, fromIndex)\n\t\t}\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tindexOf(searchElement, fromIndex) {\n\t\tif(fromIndex == undefined) {\n\t\t\treturn this.getValues().indexOf(searchElement)\n\t\t} else {\n\t\t\treturn this.getValues().indexOf(searchElement, fromIndex)\n\t\t}\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tjoin(separator) {\n\t\tthrow new Error(\"Managed Arrays cannot be joined into strings\")\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tkeys() {\n\t\treturn this.getValues().keys()\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tlastIndexOf(searchElement, fromIndex) {\n\t\tif(fromIndex == undefined) {\n\t\t\treturn this.getValues().lastIndexOf(searchElement)\n\t\t} else {\n\t\t\treturn this.getValues().lastIndexOf(searchElement, fromIndex)\n\t\t}\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tmap(callback, thisarg) {\n\t\tlet newArr = this.getValues().map(callback, thisarg)\n\t\tlet {valid, error, fields} = this.validate(newArr)\n\n\t\tif(valid == false) {\n\t\t\tthrow new TypeError(errors)\n\t\t} else {\n\t\t\treturn newArr\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tpop() {\n\t\tlet value = this.value.pop()\n\t\tif(value != undefined) {\n\t\t\tthis.length--\n\t\t\treturn value.getValue()\n\t\t} else {\n\t\t\treturn value\n\t\t}\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tpush(...elements) {\n\t\tconsole.log(elements)\n\t\tconsole.log(this.validate(elements))\n\t\tlet {valid, error, fields} = this.validate(elements)\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tfor(let field of fields) {\n\t\t\t\tthis.value.push(field)\n\t\t\t\tthis.itemsIdx = (this.itemsIdx+1)%this.schema.items.length\n\t\t\t\tthis.length++\n\n\t\t\t}\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\treduce(callback, initialValue) {\n\t\treturn this.getValues().reduce(callback, initialValue)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\treduceRight(callback, initialValue) {\n\t\treturn this.getValues().reduceRight(callback, initialValue)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\treverse() {\n\t\tthis.value.reverse()\n\t\treturn this.getValues()\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tshift() {\n\t\tlet element = this.value.shift()\n\t\treturn element.getValue()\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tslice(begin, end) {\n\t\treturn this.getValues().slice(begin, end)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tsome(callback, thisarg) {\n\t\treturn this.getValues().some(callback, thisarg)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tsort(compareFunction) {\n\t\tlet sorted = this.getValues().sort(compareFunction)\n\t\tlet {valid, error, fields} = this.validate(sorted)\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = fields\n\t\t}\n\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tsplice(start, deleteCount, ...items) {\n\t\tlet {valid, error, fields} = this.validate(items)\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value.splice(start, deleteCount, ...fields)\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tunshift(...elements) {\n\t\tlet {valid, error, fields} = this.validate(elements)\n\n\t\tif(valid == false) {\n\t\t\tthrow new TypeError(error)\n\t\t} else {\n\t\t\tthis.value.unshift(...fields)\n\t\t}\n\t}\n\t\n\t/**\n\t * @return {Iterator} Returns an iterator object for this ArrayMFields value\n\t */\n\titerator() {\n\t\treturn this.getValues()[Symbol.iterator]()\n\t}\n\n\t/** \n\t * Implementation of the validate function for ArrayMField \n\t *\n\t * @param {Array} values - An array containing the values to validate\n\t *\n\t * @return {Boolean, Error, MField} Boolean indicating whether all values where valid; if there were any validation errors we return the error. only when valid == false; An array containing valid MFields of the given values. only when valid == true\n\t */\n\tvalidate(values) {\n\t\tif(values == undefined) {\n\t\t\treturn {true, undefined, undefined}\n\t\t}\n\n\t\tlet fields = []\n\t\tlet valid = true;\n\t\tlet error\n\t\tlet field\n\n\t\tif(this.schema.items instanceof Array) {\n\t\t\tlet tmpItemsIdx = this.itemsIdx\n\t\t\tfor(let value of values) {\n\t\t\t\tfield = MFieldFactory(this.schema.items[tmpItemsIdx], this.superKlass)\n\t\t\t\ttmpItemsIdx++;\n\n\t\t\t\ttry { \n\t\t\t\t\tfield.setValue(value)\n\t\t\t\t} catch (err) {\n\t\t\t\t\tvalid = false\n\t\t\t\t\terror = err\n\t\t\t\t\tbreak\n\t\t\t\t}\n\n\t\t\t\tfields.push(field)\n\t\t\t}\n\t\t} else {\n\t\t\tfor(let value of values) {\n\t\t\t\tconsole.log(value, this.schema.items)\n\t\t\t\tfield = MFieldFactory(this.schema.items, this.superKlass)\n\t\t\t\tconsole.log(field)\n\t\t\t\ttry { \n\t\t\t\t\tfield.setValue(value)\n\t\t\t\t} catch (err) {\n\t\t\t\t\tvalid = false\n\t\t\t\t\terror = err\n\t\t\t\t\tbreak\n\t\t\t\t}\n\n\t\t\t\tfields.push(field)\n\t\t\t}\n\t\t}\n\t\treturn {valid, error, fields}\n\t}\n\n\t/**\n\t * @param {Integer} idx - the index to retrieve from this array\n\t *\n\t * @return {*, Boolean} Get either returns the value on the given index or false\n\t */\n\tget(idx) {\n\t\tif(this.value.hasOwnProperty(idx)) {\n\t\t\treturn this.value[idx].getValue()\n\t\t} else {\n\t\t\treturn false\n\t\t}\n\t}\n\n\t/**\n\t * @return {Array} A regular JavaScript array containing this ArrayMFields values\n\t */\n\tgetValues() {\n\t\tlet arr = []\n\t\tfor(let val of this.value) {\n\t\t\tarr.push(val.getValue())\n\t\t}\n\t\treturn arr\n\t}\n\n\t/**\n\t * @return {ArrayMField} Since an ArrayMField works like a regular JavaScript array we return this instead of this.value\n\t */\n\tgetValue() {\n\t\treturn this\n\t}\n\n\t/**\n\t * setValue takes a value as argument and attempts to validate this value. If it was valid we set \n\t * this.value to the field returned by the validate method, otherwise we throw the error that was returned\n\t * \n\t * @param {Array} values - The value that should be set in this ArrayMField\n\t */\n\tsetValue(values) {\n\t\tif(!(values instanceof Array)) {\n\t\t\tthrow new TypeError(\"The value of an ArrayMField can only be set to that of an actual JavaScript array\")\n\t\t} else {\n\t\t\tthis.value = [];\n\t\t\tthis.push(...values)\n\t\t}\n\t}\n}\n\n\n/**\n * Enum implementation of MField which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue\t\t===>\tenum.includes(value)\n */\nexport class EnumMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this fields value\n\t */\n\tconstructor(schema) {\n\t\tsuper(\"enum\", schema, schema.enum[0])\n\t}\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet valid = false;\n\t\tlet error\n\t\tif(!this.schema.enum.includes(value)) {\n\t\t\terror = new TypeError(\"value must be one of \"+JSON.stringyfy(schema.enum))\n\t\t\treturn {valid, error}\n\t\t} else {\n\t\t\tvalid = true\n\t\t\treturn {valid, error}\n\t\t}\n\t}\n}\n\n/**\n *\tOneOF implementation of MFIeld which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue\t\t===>\tvalue matches at least one schema in schema.oneOf\n */\nexport class OneOfMField extends MField {\n\tconstructor(schema, superKlass) {\n\t\tsuper(\"oneOf\", schema, schema.oneOf[0].klass)\n\t\t/**\n\t\t * The MObject that this OneOfMField belongs to\n\t\t * @type {MObject}\n\t\t */\n\t\tthis.superKlass = superKlass\n\t}\t\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error, MField} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned. If it was valid, the valid MField is returned\n\t */\n\tvalidate(value) {\n\t\tlet valid = false\n\t\tlet error\n\t\tlet field\n\n\t\tfor(let schema of this.schema.oneOf) {\n\t\t\ttry{\n\t\t\t\tfield = MFieldFactory(schema, this.superKlass)\n\t\t\t\tfield.setValue(value)\n\t\t\t\tvalid = true\n\t\t\t\treturn {valid, error, field}\n\t\t\t} catch (err) {\n\t\t\t\t/* do nothing, try next value */\n\t\t\t}\n\t\t}\n\t\terror = new TypeError(\"value does not match any of the schemas defined in oneOf\")\n\t\treturn {valid, error, field}\n\t}\n\n\t/**\n\t * setValue takes a value as argument and attempts to validate this value. If it was valid we set \n\t * this.value to the field returned by the validate method, otherwise we throw the error that was returned\n\t * \n\t * @param {*} value - The value that should be set in this MField\n\t */\n\tsetValue(value) {\n\t\tlet {valid, error, field} = this.validate(value)\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = field\n\t\t}\n\t}\n\t\n\t/**\n\t * @return {*} This OneOfMFields value\n\t */\n\tgetValue() {\n\t\treturn this.value.getValue()\n\t}\n}",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 37,
+    "kind": "class",
+    "name": "ArrayHandler",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayHandler",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/fields/MFieldMulti.js",
+    "importStyle": "{ArrayHandler}",
+    "description": "The ArrayHandler ensures that ArrayMfield[idx] returns ArrayMField.value[idx] when idx is an integer",
+    "lineNumber": 7,
+    "interface": false
+  },
+  {
+    "__docId__": 38,
+    "kind": "method",
+    "name": "get",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayHandler",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayHandler#get",
+    "access": null,
+    "description": "",
+    "lineNumber": 15,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "target",
+        "description": "The target object."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "String, Symbol"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "propKey",
+        "description": "The name of the property to get."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "receiver",
+        "description": "Either the proxy or an object that inherits from the proxy."
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "*"
+      ],
+      "spread": false,
+      "description": "Either the value stored at the requested index or the result of Reflect.get()"
+    }
+  },
+  {
+    "__docId__": 39,
+    "kind": "class",
+    "name": "ArrayMField",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/fields/MFieldMulti.js",
+    "importStyle": "{ArrayMField}",
+    "description": "The array MField implementation is a bit different from other MField implementations.\nAn ArrayMField must act like a regular JavaScript array and therefore it forwards all\noriginal ArrayMethods to the array stored within the value field and applies validation\nwhere neccesary. When the array has been modified, the arrayHasChanged() callback is\ninvoked on the MObject it belongs to.\n\n\nthe ArrayMField always returns regular javascript values or managed objects.\nthe ArrayMField always takes regular javascript values as input.\nthe ArrayMField.value only contains objects that are instances of MFields.",
+    "lineNumber": 36,
+    "interface": false,
+    "extends": [
+      "framework/basicDataManager/fields/MFieldSingle.js~MField"
+    ]
+  },
+  {
+    "__docId__": 40,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#constructor",
+    "access": null,
+    "description": "",
+    "lineNumber": 41,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "schema",
+        "description": "A JSON schema that describes this MFields value"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "MObject"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "superKlass",
+        "description": "The MObject that this field belongs to"
+      }
+    ]
+  },
+  {
+    "__docId__": 41,
+    "kind": "member",
+    "name": "superKlass",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#superKlass",
+    "access": null,
+    "description": "The MObject that this ArrayMField belongs to",
+    "lineNumber": 48,
+    "type": {
+      "nullable": null,
+      "types": [
+        "MObject"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 42,
+    "kind": "member",
+    "name": "itemsIdx",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#itemsIdx",
+    "access": null,
+    "description": "If we have a list of items, this parameter keeps track of which item\nwe need to use to validate the next element",
+    "lineNumber": 55,
+    "type": {
+      "nullable": null,
+      "types": [
+        "number"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 43,
+    "kind": "member",
+    "name": "length",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#length",
+    "access": null,
+    "description": "The length of the array stored in this.value",
+    "lineNumber": 61,
+    "type": {
+      "nullable": null,
+      "types": [
+        "number"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 44,
+    "kind": "member",
+    "name": "[Symbol.iterator]",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#[Symbol.iterator]",
+    "access": null,
+    "description": "Override this[Symbol.iterator]",
+    "lineNumber": 66,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 45,
+    "kind": "method",
+    "name": "concat",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#concat",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 72,
+    "params": [
+      {
+        "name": "values",
+        "types": [
+          "...*"
+        ],
+        "spread": true
+      }
+    ]
+  },
+  {
+    "__docId__": 46,
+    "kind": "method",
+    "name": "copyWithin",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#copyWithin",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 85,
+    "params": [
+      {
+        "name": "target",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "start",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "end",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 47,
+    "kind": "method",
+    "name": "entries",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#entries",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 92,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 48,
+    "kind": "method",
+    "name": "every",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#every",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 99,
+    "params": [
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "thisarg",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 49,
+    "kind": "method",
+    "name": "fill",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#fill",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 106,
+    "params": [
+      {
+        "name": "value",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "start",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "end",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 50,
+    "kind": "member",
+    "name": "value",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#value",
+    "access": null,
+    "description": null,
+    "lineNumber": 113,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 51,
+    "kind": "method",
+    "name": "filter",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#filter",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 121,
+    "params": [
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "thisarg",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 52,
+    "kind": "method",
+    "name": "find",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#find",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 128,
+    "params": [
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "thisarg",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 53,
+    "kind": "method",
+    "name": "findIndex",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#findIndex",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 135,
+    "params": [
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "thisarg",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 54,
+    "kind": "method",
+    "name": "forEach",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#forEach",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 142,
+    "params": [
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "thisarg",
+        "types": [
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "__docId__": 55,
+    "kind": "member",
+    "name": "value",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#value",
+    "access": null,
+    "description": null,
+    "lineNumber": 150,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 56,
+    "kind": "method",
+    "name": "includes",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#includes",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 157,
+    "params": [
+      {
+        "name": "searchElement",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "fromIndex",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 57,
+    "kind": "method",
+    "name": "indexOf",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#indexOf",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 168,
+    "params": [
+      {
+        "name": "searchElement",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "fromIndex",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 58,
+    "kind": "method",
+    "name": "join",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#join",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 179,
+    "params": [
+      {
+        "name": "separator",
+        "types": [
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "__docId__": 59,
+    "kind": "method",
+    "name": "keys",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#keys",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 186,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 60,
+    "kind": "method",
+    "name": "lastIndexOf",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#lastIndexOf",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 193,
+    "params": [
+      {
+        "name": "searchElement",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "fromIndex",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 61,
+    "kind": "method",
+    "name": "map",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#map",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 204,
+    "params": [
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "thisarg",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 62,
+    "kind": "method",
+    "name": "pop",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#pop",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 218,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 63,
+    "kind": "method",
+    "name": "push",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#push",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 231,
+    "params": [
+      {
+        "name": "elements",
+        "types": [
+          "...*"
+        ],
+        "spread": true
+      }
+    ]
+  },
+  {
+    "__docId__": 64,
+    "kind": "member",
+    "name": "itemsIdx",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#itemsIdx",
+    "access": null,
+    "description": null,
+    "lineNumber": 241,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 65,
+    "kind": "method",
+    "name": "reduce",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#reduce",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 251,
+    "params": [
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "initialValue",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 66,
+    "kind": "method",
+    "name": "reduceRight",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#reduceRight",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 258,
+    "params": [
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "initialValue",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 67,
+    "kind": "method",
+    "name": "reverse",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#reverse",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 265,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 68,
+    "kind": "method",
+    "name": "shift",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#shift",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 273,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 69,
+    "kind": "method",
+    "name": "slice",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#slice",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 281,
+    "params": [
+      {
+        "name": "begin",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "end",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 70,
+    "kind": "method",
+    "name": "some",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#some",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 288,
+    "params": [
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "thisarg",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 71,
+    "kind": "method",
+    "name": "sort",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#sort",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 295,
+    "params": [
+      {
+        "name": "compareFunction",
+        "types": [
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "__docId__": 72,
+    "kind": "member",
+    "name": "value",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#value",
+    "access": null,
+    "description": null,
+    "lineNumber": 301,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 73,
+    "kind": "method",
+    "name": "splice",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#splice",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 309,
+    "params": [
+      {
+        "name": "start",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "deleteCount",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "items",
+        "types": [
+          "...*"
+        ],
+        "spread": true
+      }
+    ]
+  },
+  {
+    "__docId__": 74,
+    "kind": "method",
+    "name": "unshift",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#unshift",
+    "access": null,
+    "description": "See JavaScript Array documentation",
+    "lineNumber": 322,
+    "params": [
+      {
+        "name": "elements",
+        "types": [
+          "...*"
+        ],
+        "spread": true
+      }
+    ]
+  },
+  {
+    "__docId__": 75,
+    "kind": "method",
+    "name": "iterator",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#iterator",
+    "access": null,
+    "description": "",
+    "lineNumber": 335,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Iterator"
+      ],
+      "spread": false,
+      "description": "Returns an iterator object for this ArrayMFields value"
+    }
+  },
+  {
+    "__docId__": 76,
+    "kind": "method",
+    "name": "validate",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#validate",
+    "access": null,
+    "description": "Implementation of the validate function for ArrayMField ",
+    "lineNumber": 346,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Array"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "values",
+        "description": "An array containing the values to validate"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Boolean, Error, MField"
+      ],
+      "spread": false,
+      "description": "Boolean indicating whether all values where valid; if there were any validation errors we return the error. only when valid == false; An array containing valid MFields of the given values. only when valid == true"
+    }
+  },
+  {
+    "__docId__": 77,
+    "kind": "method",
+    "name": "get",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#get",
+    "access": null,
+    "description": "",
+    "lineNumber": 396,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Integer"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "idx",
+        "description": "the index to retrieve from this array"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "*, Boolean"
+      ],
+      "spread": false,
+      "description": "Get either returns the value on the given index or false"
+    }
+  },
+  {
+    "__docId__": 78,
+    "kind": "method",
+    "name": "getValues",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#getValues",
+    "access": null,
+    "description": "",
+    "lineNumber": 407,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Array"
+      ],
+      "spread": false,
+      "description": "A regular JavaScript array containing this ArrayMFields values"
+    }
+  },
+  {
+    "__docId__": 79,
+    "kind": "method",
+    "name": "getValue",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#getValue",
+    "access": null,
+    "description": "",
+    "lineNumber": 418,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "ArrayMField"
+      ],
+      "spread": false,
+      "description": "Since an ArrayMField works like a regular JavaScript array we return this instead of this.value"
+    }
+  },
+  {
+    "__docId__": 80,
+    "kind": "method",
+    "name": "setValue",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#setValue",
+    "access": null,
+    "description": "setValue takes a value as argument and attempts to validate this value. If it was valid we set \nthis.value to the field returned by the validate method, otherwise we throw the error that was returned",
+    "lineNumber": 428,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Array"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "values",
+        "description": "The value that should be set in this ArrayMField"
+      }
+    ]
+  },
+  {
+    "__docId__": 81,
+    "kind": "member",
+    "name": "value",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#value",
+    "access": null,
+    "description": null,
+    "lineNumber": 432,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*[]"
+      ]
+    }
+  },
+  {
+    "__docId__": 82,
+    "kind": "class",
+    "name": "EnumMField",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~EnumMField",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/fields/MFieldMulti.js",
+    "importStyle": "{EnumMField}",
+    "description": "Enum implementation of MField which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue\t\t===>\tenum.includes(value)",
+    "lineNumber": 445,
+    "interface": false,
+    "extends": [
+      "framework/basicDataManager/fields/MFieldSingle.js~MField"
+    ]
+  },
+  {
+    "__docId__": 83,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~EnumMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~EnumMField#constructor",
+    "access": null,
+    "description": "",
+    "lineNumber": 449,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "schema",
+        "description": "A JSON schema that describes this fields value"
+      }
+    ]
+  },
+  {
+    "__docId__": 84,
+    "kind": "method",
+    "name": "validate",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~EnumMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~EnumMField#validate",
+    "access": null,
+    "description": "",
+    "lineNumber": 458,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value that should be validated"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Boolean, Error"
+      ],
+      "spread": false,
+      "description": "Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned"
+    }
+  },
+  {
+    "__docId__": 85,
+    "kind": "class",
+    "name": "OneOfMField",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/fields/MFieldMulti.js",
+    "importStyle": "{OneOfMField}",
+    "description": "OneOF implementation of MFIeld which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue\t\t===>\tvalue matches at least one schema in schema.oneOf",
+    "lineNumber": 477,
+    "interface": false,
+    "extends": [
+      "framework/basicDataManager/fields/MFieldSingle.js~MField"
+    ]
+  },
+  {
+    "__docId__": 86,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#constructor",
+    "access": null,
+    "description": null,
+    "lineNumber": 478,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "params": [
+      {
+        "name": "schema",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "superKlass",
+        "types": [
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "__docId__": 87,
+    "kind": "member",
+    "name": "superKlass",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#superKlass",
+    "access": null,
+    "description": "The MObject that this OneOfMField belongs to",
+    "lineNumber": 484,
+    "type": {
+      "nullable": null,
+      "types": [
+        "MObject"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 88,
+    "kind": "method",
+    "name": "validate",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#validate",
+    "access": null,
+    "description": "",
+    "lineNumber": 492,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value that should be validated"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Boolean, Error, MField"
+      ],
+      "spread": false,
+      "description": "Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned. If it was valid, the valid MField is returned"
+    }
+  },
+  {
+    "__docId__": 89,
+    "kind": "method",
+    "name": "setValue",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#setValue",
+    "access": null,
+    "description": "setValue takes a value as argument and attempts to validate this value. If it was valid we set \nthis.value to the field returned by the validate method, otherwise we throw the error that was returned",
+    "lineNumber": 517,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value that should be set in this MField"
+      }
+    ]
+  },
+  {
+    "__docId__": 90,
+    "kind": "member",
+    "name": "value",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#value",
+    "access": null,
+    "description": null,
+    "lineNumber": 523,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 91,
+    "kind": "method",
+    "name": "getValue",
+    "memberof": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#getValue",
+    "access": null,
+    "description": "",
+    "lineNumber": 530,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "*"
+      ],
+      "spread": false,
+      "description": "This OneOfMFields value"
+    }
+  },
+  {
+    "__docId__": 92,
+    "kind": "file",
+    "name": "framework/basicDataManager/fields/MFieldSingle.js",
+    "content": "import {MObject} from \"../MObject\"\n\n/**\n * The basic MField class privides the API for data managers that\n * want to use the MFields values. By default we can invoke:\n *\t\t\n * getValue\t\treturns the internal value of the MField.\n * setValue\t\tused to set the internal value of the MField.\n * getType\t\t\treturns the type of the value stored in the MField.4\n * toString\t\treturns a string representing this fields value\n *\n * Each class that extends MField must provide the validate(value) function\n * which returns true iff the given parameter matches the schema for this MField.\n */\nexport class MField {\n\t/**\n\t * @param {String} type - A string representing the type of this MField\n\t * @param {Object} schema - A JSON schema that describes this fields value\n\t * @param {*} value - The value that should be used to initialize this MField\n\t */\n\tconstructor(type, schema, value) {\n\t\t/**\n\t\t * String representing the type of the MField's value\n\t\t * @type {String}\n\t\t */\n\t\tthis.type = type\n\n\t\t/**\n\t\t * The schema describing this value\n\t\t * @type {Schema}\n\t\t */\n\t\tthis.schema = schema\n\n\t\t/**\n\t\t * The initial value for this MField\n\t\t * @type {*}\n\t\t */\n\t\tthis.value = value\n\t}\n\n\t/**\n\t * setValue takes a value as argument and attempts to validate this value. If it was valid we set \n\t * this.value to the value, and otherwise we throw the error returned by the validate method\n\t * \n\t * @param {*} value - The value that should be set in this MField\n\t */\n\tsetValue(value) {\n\t\tlet {valid, error} = this.validate(value)\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = value\n\t\t}\n\t}\n\n\t/**\n\t * @return {*} This MFields value\n\t */\n\tgetValue() {\n\t\treturn this.value\n\t}\n\n\t/**\n\t * @return {String} A string representing this MFields type\n\t */\n\tgetType() {\n\t\treturn this.type\n\t}\n\n\t/**\n\t * @return String representing this MFields value\n\t */\n\ttoString() {\n\t\treturn String(this.value)\n\t}\n}\n\n/**\n * Number implementation of MField which checks the following constraints:\n * \t\t\n *\t\tREQUIRED:\n * \t\t\tvalue \t\t\t\t\t\t\t===>\ttypeof(value) == typeof(Number)\n *\t\tOPTIONAL:\n *\t\t\tminimum && exclusiveMinimum \t===> \tvalue > minimum\n *\t\t\tminimum \t\t\t\t\t\t===>\tvalue >= minimum\n *\t\t\tmaximum && exclusiveMaximum\t\t===>\tvalue < maximum\n *\t\t\tmaximum \t\t\t\t\t\t===>\tvalue <= maximum\n *\t\t\tmultipleOf\t\t\t\t\t\t===>\tvalue%multipleOf == 0\n *\n *\n */\nexport class NumberMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tsuper(\"number\", schema, 0)\n\t}\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */ \n\tvalidate(value) {\n\t\tlet valid = false\n\t\tlet error\n\n\t\tif(typeof(value) == \"number\") {\n\t\t\tif( this.schema.hasOwnProperty(\"exclusiveMinimum\") && this.schema.hasOwnProperty(\"minimum\") && value <= this.schema.minimum) {\n\t\t\t\terror = new TypeError(\"value must be greater than \"+this.schema.minimum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t} else if(this.schema.hasOwnProperty(\"minimum\") && value < this.schema.minimum) {\n\t\t\t\terror = new TypeError(\"value must be greater than or equal to \"+this.schema.minimum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t}\n\n\t\t\tif(this.schema.hasOwnProperty(\"exclusiveMaximum\") && this.schema.hasOwnProperty(\"maximum\") && value >= this.schema.maximum) {\n\t\t\t\terror = new TypeError(\"value must be less than \"+this.schema.maximum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t} else if (this.schema.hasOwnProperty(\"maximum\") && value > this.schema.maximum) {\n\t\t\t\terror = new TypeError(\"value must be less than or equal to \"+this.schema.maximum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t}\n\n\t\t\tif(this.schema.hasOwnProperty(\"multipleOf\") && value%this.schema.multipleOf != 0) {\n\t\t\t\terror = new TypeError(\"value must be a multiple of \" + this.schema.multipleOf)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t}\n\n\n\t\t\tvalid = true\n\t\t} else {\n\t\t\terror = new TypeError(\"the given value must be a Number\")\n\t\t}\n\t\treturn {valid, error}\n\t}\n}\n\n\n/**\n * Integer implementation of MField which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue \t===>\tvalue%1 == 0\n */\nexport class IntegerMField extends NumberMField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tsuper(schema)\n\t\t/**\n\t\t * Override NumberMFields type\n\t\t * @type {String}\n\t\t */\n\t\tthis.type = \"integer\"\n\t}\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\t\tif(valid == true) {\n\t\t\tif(value%1 == 0) {\n\t\t\t\tvalid = true\n\t\t\t} else {\n\t\t\t\tvalid = false\n\t\t\t\terror = new TypeError(\"value must be an Integer\")\n\t\t\t}\n\t\t}\n\t\treturn {valid, error}\n\t}\n}\n\n\n /**\n *\tString implementation of MField which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue \t\t===>\ttypeof(value) == typeof(String)\n *\t\tOPTIONAL:\n *\t\t\tminLength\t===>\tvalue.length >= minLength\n *\t\t\tmaxLength\t===>\tvalue.length <= maxLength\n *\t\t\tpattern\t\t===>\tvalue matches pattern\n *\t\t\tformat\t\t===>\tvalue is one of:\n * \n * \t\t\t\t\t\t\t\t\tdate-time\n * \t\t\t\t\t\t\t\t\temail\n * \t\t\t\t\t\t\t\t\thostname\n * \t\t\t\t\t\t\t\t\tipv4\n * \t\t\t\t\t\t\t\t\tipv6\n * \t\t\t\t\t\t\t\t\turi\n */\nexport class StringMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tsuper(\"string\", schema, \"\")\n\t}\n\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet valid = false;\n\t\tlet error\n\t\tif(!typeof(value) === \"string\") {\n\t\t\terror = new TypeError(\"value must be a String\")\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"minLength\") && value.length < this.schema.minLength) {\n\t\t\terror = new TypeError(\"value is shorter than the minimum length of \"+this.schema.minLength)\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"maxLength\") && value.length > this.schema.maxLength + exclMax) {\n\t\t\terror = new TypeError(\"value is longer than the maximum length of \"+this.schema.maxLength)\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"pattern\") ** value.match(this.schema.pattern) == null) {\n\t\t\terror = new TypeError(\"value does not match the pattern \"+this.schema.pattern);\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"format\")) {\n\t\t\tif(this.schema.format == \"date-time\") {\n\t\t\t\tif(Date.parse(value) == NaN) {\n\t\t\t\t\terror = new TypeError(\"value does not match the date-time format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"email\") {\n\t\t\t\tif(/^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value does not match the email format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"hostname\") {\n\t\t\t\tif(/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value does not match the hostname format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"ipv4\") {\n\t\t\t\tif(/^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value does not match the ipv4 format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"ipv6\") {\n\t\t\t\tif(/^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))?$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value does not match the ipv6 format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"uri\") {\n\t\t\t\tif(/^([a-z][a-z0-9+.-]*):(?:\\/\\/((?:(?=((?:[a-z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*))(\\3)@)?(?=(\\[[0-9A-F:.]{2,}\\]|(?:[a-z0-9-._~!$&'()*+,;=]|%[0-9A-F]{2})*))\\5(?::(?=(\\d*))\\6)?)(\\/(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/]|%[0-9A-F]{2})*))\\8)?|(\\/?(?!\\/)(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/]|%[0-9A-F]{2})*))\\10)?)(?:\\?(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/?]|%[0-9A-F]{2})*))\\11)?(?:#(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/?]|%[0-9A-F]{2})*))\\12)?$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value does not match the uri format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tvalid = true;\n\t\treturn {valid, error}\n\t}\n}\n\n/**\n * Integer implementation of MField which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue \t===>\ttypeof(value) == typeof(Boolean)\n */\nexport class BooleanMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tsuper(\"boolean\", schema, false)\n\t}\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet valid = true\n\t\tlet error\n\t\tif(value === false || value === true) {\n\t\t\treturn {valid, error}\n\t\t} else {\n\t\t\tvalid = false;\n\t\t\terror = new TypeError(\"value must be a Boolean\")\n\t\t\treturn {valid, error}\n\t\t}\n\t}\n}\n\n/**\n * MObject implementation of MField which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue \t \t\t\t===>\tvalue instanceof MObject && value.klass == schema.klass\n *\t\tOPTIONAL:\n *\t\t\tinverse\t\t \t\t===>\t(value[inverse] == this || value[inverse].includes(this))\n */\nexport class MObjectMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t * @param {MObject} superKlass - The MObject that this field belongs to\n\t */ \t\n\tconstructor(schema, superKlass) {\n\t\tsuper(\"object\", schema, schema.klass)\n\n\t\t/**\n\t\t * The MObject that this OneOfMField belongs to\n\t\t * @type {MObject}\n\t\t */\n\t\tthis.superKlass = superKlass\n\t}\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet valid = false;\n\t\tlet error;\n\n\t\tif(!(value instanceof MObject && value.getKlass() == this.schema.klass)) {\n\t\t\terror = new TypeError(\"value must be managed data\")\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"inverse\")) {\n\t\t\tconsole.log(\"inverse\", this.schema.inverse)\n\t\t\tif(value.__getType(this.schema.inverse) == \"array\") {\n\t\t\t\tconsole.log(\"pushing inverse\")\n\t\t\t\tconsole.log(value[this.schema.inverse], this.superKlass)\n\t\t\t\tvalue[this.schema.inverse].push(this.superKlass)\n\t\t\t\tconsole.log(\"after pushing inverse: \", value[this.schema.inverse])\n\t\t\t} else {\n\t\t\t\tconsole.log(\"setting inverse\")\n\t\t\t\tvalue[this.schema.inverse] = this.value\n\t\t\t}\n\t\t}\n\t\tvalid = true\n\t\treturn {valid, error}\n\t}\n}",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 93,
+    "kind": "class",
+    "name": "MField",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MField",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js",
+    "importStyle": "{MField}",
+    "description": "The basic MField class privides the API for data managers that\nwant to use the MFields values. By default we can invoke:\n\t\ngetValue\t\treturns the internal value of the MField.\nsetValue\t\tused to set the internal value of the MField.\ngetType\t\t\treturns the type of the value stored in the MField.4\ntoString\t\treturns a string representing this fields value\n\nEach class that extends MField must provide the validate(value) function\nwhich returns true iff the given parameter matches the schema for this MField.",
+    "lineNumber": 15,
+    "interface": false
+  },
+  {
+    "__docId__": 94,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MField#constructor",
+    "access": null,
+    "description": "",
+    "lineNumber": 21,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "String"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "type",
+        "description": "A string representing the type of this MField"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "schema",
+        "description": "A JSON schema that describes this fields value"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value that should be used to initialize this MField"
+      }
+    ]
+  },
+  {
+    "__docId__": 95,
+    "kind": "member",
+    "name": "type",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MField#type",
+    "access": null,
+    "description": "String representing the type of the MField's value",
+    "lineNumber": 26,
+    "type": {
+      "nullable": null,
+      "types": [
+        "String"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 96,
+    "kind": "member",
+    "name": "schema",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MField#schema",
+    "access": null,
+    "description": "The schema describing this value",
+    "lineNumber": 32,
+    "type": {
+      "nullable": null,
+      "types": [
+        "Schema"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 97,
+    "kind": "member",
+    "name": "value",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MField#value",
+    "access": null,
+    "description": "The initial value for this MField",
+    "lineNumber": 38,
+    "type": {
+      "nullable": null,
+      "types": [
+        "*"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 98,
+    "kind": "method",
+    "name": "setValue",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MField#setValue",
+    "access": null,
+    "description": "setValue takes a value as argument and attempts to validate this value. If it was valid we set \nthis.value to the value, and otherwise we throw the error returned by the validate method",
+    "lineNumber": 47,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value that should be set in this MField"
+      }
+    ]
+  },
+  {
+    "__docId__": 99,
+    "kind": "member",
+    "name": "value",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MField#value",
+    "access": null,
+    "description": null,
+    "lineNumber": 52,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 100,
+    "kind": "method",
+    "name": "getValue",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MField#getValue",
+    "access": null,
+    "description": "",
+    "lineNumber": 59,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "*"
+      ],
+      "spread": false,
+      "description": "This MFields value"
+    }
+  },
+  {
+    "__docId__": 101,
+    "kind": "method",
+    "name": "getType",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MField#getType",
+    "access": null,
+    "description": "",
+    "lineNumber": 66,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "String"
+      ],
+      "spread": false,
+      "description": "A string representing this MFields type"
+    }
+  },
+  {
+    "__docId__": 102,
+    "kind": "method",
+    "name": "toString",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MField#toString",
+    "access": null,
+    "description": "",
+    "lineNumber": 73,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "*"
+      ],
+      "spread": false,
+      "description": "String representing this MFields value"
+    }
+  },
+  {
+    "__docId__": 103,
+    "kind": "class",
+    "name": "NumberMField",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~NumberMField",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js",
+    "importStyle": "{NumberMField}",
+    "description": "Number implementation of MField which checks the following constraints:\n\t\t\n\tREQUIRED:\n\t\t\tvalue \t\t\t\t\t\t\t===>\ttypeof(value) == typeof(Number)\n\tOPTIONAL:\n\t\tminimum && exclusiveMinimum \t===> \tvalue > minimum\n\t\tminimum \t\t\t\t\t\t===>\tvalue >= minimum\n\t\tmaximum && exclusiveMaximum\t\t===>\tvalue < maximum\n\t\tmaximum \t\t\t\t\t\t===>\tvalue <= maximum\n\t\tmultipleOf\t\t\t\t\t\t===>\tvalue%multipleOf == 0",
+    "lineNumber": 92,
+    "interface": false,
+    "extends": [
+      "MField"
+    ]
+  },
+  {
+    "__docId__": 104,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~NumberMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~NumberMField#constructor",
+    "access": null,
+    "description": "",
+    "lineNumber": 96,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "schema",
+        "description": "A JSON schema that describes this MFields value"
+      }
+    ]
+  },
+  {
+    "__docId__": 105,
+    "kind": "method",
+    "name": "validate",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~NumberMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~NumberMField#validate",
+    "access": null,
+    "description": "",
+    "lineNumber": 105,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value that should be validated"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Boolean, Error"
+      ],
+      "spread": false,
+      "description": "Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned"
+    }
+  },
+  {
+    "__docId__": 106,
+    "kind": "class",
+    "name": "IntegerMField",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~IntegerMField",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js",
+    "importStyle": "{IntegerMField}",
+    "description": "Integer implementation of MField which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue \t===>\tvalue%1 == 0",
+    "lineNumber": 152,
+    "interface": false,
+    "extends": [
+      "NumberMField"
+    ]
+  },
+  {
+    "__docId__": 107,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~IntegerMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~IntegerMField#constructor",
+    "access": null,
+    "description": "",
+    "lineNumber": 156,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "schema",
+        "description": "A JSON schema that describes this MFields value"
+      }
+    ]
+  },
+  {
+    "__docId__": 108,
+    "kind": "member",
+    "name": "type",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~IntegerMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~IntegerMField#type",
+    "access": null,
+    "description": "Override NumberMFields type",
+    "lineNumber": 162,
+    "type": {
+      "nullable": null,
+      "types": [
+        "String"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 109,
+    "kind": "method",
+    "name": "validate",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~IntegerMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~IntegerMField#validate",
+    "access": null,
+    "description": "",
+    "lineNumber": 170,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value that should be validated"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Boolean, Error"
+      ],
+      "spread": false,
+      "description": "Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned"
+    }
+  },
+  {
+    "__docId__": 110,
+    "kind": "class",
+    "name": "StringMField",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~StringMField",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js",
+    "importStyle": "{StringMField}",
+    "description": "String implementation of MField which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue \t\t===>\ttypeof(value) == typeof(String)\n\tOPTIONAL:\n\t\tminLength\t===>\tvalue.length >= minLength\n\t\tmaxLength\t===>\tvalue.length <= maxLength\n\t\tpattern\t\t===>\tvalue matches pattern\n\t\tformat\t\t===>\tvalue is one of:\n\n\t\t\t\t\t\t\t\t\tdate-time\n\t\t\t\t\t\t\t\t\temail\n\t\t\t\t\t\t\t\t\thostname\n\t\t\t\t\t\t\t\t\tipv4\n\t\t\t\t\t\t\t\t\tipv6\n\t\t\t\t\t\t\t\t\turi",
+    "lineNumber": 203,
+    "interface": false,
+    "extends": [
+      "MField"
+    ]
+  },
+  {
+    "__docId__": 111,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~StringMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~StringMField#constructor",
+    "access": null,
+    "description": "",
+    "lineNumber": 207,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "schema",
+        "description": "A JSON schema that describes this MFields value"
+      }
+    ]
+  },
+  {
+    "__docId__": 112,
+    "kind": "method",
+    "name": "validate",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~StringMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~StringMField#validate",
+    "access": null,
+    "description": "",
+    "lineNumber": 217,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value that should be validated"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Boolean, Error"
+      ],
+      "spread": false,
+      "description": "Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned"
+    }
+  },
+  {
+    "__docId__": 113,
+    "kind": "class",
+    "name": "BooleanMField",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~BooleanMField",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js",
+    "importStyle": "{BooleanMField}",
+    "description": "Integer implementation of MField which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue \t===>\ttypeof(value) == typeof(Boolean)",
+    "lineNumber": 285,
+    "interface": false,
+    "extends": [
+      "MField"
+    ]
+  },
+  {
+    "__docId__": 114,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~BooleanMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~BooleanMField#constructor",
+    "access": null,
+    "description": "",
+    "lineNumber": 289,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "schema",
+        "description": "A JSON schema that describes this MFields value"
+      }
+    ]
+  },
+  {
+    "__docId__": 115,
+    "kind": "method",
+    "name": "validate",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~BooleanMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~BooleanMField#validate",
+    "access": null,
+    "description": "",
+    "lineNumber": 298,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value that should be validated"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Boolean, Error"
+      ],
+      "spread": false,
+      "description": "Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned"
+    }
+  },
+  {
+    "__docId__": 116,
+    "kind": "class",
+    "name": "MObjectMField",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js",
+    "static": true,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MObjectMField",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js",
+    "importStyle": "{MObjectMField}",
+    "description": "MObject implementation of MField which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue \t \t\t\t===>\tvalue instanceof MObject && value.klass == schema.klass\n\tOPTIONAL:\n\t\tinverse\t\t \t\t===>\t(value[inverse] == this || value[inverse].includes(this))",
+    "lineNumber": 319,
+    "interface": false,
+    "extends": [
+      "MField"
+    ]
+  },
+  {
+    "__docId__": 117,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MObjectMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MObjectMField#constructor",
+    "access": null,
+    "description": "",
+    "lineNumber": 324,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "schema",
+        "description": "A JSON schema that describes this MFields value"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "MObject"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "superKlass",
+        "description": "The MObject that this field belongs to"
+      }
+    ]
+  },
+  {
+    "__docId__": 118,
+    "kind": "member",
+    "name": "superKlass",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MObjectMField",
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MObjectMField#superKlass",
+    "access": null,
+    "description": "The MObject that this OneOfMField belongs to",
+    "lineNumber": 331,
+    "type": {
+      "nullable": null,
+      "types": [
+        "MObject"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 119,
+    "kind": "method",
+    "name": "validate",
+    "memberof": "framework/basicDataManager/fields/MFieldSingle.js~MObjectMField",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/fields/MFieldSingle.js~MObjectMField#validate",
+    "access": null,
+    "description": "",
+    "lineNumber": 339,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "The value that should be validated"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Boolean, Error"
+      ],
+      "spread": false,
+      "description": "Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned"
+    }
+  },
+  {
+    "__docId__": 120,
+    "kind": "file",
+    "name": "framework/basicDataManager/schemaInterpreter.js",
+    "content": "export let parseSchema = function(schema) {\n\treturn new SchemaInterpreter.parseSchema(schema)\n}\n\nexport class SchemaInterpreter {\n\t/**\n\t * ParseSchema takes as input a schema and then traverses the structure, collecting data for\n\t * the data managers. The schema and definitions are split into separate schemas, each of which\n\t * describes a Klass. The klass schema also contains a list of all klasses contained within the\n\t * fields of the klass.\n\t *\n\t * Each '$ref' keyword is replaced by a Klass name. The basic data manager will then know that a\n\t * field should be an instance of that klass.\n\t */\n\tparseSchema(schema) {\n\t\tif(!schema.hasOwnProperty('name')) {\n\t\t\tthrow new TypeError('schema must have a name');\n\t\t}\n\t\tif(!schema.hasOwnProperty('properties')) {\n\t\t\tthrow new TypeError('schema must have properties');\t\n\t\t}\n\t\t\n\t\t/* Add the name of the schema as identifier for the 'main klass' */\n\t\tthis.klasses = [schema.name];\n\n\t\t/* initialize an object that maps klass names to schema definitions */\n\t\tthis.klassSchemas = Object.create(Object);\n\t\t/* initialize an object that maps reference paths to klass names */\n\t\tthis.klassPaths = Object.create(Object);\n\n\t\t/* initialize an empty array that will be used as stack to keep track\n\t\t * of the klasses contained within a klass's fields */\n\t\tthis.currentSubKlasses = [];\n\n\t\t/* create an empty main schema, set its type and copy the properties \n\t\t * from the given schema, then add this schema to the schema that will \n\t\t * contain all klass definitions */\n\t\tlet mainSchema = Object.create(Object);\n\t\tmainSchema['type'] = 'object';\n\t\tmainSchema['properties'] = schema['properties'];\n\t\tthis.klassSchemas[schema.name] = Object.create(Object);\n\t\tthis.klassSchemas[schema.name].schema = mainSchema;\n\t\tthis.klassPaths['#'] = schema.name;\n\t\t/* parse the definitions from the schema, if they exist */\n\t\tif(schema.hasOwnProperty('definitions')) {\n\t\t\tthis.parseDefinitions(schema['definitions']);\t\n\t\t}\n\t\t\n\t\t/* parse the schema as an object */\n\t\tthis.parseObject(schema, schema['name']);\n\n\t\t/* append the found sub klasses to the main schema */\n\t\tthis.klassSchemas[schema.name].subKlasses = this.currentSubKlasses;\n\t\t/* return an object containing the name of the main klass and a klassSchemas field\n\t\t * containing schema definitions for all klasses that were defined within the schema */\n\t\treturn {\"mainKlass\": schema['name'], \"klassSchemas\": this.klassSchemas};\n\t}\n\t\n\t/**\n\t * parseDefinitions splits the klasses defined in the 'definitions' part of the schema\n\t * into separate schemas and stores these in an object that maps Klass names to the \n\t * corresponding schema.\n\t */\n\tparseDefinitions(definitions) {\n\t\tfor(let definition in definitions) {\n\t\t\t/* append the definition name as a klass name and add the definition as a separate schema */\n\t\t\tthis.klasses.push(definition);\n\t\t\tthis.klassSchemas[definition] = Object.create(Object);\n\t\t\tthis.klassSchemas[definition].schema = definitions[definition];\n\n\t\t\t/* map the path that a $ref will use to the definition name */\n\t\t\tthis.klassPaths['#/definitions/'+definition] = definition;\n\t\t}\n\n\t\tfor(let definition in definitions) {\n\t\t\t/* loop over each definition again. This time parse the definition as an object \n\t\t\t * and add the sub klasses to the subKlasses field of the schema */\t\t\n\t\t\tthis.parseObject(this.klassSchemas[definition].schema, definition);\n\t\t\tthis.klassSchemas[definition].subKlasses = this.currentSubKlasses;\n\t\t}\n\t}\n\t\n\t/**\n\t * An object always contains a 'properties' keyword. ParseObject initializes the subKlass stack,\n\t * sets the current klass and then calls the parseProperties function\n\t */\n\tparseObject(object, klass) {\n\t\t/* reinitialize the currentSubKlasses field and set the current klass */\n\t\tthis.currentSubKlasses = [];\n\t\tthis.currentKlass = klass;\n\n\t\t/* parse the object's properties */\n\t\tthis.parseProperties(object['properties']);\t\n\t}\n\t\n\t/**\n\t * ParseProperties checks for keywords that are allowed within JSON schema and calls the appropriate\n\t * parse function. If it finds a reference, this reference is replaced by a {'type': klassName} object.\n\t */\n\tparseProperties(properties) {\n\t\tfor(var propKey in properties) {\n\t\t\t/* for each property: */\n\t\t\tlet property = properties[propKey];\n\t\t\tif(property.hasOwnProperty('type') && !property.hasOwnProperty('$ref')) {\n\t\t\t\t/* if the property has a type field, but no reference, we parse its type */\n\t\t\t\tthis.parseType(property);\n\t\t\t}\n\t\t\tif(property.hasOwnProperty('$ref')) {\n\t\t\t\t/* if we find a reference: set the klass name as a type and remove the \n\t\t\t\t * reference from the schema */\n\t\t\t\tproperty['klass'] = this.klassPaths[property['$ref']];\n\t\t\t\tproperty['type'] = 'object';\n\t\t\t\tthis.currentSubKlasses.push(this.klassPaths[property['$ref']]);\n\t\t\t\tdelete property['$ref'];\n\t\t\t}\n\t\t\tif(property.hasOwnProperty['enum']) {\n\t\t\t\t/* if we encounter an enum: parse each type in the type array */\n\t\t\t\tthis.parseTypeArray(property['enum']);\n\t\t\t}\n\t\t}\n\t}\n\t\n\t/*\n\t * If we find an 'items', 'oneOf', 'anyOf' or 'allOf' keyword, then we parse each \n\t * type in the type array. If the type is an object we throw an error, since each\n\t * property that is an object must have a definition in the 'defenitions' object of\n\t * the schema, and then the field must reference that definition through the '$ref' keyword\n\t */\n\tparseType(typeObj) {\n\t\tlet type = typeObj['type'];\n\t\tif(type == 'array') {\n\t\t\tif(typeObj.hasOwnProperty('items')) {\n\t\t\t\tthis.parseTypeArray(typeObj.items);\t\n\t\t\t}\n\t\t} else if(typeObj.hasOwnProperty('oneOf')) {\n\t\t\tthis.parseTypeArray(typeObj['oneOf']);\t\n\t\t} else if(typeObj.hasOwnProperty('anyOf')) {\n\t\t\tthis.parseTypeArray(typeObj['anyOf']);\t\n\t\t} else if(typeObj.hasOwnProperty('allOf')) {\n\t\t\tthis.parseTypeArray(typeObj['allOf']);\t\n\t\t} else if(type == 'object' && !typeObj.hasOwnProperty(\"klass\")){\n\t\t\tthrow new TypeError(\"A property referring to an object must have a reference to '#/definitions/<definition>' containing the object definition\");\t\n\t\t}\n\t}\n\t\n\t/**\n\t * parseTypeArray parses an arary of types that is contained in the 'items', 'oneOf', 'anyOf' or 'allOf'\n\t * keywords. If it finds a reference this reference is replaced by a {'type': klassName} object.\n\t */\n\tparseTypeArray(arr) {\n\t\tif(arr instanceof Array) {\n\t\t\tfor(var item of arr) {\n\t\t\t\tif(item.hasOwnProperty('$ref')) {\n\t\t\t\t\t/* if we find a reference in the type array: replace this reference by a klass */\n\t\t\t\t\titem['klass'] = this.klassPaths[item['$ref']];\n\t\t\t\t\titem['type'] = 'object';\n\t\t\t\t\tthis.currentSubKlasses.push(this.klassPaths[item['$ref']]);\n\t\t\t\t\tdelete item['$ref'];\n\t\t\t\t} else if(item.hasOwnProperty('type') && item['type'] != 'object'){\n\t\t\t\t\t/* if we find a type: parse this type */\n\t\t\t\t\tthis.parseType(item);\t\n\t\t\t\t} else if(item.hasOwnProperty(\"oneOf\")){\n\t\t\t\t\tthis.parseTypeArray(item.oneOf);\n\t\t\t\t} else if (item.hasOwnProperty(\"enum\")) {\n\t\t\t\t\tthis.parseTypeArray(item.enum);\n\t\t\t\t} else if (typeof(item) == Object && !item.hasOwnProperty(\"klass\")) {\n\t\t\t\t\t/* if the item is an object, we throw an error since an object must have a reference to a definition */\n\t\t\t\t\tthrow new TypeError(\"oneOf containing objects must consist of basic types, or have a reference to '#/definitions/<definition>' containing the object definition\");\n\t\t\t\t}\n\t\t\t}\n\t\t} else {\n\t\t\tif(arr.hasOwnProperty('$ref')) {\n\t\t\t\t/* if we find a reference in the type array: replace this reference by a klass */\n\t\t\t\tarr['klass'] = this.klassPaths[arr['$ref']];\n\t\t\t\tarr['type'] = 'object';\n\t\t\t\tthis.currentSubKlasses.push(this.klassPaths[arr['$ref']]);\n\t\t\t\tdelete arr['$ref'];\n\t\t\t} else if(arr.hasOwnProperty('type') && arr['type'] != 'object'){\n\t\t\t\t/* if we find a type: parse this type */\n\t\t\t\tthis.parseType(arr);\t\n\t\t\t}  else if(arr.hasOwnProperty(\"oneOf\")){\n\t\t\t\tthis.parseTypeArray(arr.oneOf);\n\t\t\t} else if (arr.hasOwnProperty(\"enum\")) {\n\t\t\t\tthis.parseTypeArray(arr.enum);\n\t\t\t} else if (typeof(arr) == Object && !arr.hasOwnProperty(\"klass\")) {\n\t\t\t\t/* if the arr is an object, we throw an error since an object must have a reference to a definition */\n\t\t\t\tthrow new TypeError(\"oneOf containing objects must consist of basic types, or have a reference to '#/definitions/<definition>' containing the object definition\");\n\t\t\t}\n\t\t}\n\t}\n}",
+    "static": true,
+    "longname": "framework/basicDataManager/schemaInterpreter.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 121,
+    "kind": "function",
+    "name": "parseSchema",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~parseSchema",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/schemaInterpreter.js",
+    "importStyle": "{parseSchema}",
+    "description": null,
+    "lineNumber": 1,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "params": [
+      {
+        "name": "schema",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 122,
+    "kind": "class",
+    "name": "SchemaInterpreter",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js",
+    "static": true,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/basicDataManager/schemaInterpreter.js",
+    "importStyle": "{SchemaInterpreter}",
+    "description": null,
+    "lineNumber": 5,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "interface": false
+  },
+  {
+    "__docId__": 123,
+    "kind": "method",
+    "name": "parseSchema",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseSchema",
+    "access": null,
+    "description": "ParseSchema takes as input a schema and then traverses the structure, collecting data for\nthe data managers. The schema and definitions are split into separate schemas, each of which\ndescribes a Klass. The klass schema also contains a list of all klasses contained within the\nfields of the klass.\n\nEach '$ref' keyword is replaced by a Klass name. The basic data manager will then know that a\nfield should be an instance of that klass.",
+    "lineNumber": 15,
+    "params": [
+      {
+        "name": "schema",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "{\"mainKlass\": *, \"klassSchemas\": *}"
+      ]
+    }
+  },
+  {
+    "__docId__": 124,
+    "kind": "member",
+    "name": "klasses",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#klasses",
+    "access": null,
+    "description": null,
+    "lineNumber": 24,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "undefined[]"
+      ]
+    }
+  },
+  {
+    "__docId__": 125,
+    "kind": "member",
+    "name": "klassSchemas",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#klassSchemas",
+    "access": null,
+    "description": null,
+    "lineNumber": 27,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 126,
+    "kind": "member",
+    "name": "klassPaths",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#klassPaths",
+    "access": null,
+    "description": null,
+    "lineNumber": 29,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 127,
+    "kind": "member",
+    "name": "currentSubKlasses",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#currentSubKlasses",
+    "access": null,
+    "description": null,
+    "lineNumber": 33,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*[]"
+      ]
+    }
+  },
+  {
+    "__docId__": 128,
+    "kind": "method",
+    "name": "parseDefinitions",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseDefinitions",
+    "access": null,
+    "description": "parseDefinitions splits the klasses defined in the 'definitions' part of the schema\ninto separate schemas and stores these in an object that maps Klass names to the \ncorresponding schema.",
+    "lineNumber": 64,
+    "params": [
+      {
+        "name": "definitions",
+        "types": [
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "__docId__": 129,
+    "kind": "method",
+    "name": "parseObject",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseObject",
+    "access": null,
+    "description": "An object always contains a 'properties' keyword. ParseObject initializes the subKlass stack,\nsets the current klass and then calls the parseProperties function",
+    "lineNumber": 87,
+    "params": [
+      {
+        "name": "object",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "klass",
+        "types": [
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "__docId__": 130,
+    "kind": "member",
+    "name": "currentSubKlasses",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#currentSubKlasses",
+    "access": null,
+    "description": null,
+    "lineNumber": 89,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*[]"
+      ]
+    }
+  },
+  {
+    "__docId__": 131,
+    "kind": "member",
+    "name": "currentKlass",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#currentKlass",
+    "access": null,
+    "description": null,
+    "lineNumber": 90,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 132,
+    "kind": "method",
+    "name": "parseProperties",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseProperties",
+    "access": null,
+    "description": "ParseProperties checks for keywords that are allowed within JSON schema and calls the appropriate\nparse function. If it finds a reference, this reference is replaced by a {'type': klassName} object.",
+    "lineNumber": 100,
+    "params": [
+      {
+        "name": "properties",
+        "types": [
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "__docId__": 133,
+    "kind": "method",
+    "name": "parseType",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseType",
+    "access": null,
+    "description": null,
+    "lineNumber": 129,
+    "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
+    "params": [
+      {
+        "name": "typeObj",
+        "types": [
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "__docId__": 134,
+    "kind": "method",
+    "name": "parseTypeArray",
+    "memberof": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseTypeArray",
+    "access": null,
+    "description": "parseTypeArray parses an arary of types that is contained in the 'items', 'oneOf', 'anyOf' or 'allOf'\nkeywords. If it finds a reference this reference is replaced by a {'type': klassName} object.",
+    "lineNumber": 150,
+    "params": [
+      {
+        "name": "arr",
+        "types": [
+          "*"
+        ]
+      }
+    ]
+  },
+  {
+    "__docId__": 135,
+    "kind": "file",
+    "name": "framework/mixins/lockingMObject.js",
+    "content": "/**\n * A mixin that provides functionality for locking and unlocking MObjects\n */\nexport let LockingMObject = (superclass) => class extends superclass {\n\tconstructor(schema, klass, subKlasses, ...otherArgs) {\n\t\tsuper(schema, klass, subKlasses, ...otherArgs);\n\t\t/**\n\t\t * @type{Boolean}\n\t\t */\n\t\tthis.locked = false;\n\t}\n\n\t/**\n\t * @param {Symbol, String} propKey - The property key to set in this.data\n\t * @param {*} value - The value to set this.data[propKey] to\n\t * @return {Boolean} True if setting the value was succesfull\n\t * @throws {TypeError}\n\t */\n\tset(propKey, value) {\n\t\tif(this.locked == true) {\n\t\t\tthrow new TypeError(\"object is locked\");\n\t\t}\n\t\treturn super.set(propKey, value);\n\t}\n\n\t/**\n\t * @param {Symbol, String} propKey - The property key to look for in this.data\n\t * @return {Boolean} True if getting the value was succesfull\n\t * @throws {TypeError}\n\t */\n\tget(propKey) {\n\t\treturn super.get(propKey);\n\t}\n\n\t/**\n\t * @param {Symbol, String} array - The array that will be modified\n\t * @return {Boolean} True if the object is not locked\n\t * @throws {TypeError}\n\t */\n\tnotifyBeforeArrayChanged(array) {\n\t\tif(this.isLocked()) {\n\t\t\tthrow new TypeError(\"object is locked\");\n\t\t}\n\t\treturn true;\n\t}\n\n\n\t/**\n\t * Sets locked to true\n\t */\n\tlock() {\n\t\tthis.locked = true;\n\t}\n\n\t/**\n\t * @return {Boolean} True if locked, false otherwise\n\t */\n\tisLocked() {\n\t\treturn this.locked;\n\t}\n\n\t/**\n\t * Sets locked to false\n\t */\n\tunlock() {\n\t\tthis.locked = false;\n\t}\t\n}",
+    "static": true,
+    "longname": "framework/mixins/lockingMObject.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 136,
+    "kind": "function",
+    "name": "LockingMObject",
+    "memberof": "framework/mixins/lockingMObject.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "framework/mixins/lockingMObject.js~LockingMObject",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/mixins/lockingMObject.js",
+    "importStyle": "{LockingMObject}",
+    "description": "A mixin that provides functionality for locking and unlocking MObjects",
+    "lineNumber": 4,
+    "params": [
+      {
+        "name": "superclass",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 137,
+    "kind": "file",
+    "name": "framework/mixins/loggingMObject.js",
+    "content": "/**\n * A mixin that logs get, set and array change events\n */\nexport let LoggingMObject = (superclass) => class extends superclass {\n\tconstructor(schema, klass, subKlasses, ...otherArgs) {\n\t\tsuper(schema, klass, subKlasses, ...otherArgs);\n\t\tconsole.log(\"building LoggedMObject of klass \"+klass+\" with schema: \" + JSON.stringify(schema));\n\t}\n\n\tset(propKey, value) {\n\t\tlet result;\n\t\ttry {\n\t\t\tresult = super.__set(propKey, value);\n\t\t\tconsole.log(\"set property \"+propKey+\" of klass \"+this.klass);\n\t\t} catch (err) {\n\t\t\tconsole.log(\"Error when setting property \"+propKey+\" of klass \"+this.klass+\" to value: \" + value + \". Got error message: \"+ err);\n\t\t\tconsole.log(err.stack);\n\t\t\tconsole.log(\"An error occured with message: \"+err.message+\". See console for more detailed information\");\n\t\t\tthrow new Error(err.message);\n\t\t}\n\t\treturn result;\n\t}\n\n\tget(propKey) {\n\t\t//console.log(propKey, this);\n\t\tlet result;\n\t\ttry {\n\t\t\tresult = super.__get(propKey);\n\t\t\tconsole.log(\"getting property \"+propKey+\" of klass \"+this.klass);\n\t\t} catch (err) {\n\t\t\tconsole.log(\"A \"+err.type+\" occured: \"+err.message);\n\t\t\tconsole.log(err.stack);\n\t\t\tconsole.log(\"An error occured with message: \"+err.message+\". See console for more detailed information\");\n\t\t\tthrow new Error(err.message);\n\t\t}\n\t\treturn result;\n\t}\n}",
+    "static": true,
+    "longname": "framework/mixins/loggingMObject.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 138,
+    "kind": "function",
+    "name": "LoggingMObject",
+    "memberof": "framework/mixins/loggingMObject.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "framework/mixins/loggingMObject.js~LoggingMObject",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/mixins/loggingMObject.js",
+    "importStyle": "{LoggingMObject}",
+    "description": "A mixin that logs get, set and array change events",
+    "lineNumber": 4,
+    "params": [
+      {
+        "name": "superclass",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 139,
+    "kind": "file",
+    "name": "framework/mixins/persistentMObject.js",
+    "content": "import {MObject} from \"../basicDataManager/MObject\";\nimport {MFieldFactory} from \"../basicDataManager/fields/MFieldFactory\";\nimport {ArrayMField} from \"../basicDataManager/fields/MFieldMulti\"\n\n/**\n * A persistence mixin that:\n * \t\t- serializes this.data\n * \t\t- saves all MObjects stored in this.data\n *\t\t- saves a serialized verion of itself\n *\t\t- loads an earlier state from local storage based on a given id\n */\nexport let Persistentence = (superclass) => class extends superclass {\n\t/**\n\t * Constructor for a persistent MObject\n\t *\n\t * @param {Object} schema - A schema describing the data property of this managed object\n\t * @param {String} klass - A string representing the klass name of tihs managed object\n\t * @param {DataManager} factory - A DataManager that this Persistent MObject can use to create new managed objects\n\t * @param {String} id - An id to use when saving this MObjet\n\t */\n\tconstructor(schema, klass, factory, id, ...otherArgs) {\n\t\tsuper(schema, klass, subKlasses, ...otherArgs);\n\t\t/**\n\t\t * @type {DataManager}\n\t\t */\n\t\tthis.factory = factory;\n\t\t/**\n\t\t * @type {String}\n\t\t */\n\t\tthis.id = id;\n\t}\n\n\t/**\n\t * @param {Symbol, String} propKey - The property key to set in this.data\n\t * @param {*} value - The value to set this.data[propKey] to\n\t * @return {Boolean} True if setting the value was succesfull\n\t * @throws {TypeError}\n\t */\n\tset(propKey, value) {\n\t\tlet result = super.set(propKey, value);\t\n\t\treturn result;\n\t}\n\n\t/**\n\t * @return {String} the id used to save this Persistent MObject\n\t */\n\tgetId() {\n\t\treturn this.id;\n\t}\n\n\t/**\n\t * @return {Object} A serialized version of this.data\n\t */\n\tserialize() {\n\t\tlet obj = {}\n\t\tfor(let propKey in this.data) {\n\t\t\tobj[propKey] = this.serializeProp(this.data[propKey])\n\t\t}\n\t\treturn obj\n\t}\n\n\t/**\n\t * @param {MField} prop - An instance of MField to serialize\n\t * @return {*} A serialized version of the given MField\n\t */\n\tserializeProp(prop) {\n\t\tswitch(prop.getType()) {\n\t\t\tcase \"object\": {\n\t\t\t\treturn this.serializeObject(prop.getValue())\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"array\": {\n\t\t\t\treturn this.serializeArray(prop)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tdefault: {\n\t\t\t\treturn prop.getValue()\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\n\t/**\n\t * @param {ArrayMField} prop - An instance of ArrayMField to serialize\n\t * @return {Array} A serialized version of the given array\n\t */\n\tserializeArray(prop) {\n\t\tlet arr = []\n\t\tfor(let item of prop) {\n\t\t\tif(item instanceof MObject) {\n\t\t\t\tarr.push(this.serializeObject(item))\n\t\t\t} else if(item instanceof ArrayMField) {\n\t\t\t\tarr.push(this.serializeArray(item))\n\t\t\t} else {\n\t\t\t\tarr.push(item)\n\t\t\t}\n\t\t}\n\t\treturn arr\n\t}\n\n\t/**\n\t * @param {MObjectMField} prop - An MObjectMField to serialize\n\t * @return {Object} - A serialized version of the MObject\n\t */\n\tserializeObject(prop) {\n\t\treturn {klass: prop.getKlass(), id: prop.getId()}\n\t}\n\n\t/**\n\t * A method that saves this.data\n\t * @param {number} [time] - A timestamp that indicates when saving started\n\t */\n\tsave(time) {\n\t\tconsole.log(\"saving: \", time);\n\t\t/* get current time and set time if not defined */\n\t\tlet now = new Date().getTime();\n\t\tif(time == undefined) {\n\t\t\ttime = now;\n\t\t}\n\n\t\t/* check if this item has been saved already */\n\t\tlet loadedItem = JSON.parse(localStorage.getItem(this.id));\n\t\tif(loadedItem && loadedItem.updated_at >= time) {\n\t\t\treturn;\n\t\t}\n\n\t\t/* initialize saveItem and serialize this.data */\n\t\tlet saveItem = this.serialize()\n\t\tsaveItem.updated_at = now\n\n\t\t/* save the item */\n\t\tlocalStorage.setItem(this.id, JSON.stringify(saveItem));\n\n\t\t/* go over each property and if its managed data, call that items save function */\n\t\tfor(let prop in this.data) {\n\t\t\tthis.saveProp(this.data[prop], time);\n\t\t}\n\t}\n\n\t/**\n\t * Save the given property if it is an MObject or Array\n\t * @param {MField} prop - The MField to save\n\t * @param {number} [time] - A timestamp that indicates when saving started\n\t */\n\tsaveProp(prop, time) {\n\t\tconsole.log(\"saving prop:\", prop, prop.getType())\n\t\tswitch(prop.getType()) {\n\t\t\tcase \"object\": {\n\t\t\t\tprop.getValue().save(time)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"array\": {\n\t\t\t\tthis.saveArray(prop, time); console.log(\"arr\")\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\n\t/**\n\t * Save the MObjects in the given array, if there are any\n\t * @param {ArrayMField} prop - The ArrayMField to save\n\t * @param {number} [time] - A timestamp that indicates when saving started\n\t */\n\tsaveArray(prop, time) {\n\t\tconsole.log(\"saving array:\", prop)\n\t\tfor(let item of prop) {\n\t\t\tif(item instanceof MObject) {\n\t\t\t\titem.save(time)\n\t\t\t} else if (item instanceof ArrayMField) {\n\t\t\t\tthis.saveArray(item, time)\n\t\t\t}\n\t\t}\n\t}\n\n\t/**\n\t * Load an earlier state of this MObject from localStorage\n\t * @param {Array} loadedItems - An array containing all items that were loaded so far\n\t */\n\tload(loadedItems) {\n\t\tif(loadedItems == undefined) {\n\t\t\tloadedItems = []\n\t\t}\n\t\tif(!loadedItems.includes(this.proxy)) {\n\t\t\tloadedItems.push(this.proxy)\n\t\t}\n\n\t\tlet item = JSON.parse(localStorage.getItem(this.id))\n\t\tdelete item.updated_at\n\t\tif(item != undefined) {\n\t\t\tfor(let propKey in item) {\n\t\t\t\tthis.proxy[propKey] = this.loadProp(item[propKey], loadedItems)\n\t\t\t}\n\t\t}\n\t}\n\n\t/**\n\t * Loads a single property\n\t * @param {Object} prop - The serialized property to load into this MObject\n\t * @param {Array} loadeditems - An array containing all items that were loaded so far\n\t * @return {Object} The loaded property\n\t */\n\tloadProp(prop, loadedItems) {\n\t\tif (prop.hasOwnProperty(\"klass\")) {\n\t\t\treturn this.loadObject(prop, loadedItems)\n\t\t} else if(prop instanceof Array) {\n\t\t\treturn this.loadArray(prop, loadedItems)\n\t\t} else {\n\t\t\treturn prop\n\t\t}\n\t}\n\n\t/**\n\t * Load an array of properties\n\t * @param {Array} prop - An array of serialized properties\n\t * @param {Array} loadeditems - An array containing all items that were loaded so far\n\t * @return {Array} An array containing the loaded properties\n\t */\n\tloadArray(prop, loadedItems) {\n\t\tconsole.log(prop, prop.hasOwnProperty(\"klass\"), prop instanceof Array)\n\t\tlet arr = []\n\t\tfor(let item of prop) {\n\t\t\tif(item.hasOwnProperty(\"klass\")) {\n\t\t\t\tarr.push(this.loadObject(item, loadedItems))\n\t\t\t} else if(prop instanceof Array) {\n\t\t\t\tarr.push(this.loadArray(item, loadedItems))\n\t\t\t} else {\n\t\t\t\tarr.push(item)\n\t\t\t}\n\t\t}\n\t\treturn arr\n\t}\n\n\t/**\n\t * Load an MObject property\n\t * @param {Array} prop - A serialized MObject\n\t * @param {Array} loadeditems - An array containing all items that were loaded so far\n\t * @return {MObject} The loaded MObject \n\t */\n\tloadObject(prop, loadedItems) {\n\t\t/* Check if the object was loaded before*/\n\t\tfor(let item of loadedItems) {\n\t\t\tif(item.getId() == prop.id) {\n\t\t\t\treturn item;\n\t\t\t}\n\t\t}\n\n\t\t/* Check if the object we're loading has any inverse properties */\n\t\tlet properties = this.factory.schema.klassSchemas[prop.klass].schema.properties;\n\t\tlet inverseKey = \"\";\n\t\tfor(let property in properties) {\n\t\t\tif(properties[property].hasOwnProperty(\"inverse\")) {\n\t\t\t\tinverseKey = property;\n\t\t\t}\n\t\t}\n\n\t\t/* If there was an inverse property, provide the proper init object to the constructor of the MObject */\n\t\tif(inverseKey != \"\") {\n\t\t\tlet init = {};\n\t\t\tinit[inverseKey] = this.proxy;\n\t\t\tlet newObj = new this.factory[prop.klass](init, this.factory, prop.id)\n\t\t\tnewObj.load(loadedItems);\n\t\t\treturn newObj;\n\t\t}\n\t\t/* Otherwise: create a simple empty MObject and tell it to load its data*/\n\t\tlet newObj = new this.factory[prop.klass]({}, this.factory, prop.id);\n\t\tnewObj.load(loadedItems);\n\t\treturn newObj;\n\t}\n}",
+    "static": true,
+    "longname": "framework/mixins/persistentMObject.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 140,
+    "kind": "function",
+    "name": "Persistentence",
+    "memberof": "framework/mixins/persistentMObject.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "framework/mixins/persistentMObject.js~Persistentence",
+    "access": null,
+    "export": true,
+    "importPath": "ManagedDataJS/framework/mixins/persistentMObject.js",
+    "importStyle": "{Persistentence}",
+    "description": "A persistence mixin that:\n\t\t- serializes this.data\n\t\t- saves all MObjects stored in this.data\n\t- saves a serialized verion of itself\n\t- loads an earlier state from local storage based on a given id",
+    "lineNumber": 12,
+    "params": [
+      {
+        "name": "superclass",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 142,
+    "kind": "external",
+    "name": "Infinity",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Infinity",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 143,
+    "kind": "external",
+    "name": "NaN",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~NaN",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 144,
+    "kind": "external",
+    "name": "undefined",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~undefined",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 145,
+    "kind": "external",
+    "name": "null",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~null",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 146,
+    "kind": "external",
+    "name": "Object",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Object",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 147,
+    "kind": "external",
+    "name": "object",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~object",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 148,
+    "kind": "external",
+    "name": "Function",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Function",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 149,
+    "kind": "external",
+    "name": "function",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~function",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 150,
+    "kind": "external",
+    "name": "Boolean",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Boolean",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 151,
+    "kind": "external",
+    "name": "boolean",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~boolean",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 152,
+    "kind": "external",
+    "name": "Symbol",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Symbol",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 153,
+    "kind": "external",
+    "name": "Error",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Error",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 154,
+    "kind": "external",
+    "name": "EvalError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/EvalError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~EvalError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 155,
+    "kind": "external",
+    "name": "InternalError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/InternalError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~InternalError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 156,
+    "kind": "external",
+    "name": "RangeError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RangeError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~RangeError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 157,
+    "kind": "external",
+    "name": "ReferenceError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~ReferenceError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 158,
+    "kind": "external",
+    "name": "SyntaxError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~SyntaxError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 159,
+    "kind": "external",
+    "name": "TypeError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~TypeError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 160,
+    "kind": "external",
+    "name": "URIError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/URIError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~URIError",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 161,
+    "kind": "external",
+    "name": "Number",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Number",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 162,
+    "kind": "external",
+    "name": "number",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~number",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 163,
+    "kind": "external",
+    "name": "Date",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Date",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 164,
+    "kind": "external",
+    "name": "String",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~String",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 165,
+    "kind": "external",
+    "name": "string",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~string",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 166,
+    "kind": "external",
+    "name": "RegExp",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~RegExp",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 167,
+    "kind": "external",
+    "name": "Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 168,
+    "kind": "external",
+    "name": "Int8Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int8Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int8Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 169,
+    "kind": "external",
+    "name": "Uint8Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 170,
+    "kind": "external",
+    "name": "Uint8ClampedArray",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8ClampedArray",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 171,
+    "kind": "external",
+    "name": "Int16Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int16Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int16Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 172,
+    "kind": "external",
+    "name": "Uint16Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint16Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint16Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 173,
+    "kind": "external",
+    "name": "Int32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int32Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 174,
+    "kind": "external",
+    "name": "Uint32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint32Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 175,
+    "kind": "external",
+    "name": "Float32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Float32Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 176,
+    "kind": "external",
+    "name": "Float64Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float64Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Float64Array",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 177,
+    "kind": "external",
+    "name": "Map",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Map",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 178,
+    "kind": "external",
+    "name": "Set",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Set",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 179,
+    "kind": "external",
+    "name": "WeakMap",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakMap",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 180,
+    "kind": "external",
+    "name": "WeakSet",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakSet",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 181,
+    "kind": "external",
+    "name": "ArrayBuffer",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~ArrayBuffer",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 182,
+    "kind": "external",
+    "name": "DataView",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~DataView",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 183,
+    "kind": "external",
+    "name": "JSON",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~JSON",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 184,
+    "kind": "external",
+    "name": "Promise",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Promise",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 185,
+    "kind": "external",
+    "name": "Generator",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Generator",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 186,
+    "kind": "external",
+    "name": "GeneratorFunction",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/GeneratorFunction",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~GeneratorFunction",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 187,
+    "kind": "external",
+    "name": "Reflect",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Reflect",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 188,
+    "kind": "external",
+    "name": "Proxy",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Proxy",
+    "access": null,
+    "description": "",
+    "lineNumber": 193,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 190,
+    "kind": "external",
+    "name": "CanvasRenderingContext2D",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~CanvasRenderingContext2D",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 191,
+    "kind": "external",
+    "name": "DocumentFragment",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~DocumentFragment",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 192,
+    "kind": "external",
+    "name": "Element",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Element",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~Element",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 193,
+    "kind": "external",
+    "name": "Event",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Event",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~Event",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 194,
+    "kind": "external",
+    "name": "Node",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Node",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~Node",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 195,
+    "kind": "external",
+    "name": "NodeList",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/NodeList",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~NodeList",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 196,
+    "kind": "external",
+    "name": "XMLHttpRequest",
+    "externalLink": "https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~XMLHttpRequest",
+    "access": null,
+    "description": "",
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 197,
+    "kind": "external",
+    "name": "AudioContext",
+    "externalLink": "https://developer.mozilla.org/en/docs/Web/API/AudioContext",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
+    "longname": "BuiltinExternal/WebAPIExternal.js~AudioContext",
+    "access": null,
+    "description": "",
+    "lineNumber": 34,
+    "builtinExternal": true
+  }
+]

@@ -1,0 +1,13 @@
+{
+	"name": "test2",
+	"properties": {
+		"test3": {"type": "object", "$ref": "#/definitions/test3"}
+	},
+	"definitions": {
+		"test3": {
+			"properties": {
+				"x": {"type": "integer"}
+			}
+		}
+	}
+}
