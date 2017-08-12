@@ -13,11 +13,26 @@ export class ArrayHandler {
 	 * @return {*} Either the value stored at the requested index or the result of Reflect.get()
 	 */
 	get(target, propKey, receiver) {
-		if(typeof(propKey) == "number") {
-			return target.get(propKey)
+		if(!(typeof(propKey)=="symbol") && !isNaN(propKey)) {
+			target.superKlass.notifyArray("get", [propKey], target.proxy)
+			return target.get(parseInt(propKey))
 		} else {
-			return Reflect.get(target, propKey, receiver)
+			let propValue = target[propKey]
+			if(typeof(propValue) == "function" && !(typeof(propKey) == "symbol")) {
+				return function() {
+					let argsArray = [...arguments]
+					argsArray = target.superKlass.notifyArray(propKey, argsArray, target.proxy)
+					
+					while(arguments.length > 0) {
+						Array.shift(arguments)
+					}
+					
+					Array.unshift(arguments, ...argsArray)
+					return propValue.apply(target, arguments, propKey)
+				}
+			}
 		}
+		return Reflect.get(target, propKey, receiver)
 	}
 }
 
@@ -66,6 +81,9 @@ export class ArrayMField extends MField {
 		this[Symbol.iterator] = this.iterator
 	}
 
+	setThisProxy(proxy) {
+		this.proxy = proxy
+	}
 	/**
 	 * See JavaScript Array documentation
 	 */
@@ -103,7 +121,7 @@ export class ArrayMField extends MField {
 	/**
 	 * See JavaScript Array documentation
 	 */
-	fill(value, start, end) {
+	fill(value, start, end) {	
 		let newArr = this.getValues().fill(value)
 		let {valid, error, fields} = this.validate(newArr)
 
@@ -154,12 +172,8 @@ export class ArrayMField extends MField {
 	/**
 	 * See JavaScript Array documentation
 	 */
-	includes(searchElement, fromIndex) {
-		if(fromIndex == undefined) {
-			return this.getValues().includes(searchElement)
-		} else {
-			return this.getValues().includes(searchElement, fromIndex)
-		}
+	includes(searchElement, fromIndex = 0) {
+		return this.getValues().includes(searchElement, fromIndex)
 	}
 
 	/**
@@ -177,7 +191,7 @@ export class ArrayMField extends MField {
 	 * See JavaScript Array documentation
 	 */
 	join(separator) {
-		throw new Error("Managed Arrays cannot be joined into strings")
+		return this.getValues().join(separator)
 	}
 	
 	/**
@@ -216,12 +230,15 @@ export class ArrayMField extends MField {
 	 * See JavaScript Array documentation
 	 */
 	pop() {
-		let value = this.value.pop()
-		if(value != undefined) {
+		let field = this.value.pop()
+		if(field != undefined) {
 			this.length--
-			return value.getValue()
+			if(this.schema.hasOwnProperty("inverseKey")) {
+				field.value[this.schema.inverseKey] = null
+			}
+			return field.getValue()
 		} else {
-			return value
+			return field
 		}
 	}
 
@@ -229,15 +246,25 @@ export class ArrayMField extends MField {
 	 * See JavaScript Array documentation
 	 */
 	push(...elements) {
-		console.log(elements)
-		console.log(this.validate(elements))
 		let {valid, error, fields} = this.validate(elements)
+		
 
 		if(valid == false) {
 			throw error
 		} else {
 			for(let field of fields) {
 				this.value.push(field)
+				if(this.schema.hasOwnProperty("inverseKey")) {
+					if(this.schema.inverseType == "object") {
+						if(field.getValue()[this.schema.inverseKey] != this.superKlass) {
+							field.getValue()[this.schema.inverseKey] = this.superKlass
+						}
+					} else {
+						if(!field.getValue()[this.schema.inverseKey].includes(this.superKlass)) {
+							field.getValue()[this.schema.inverseKey].push(this.superKlass)
+						}
+					}
+				}
 				this.itemsIdx = (this.itemsIdx+1)%this.schema.items.length
 				this.length++
 
@@ -272,6 +299,13 @@ export class ArrayMField extends MField {
 	 */
 	shift() {
 		let element = this.value.shift()
+		if(this.schema.hasOwnProperty("inverseKey")) {
+			if(this.schema.inverseType == "object") {
+				element[this.schema.inverseKey] = null
+			} else {
+				element[this.schema.inverseKey].remove(this.superKlass)
+			}
+		}
 		return element.getValue()
 	}
 	
@@ -292,7 +326,7 @@ export class ArrayMField extends MField {
 	/**
 	 * See JavaScript Array documentation
 	 */
-	sort(compareFunction) {
+	sort(compareFunction) {	
 		let sorted = this.getValues().sort(compareFunction)
 		let {valid, error, fields} = this.validate(sorted)
 		if(valid == false) {
@@ -306,13 +340,43 @@ export class ArrayMField extends MField {
 	/**
 	 * See JavaScript Array documentation
 	 */
-	splice(start, deleteCount, ...items) {
+	splice(start, deleteCount=0, ...items) {
 		let {valid, error, fields} = this.validate(items)
 
 		if(valid == false) {
 			throw error
 		} else {
+			let removed_values = []
+			if(deleteCount > 0) {
+				for(let i = start; i<(start+deleteCount)%this.value.length; i++) {
+					removed_values.push(this.value[i].getValue())
+				}
+			}
+
 			this.value.splice(start, deleteCount, ...fields)
+
+			if(this.schema.hasOwnProperty("inverseKey")) {
+				for(let value of removed_values) {
+					if(this.schema.inverseType == "object") {
+						value[this.schema.inverseKey]=null
+					} else {
+						if(value[this.schema.inverseKey].includes(this.superKlass)) {
+							value[this.schema.inverseKey].remove(this.superKlass)
+						}
+					}
+				}
+				for(let field of fields) {
+					if(this.schema.inverseType == "array") {
+						if(field.value[this.schema.inverseKey] != this.superKlass) {
+							field.value[this.schema.inverseKey] = this.superKlass
+						}
+					} else {
+						if(!field.value[this.schema.inverseKey].includes(this.superKlass)) {
+							field.value[this.schema.inverseKey].push(this.superKlass)
+						}
+					}
+				}
+			}
 		}
 	}
 	
@@ -326,6 +390,20 @@ export class ArrayMField extends MField {
 			throw new TypeError(error)
 		} else {
 			this.value.unshift(...fields)
+			
+			if(this.schema.hasOwnProperty("inverseKey")) {
+				for(let field of fields) {
+					if(this.schema.inverseType == "object") {
+						if(field.value[this.schema.inverseKey] != this.superKlass) {
+							field.value[this.schema.inverseKey] = this.superKlass
+						}
+					} else {
+						if(!field.value[this.schema.inverseKey].includes(this.superKlass)) {
+							field.value[this.schema.inverseKey].push(this.superKlass)
+						}
+					}
+				}
+			}
 		}
 	}
 	
@@ -334,6 +412,17 @@ export class ArrayMField extends MField {
 	 */
 	iterator() {
 		return this.getValues()[Symbol.iterator]()
+	}
+
+	addRelatedObject(other) {
+		this.push(other)
+	}
+
+	remove(other) {
+		let idx = this.indexOf(other)
+		if(idx != null) {
+			this.splice(idx, 1)
+		}
 	}
 
 	/** 
@@ -371,9 +460,7 @@ export class ArrayMField extends MField {
 			}
 		} else {
 			for(let value of values) {
-				console.log(value, this.schema.items)
 				field = MFieldFactory(this.schema.items, this.superKlass)
-				console.log(field)
 				try { 
 					field.setValue(value)
 				} catch (err) {
@@ -381,6 +468,8 @@ export class ArrayMField extends MField {
 					error = err
 					break
 				}
+
+				
 
 				fields.push(field)
 			}
@@ -394,11 +483,14 @@ export class ArrayMField extends MField {
 	 * @return {*, Boolean} Get either returns the value on the given index or false
 	 */
 	get(idx) {
-		if(this.value.hasOwnProperty(idx)) {
-			return this.value[idx].getValue()
-		} else {
-			return false
-		}
+		return this.value[idx].getValue()
+	}
+
+	/**
+	 * @return {String} A string representing this array
+	 */
+	toString() {
+		return this.getValues().toString()
 	}
 
 	/**
@@ -416,7 +508,7 @@ export class ArrayMField extends MField {
 	 * @return {ArrayMField} Since an ArrayMField works like a regular JavaScript array we return this instead of this.value
 	 */
 	getValue() {
-		return this
+		return this.proxy
 	}
 
 	/**
@@ -427,7 +519,7 @@ export class ArrayMField extends MField {
 	 */
 	setValue(values) {
 		if(!(values instanceof Array)) {
-			throw new TypeError("The value of an ArrayMField can only be set to that of an actual JavaScript array")
+			throw new TypeError("value assigned to "+this.schema.type+"MField can only be set to that of an actual JavaScript array")
 		} else {
 			this.value = [];
 			this.push(...values)
@@ -456,13 +548,12 @@ export class EnumMField extends MField {
 	 * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned
 	 */
 	validate(value) {
-		let valid = false;
-		let error
+		let {valid, error} = super.validate(value)
 		if(!this.schema.enum.includes(value)) {
-			error = new TypeError("value must be one of "+JSON.stringyfy(schema.enum))
+			valid = false
+			error = new TypeError("value assigned to "+this.schema.type+"MField must be one of "+JSON.stringyfy(schema.enum))
 			return {valid, error}
 		} else {
-			valid = true
 			return {valid, error}
 		}
 	}
@@ -490,8 +581,7 @@ export class OneOfMField extends MField {
 	 * @return {Boolean, Error, MField} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned. If it was valid, the valid MField is returned
 	 */
 	validate(value) {
-		let valid = false
-		let error
+		let {valid, error} = super.validate(value)
 		let field
 
 		for(let schema of this.schema.oneOf) {
@@ -504,7 +594,8 @@ export class OneOfMField extends MField {
 				/* do nothing, try next value */
 			}
 		}
-		error = new TypeError("value does not match any of the schemas defined in oneOf")
+		valid = false
+		error = new TypeError("value assigned to "+this.schema.type+"MField does not match any of the schemas defined in oneOf")
 		return {valid, error, field}
 	}
 

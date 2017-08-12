@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">framework/mixins/Persistence.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/rvanbuijtenen/ManagedDataJS.git" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">dataManager</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/DataManager.js~DataManager.html">DataManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObject.html">MObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObjectHandler.html">MObjectHandler</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">dataManager/fields</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html">ArrayHandler</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html">ArrayMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~EnumMField.html">EnumMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html">OneOfMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~BooleanMField.html">BooleanMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~IntegerMField.html">IntegerMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MField.html">MField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html">MObjectMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html">NumberMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~StringMField.html">StringMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-MFieldFactory">MFieldFactory</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">mixins</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Logging">Logging</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Persistence">Persistence</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">framework/mixins/Persistence.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import {MObject} from &quot;../dataManager/MObject&quot;;
+import {MFieldFactory} from &quot;../dataManager/fields/MFieldFactory&quot;;
+import {ArrayMField} from &quot;../dataManager/fields/MFieldMulti&quot;
+
+/**
+ * A persistence mixin that:
+ * - serializes this.data
+ * - saves all MObjects stored in this.data
+ * - saves a serialized verion of itself
+ * - loads an earlier state from local storage based on a given 
+ *
+ * Please refer to source for documentation on this Mixin. The documentation
+ * generator does not work properly with mixin definition
+ */
+export let Persistence = (superclass) =&gt; class extends superclass {
+	/**
+	 * @param {DataManager} factory - An instance of DataManager that this persistent MObject can use
+	 * to construct new MObjects when loading
+	 */
+	setFactory(factory) {
+		this.factory = factory
+	}
+
+	/**
+	 * @param {String} id - An ID used to identify, save and load this MObject. Must be unique
+	 */
+	setId(id) {
+		this.id = id
+	}
+
+	/**
+	 * @param {Symbol, String} propKey - The property key to set in this.data
+	 * @param {*} value - The value to set this.data[propKey] to
+	 * @return {Boolean} True if setting the value was succesfull
+	 * @throws {TypeError}
+	 */
+	set(propKey, value) {
+		let result = super.set(propKey, value);	
+		return result;
+	}
+
+	/**
+	 * @return {String} the id used to save this Persistent MObject
+	 */
+	getId() {
+		if(this.hasOwnProperty(&quot;id&quot;)) {
+			return this.id;
+		} else {
+			throw new TypeError(&quot;No id has been set for MObject &quot; + this.toString())
+		}
+	}
+
+	/**
+	 * @return {Object} A serialized version of this.data
+	 */
+	serialize() {
+		let obj = {}
+		for(let propKey in this.data) {
+			obj[propKey] = this.serializeProp(this.data[propKey])
+		}
+		return obj
+	}
+
+	/**
+	 * @param {MField} prop - An instance of MField to serialize
+	 * @return {*} A serialized version of the given MField
+	 */
+	serializeProp(prop) {
+		switch(prop.getType()) {
+			case &quot;object&quot;: {
+				return this.serializeObject(prop.getValue())
+				break
+			}
+			case &quot;array&quot;: {
+				return this.serializeArray(prop)
+				break
+			}
+			default: {
+				return prop.getValue()
+				break
+			}
+		}
+	}
+
+	/**
+	 * @param {ArrayMField} prop - An instance of ArrayMField to serialize
+	 * @return {Array} A serialized version of the given array
+	 */
+	serializeArray(prop) {
+		let arr = []
+		for(let item of prop) {
+			if(item instanceof MObject) {
+				arr.push(this.serializeObject(item))
+			} else if(item instanceof ArrayMField) {
+				arr.push(this.serializeArray(item))
+			} else {
+				arr.push(item)
+			}
+		}
+		return arr
+	}
+
+	/**
+	 * @param {MObjectMField} prop - An MObjectMField to serialize
+	 * @return {Object} - A serialized version of the MObject
+	 */
+	serializeObject(prop) {
+		return {klass: prop.getKlass(), id: prop.getId()}
+	}
+
+	/**
+	 * A method that saves this.data
+	 * @param {number} [time] - A timestamp that indicates when saving started
+	 */
+	save(time) {
+		console.log(&quot;saving: &quot;, time);
+		/* get current time and set time if not defined */
+		let now = new Date().getTime();
+		if(time == undefined) {
+			time = now;
+		}
+
+		/* check if this item has been saved already */
+		let loadedItem = JSON.parse(localStorage.getItem(this.getId()));
+		if(loadedItem &amp;&amp; loadedItem.updated_at &gt;= time) {
+			return;
+		}
+
+		/* initialize saveItem and serialize this.data */
+		let saveItem = this.serialize()
+		saveItem.updated_at = now
+
+		/* save the item */
+		localStorage.setItem(this.getId(), JSON.stringify(saveItem));
+
+		/* go over each property and if its managed data, call that items save function */
+		for(let prop in this.data) {
+			this.saveProp(this.data[prop], time);
+		}
+	}
+
+	/**
+	 * Save the given property if it is an MObject or Array
+	 * @param {MField} prop - The MField to save
+	 * @param {number} [time] - A timestamp that indicates when saving started
+	 */
+	saveProp(prop, time) {
+		console.log(&quot;saving prop:&quot;, prop, prop.getType())
+		switch(prop.getType()) {
+			case &quot;object&quot;: {
+				prop.getValue().save(time)
+				break
+			}
+			case &quot;array&quot;: {
+				this.saveArray(prop, time); console.log(&quot;arr&quot;)
+				break
+			}
+		}
+	}
+
+	/**
+	 * Save the MObjects in the given array, if there are any
+	 * @param {ArrayMField} prop - The ArrayMField to save
+	 * @param {number} [time] - A timestamp that indicates when saving started
+	 */
+	saveArray(prop, time) {
+		console.log(&quot;saving array:&quot;, prop)
+		for(let item of prop) {
+			if(item instanceof MObject) {
+				item.save(time)
+			} else if (item instanceof ArrayMField) {
+				this.saveArray(item, time)
+			}
+		}
+	}
+
+	/**
+	 * Load an earlier state of this MObject from localStorage
+	 * @param {Array} loadedItems - An array containing all items that were loaded so far
+	 */
+	load(loadedItems) {
+		if(loadedItems == undefined) {
+			loadedItems = []
+		}
+		if(!loadedItems.includes(this.proxy)) {
+			loadedItems.push(this.proxy)
+		}
+
+		let item = JSON.parse(localStorage.getItem(this.getId()))
+		delete item.updated_at
+		if(item != undefined) {
+			for(let propKey in item) {
+				this.proxy[propKey] = this.loadProp(item[propKey], loadedItems)
+			}
+		}
+	}
+
+	/**
+	 * Loads a single property
+	 * @param {Object} prop - The serialized property to load into this MObject
+	 * @param {Array} loadeditems - An array containing all items that were loaded so far
+	 * @return {Object} The loaded property
+	 */
+	loadProp(prop, loadedItems) {
+		if (prop.hasOwnProperty(&quot;klass&quot;)) {
+			return this.loadObject(prop, loadedItems)
+		} else if(prop instanceof Array) {
+			return this.loadArray(prop, loadedItems)
+		} else {
+			return prop
+		}
+	}
+
+	/**
+	 * Load an array of properties
+	 * @param {Array} prop - An array of serialized properties
+	 * @param {Array} loadeditems - An array containing all items that were loaded so far
+	 * @return {Array} An array containing the loaded properties
+	 */
+	loadArray(prop, loadedItems) {
+		let arr = []
+		for(let item of prop) {
+			if(item.hasOwnProperty(&quot;klass&quot;)) {
+				arr.push(this.loadObject(item, loadedItems))
+			} else if(prop instanceof Array) {
+				arr.push(this.loadArray(item, loadedItems))
+			} else {
+				arr.push(item)
+			}
+		}
+		return arr
+	}
+
+	/**
+	 * Load an MObject property
+	 * @param {Array} prop - A serialized MObject
+	 * @param {Array} loadeditems - An array containing all items that were loaded so far
+	 * @return {MObject} The loaded MObject 
+	 * @throws {TypeError} An error is thrown if no DataManager is set. MObjects cannot be constructed without a DataManager.
+	 */
+	loadObject(prop, loadedItems) {
+		if(!this.hasOwnProperty(&quot;factory&quot;)) {
+			throw new TypeError(&quot;MObjects cannot be loaded from localStorage without a DataManager capable of constructing the saved MObject&quot;)
+		}
+		/* Check if the object was loaded before*/
+		for(let item of loadedItems) {
+			if(item.getId() == prop.id) {
+				return item;
+			}
+		}
+
+		/* Check if the object we&apos;re loading has any inverse properties */
+		let properties = this.factory.schema.getKlassByName(prop.klass).fields
+		let inverseKey = &quot;&quot;;
+		for(let property in properties) {
+			if(properties[property].hasOwnProperty(&quot;inverse&quot;)) {
+				inverseKey = property;
+			}
+		}
+
+		/* If there was an inverse property, provide the proper init object to the constructor of the MObject */
+		if(inverseKey != &quot;&quot;) {
+			let init = {};
+			init[inverseKey] = this.proxy;
+			let newObj = new this.factory[prop.klass](init)
+			newObj.setFactory(this.factory)
+			newObj.setId(prop.id)
+			newObj.load(loadedItems);
+			return newObj;
+		}
+		/* Otherwise: create a simple empty MObject and tell it to load its data*/
+		let newObj = new this.factory[prop.klass]({});
+		newObj.setFactory(this.factory)
+		newObj.setId(prop.id)
+		newObj.load(loadedItems);
+		return newObj;
+	}
+}</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

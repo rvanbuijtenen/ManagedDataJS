@@ -88,7 +88,7 @@ class MixinBuilder {
  * @return {MObject} A proxied managed object that matches the schema and implements all mixin functionality
  */ 
 let factory = function(klass, inits, ...otherArgs) {
-	let schema = this.schema.getKlass(klass)
+	let schema = this.schema.getKlassByName(klass)
 
 	let mobjClass = {};
 	if(this.mixins.length > 0) {
@@ -97,7 +97,7 @@ let factory = function(klass, inits, ...otherArgs) {
         mobjClass = (class extends MObject {});
     }
 
-	let mobj = new mobjClass(schema, klass, ...otherArgs);
+	let mobj = new mobjClass(schema, ...otherArgs);
 	let mObjProxy = new Proxy(mobj, new MObjectHandler());
 
 	/* The MObject needs a pointer to its own proxy for when an inverse field is found */

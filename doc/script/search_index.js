@@ -1,117 +1,105 @@
 window.esdocSearchIndex = [
   [
-    "manageddatajs/framework/basicdatamanager/fields/mfieldmulti.js~arrayhandler",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayHandler.html",
-    "<span>ArrayHandler</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/fields/MFieldMulti.js</span>",
+    "manageddatajs/framework/datamanager/fields/mfieldmulti.js~arrayhandler",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html",
+    "<span>ArrayHandler</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldMulti.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/fields/mfieldmulti.js~arraymfield",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html",
-    "<span>ArrayMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/fields/MFieldMulti.js</span>",
+    "manageddatajs/framework/datamanager/fields/mfieldmulti.js~arraymfield",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html",
+    "<span>ArrayMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldMulti.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/fields/mfieldsingle.js~booleanmfield",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~BooleanMField.html",
-    "<span>BooleanMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js</span>",
+    "manageddatajs/framework/datamanager/fields/mfieldsingle.js~booleanmfield",
+    "class/framework/dataManager/fields/MFieldSingle.js~BooleanMField.html",
+    "<span>BooleanMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldSingle.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/datamanager.js~datamanager",
-    "class/framework/basicDataManager/DataManager.js~DataManager.html",
-    "<span>DataManager</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/DataManager.js</span>",
+    "manageddatajs/framework/datamanager/datamanager.js~datamanager",
+    "class/framework/dataManager/DataManager.js~DataManager.html",
+    "<span>DataManager</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/DataManager.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/fields/mfieldmulti.js~enummfield",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~EnumMField.html",
-    "<span>EnumMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/fields/MFieldMulti.js</span>",
+    "manageddatajs/framework/datamanager/fields/mfieldmulti.js~enummfield",
+    "class/framework/dataManager/fields/MFieldMulti.js~EnumMField.html",
+    "<span>EnumMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldMulti.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/fields/mfieldsingle.js~integermfield",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~IntegerMField.html",
-    "<span>IntegerMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js</span>",
+    "manageddatajs/framework/datamanager/fields/mfieldsingle.js~integermfield",
+    "class/framework/dataManager/fields/MFieldSingle.js~IntegerMField.html",
+    "<span>IntegerMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldSingle.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/mixins/lockingmobject.js~lockingmobject",
-    "function/index.html#static-function-LockingMObject",
-    "<span>LockingMObject</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/mixins/lockingMObject.js</span>",
+    "manageddatajs/framework/mixins/locking.js~locking",
+    "function/index.html#static-function-Locking",
+    "<span>Locking</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/mixins/Locking.js</span>",
     "function"
   ],
   [
-    "manageddatajs/framework/mixins/loggingmobject.js~loggingmobject",
-    "function/index.html#static-function-LoggingMObject",
-    "<span>LoggingMObject</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/mixins/loggingMObject.js</span>",
+    "manageddatajs/framework/mixins/logging.js~logging",
+    "function/index.html#static-function-Logging",
+    "<span>Logging</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/mixins/Logging.js</span>",
     "function"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/fields/mfieldsingle.js~mfield",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MField.html",
-    "<span>MField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js</span>",
+    "manageddatajs/framework/datamanager/fields/mfieldsingle.js~mfield",
+    "class/framework/dataManager/fields/MFieldSingle.js~MField.html",
+    "<span>MField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldSingle.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/fields/mfieldfactory.js~mfieldfactory",
+    "manageddatajs/framework/datamanager/fields/mfieldfactory.js~mfieldfactory",
     "function/index.html#static-function-MFieldFactory",
-    "<span>MFieldFactory</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/fields/MFieldFactory.js</span>",
+    "<span>MFieldFactory</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldFactory.js</span>",
     "function"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/mobject.js~mobject",
-    "class/framework/basicDataManager/MObject.js~MObject.html",
-    "<span>MObject</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/MObject.js</span>",
+    "manageddatajs/framework/datamanager/mobject.js~mobject",
+    "class/framework/dataManager/MObject.js~MObject.html",
+    "<span>MObject</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/MObject.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/mobject.js~mobjecthandler",
-    "class/framework/basicDataManager/MObject.js~MObjectHandler.html",
-    "<span>MObjectHandler</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/MObject.js</span>",
+    "manageddatajs/framework/datamanager/mobject.js~mobjecthandler",
+    "class/framework/dataManager/MObject.js~MObjectHandler.html",
+    "<span>MObjectHandler</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/MObject.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/fields/mfieldsingle.js~mobjectmfield",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MObjectMField.html",
-    "<span>MObjectMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js</span>",
+    "manageddatajs/framework/datamanager/fields/mfieldsingle.js~mobjectmfield",
+    "class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html",
+    "<span>MObjectMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldSingle.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/fields/mfieldsingle.js~numbermfield",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~NumberMField.html",
-    "<span>NumberMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js</span>",
+    "manageddatajs/framework/datamanager/fields/mfieldsingle.js~numbermfield",
+    "class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html",
+    "<span>NumberMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldSingle.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/fields/mfieldmulti.js~oneofmfield",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~OneOfMField.html",
-    "<span>OneOfMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/fields/MFieldMulti.js</span>",
+    "manageddatajs/framework/datamanager/fields/mfieldmulti.js~oneofmfield",
+    "class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html",
+    "<span>OneOfMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldMulti.js</span>",
     "class"
   ],
   [
-    "manageddatajs/framework/mixins/persistentmobject.js~persistentence",
-    "function/index.html#static-function-Persistentence",
-    "<span>Persistentence</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/mixins/persistentMObject.js</span>",
+    "manageddatajs/framework/mixins/persistence.js~persistence",
+    "function/index.html#static-function-Persistence",
+    "<span>Persistence</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/mixins/Persistence.js</span>",
     "function"
   ],
   [
-    "manageddatajs/framework/basicdatamanager/schemainterpreter.js~schemainterpreter",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html",
-    "<span>SchemaInterpreter</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/schemaInterpreter.js</span>",
+    "manageddatajs/framework/datamanager/fields/mfieldsingle.js~stringmfield",
+    "class/framework/dataManager/fields/MFieldSingle.js~StringMField.html",
+    "<span>StringMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldSingle.js</span>",
     "class"
-  ],
-  [
-    "manageddatajs/framework/basicdatamanager/fields/mfieldsingle.js~stringmfield",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~StringMField.html",
-    "<span>StringMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/fields/MFieldSingle.js</span>",
-    "class"
-  ],
-  [
-    "manageddatajs/framework/basicdatamanager/schemainterpreter.js~parseschema",
-    "function/index.html#static-function-parseSchema",
-    "<span>parseSchema</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/basicDataManager/schemaInterpreter.js</span>",
-    "function"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~array",
@@ -444,639 +432,579 @@ window.esdocSearchIndex = [
     "external"
   ],
   [
-    "framework/basicdatamanager/datamanager.js",
-    "file/framework/basicDataManager/DataManager.js.html",
-    "framework/basicDataManager/DataManager.js",
+    "framework/datamanager/datamanager.js",
+    "file/framework/dataManager/DataManager.js.html",
+    "framework/dataManager/DataManager.js",
     "file"
   ],
   [
-    "framework/basicdatamanager/datamanager.js~datamanager#[.schema.mainklass]",
-    "class/framework/basicDataManager/DataManager.js~DataManager.html#instance-member-[.schema.mainKlass]",
-    "framework/basicDataManager/DataManager.js~DataManager#[.schema.mainKlass]",
+    "framework/datamanager/datamanager.js~datamanager#[klass]",
+    "class/framework/dataManager/DataManager.js~DataManager.html#instance-member-[klass]",
+    "framework/dataManager/DataManager.js~DataManager#[klass]",
     "member"
   ],
   [
-    "framework/basicdatamanager/datamanager.js~datamanager#[klass]",
-    "class/framework/basicDataManager/DataManager.js~DataManager.html#instance-member-[klass]",
-    "framework/basicDataManager/DataManager.js~DataManager#[klass]",
-    "member"
-  ],
-  [
-    "framework/basicdatamanager/datamanager.js~datamanager#constructor",
-    "class/framework/basicDataManager/DataManager.js~DataManager.html#instance-constructor-constructor",
-    "framework/basicDataManager/DataManager.js~DataManager#constructor",
+    "framework/datamanager/datamanager.js~datamanager#constructor",
+    "class/framework/dataManager/DataManager.js~DataManager.html#instance-constructor-constructor",
+    "framework/dataManager/DataManager.js~DataManager#constructor",
     "method"
   ],
   [
-    "framework/basicdatamanager/datamanager.js~datamanager#mixins",
-    "class/framework/basicDataManager/DataManager.js~DataManager.html#instance-member-mixins",
-    "framework/basicDataManager/DataManager.js~DataManager#mixins",
+    "framework/datamanager/datamanager.js~datamanager#mixins",
+    "class/framework/dataManager/DataManager.js~DataManager.html#instance-member-mixins",
+    "framework/dataManager/DataManager.js~DataManager#mixins",
     "member"
   ],
   [
-    "framework/basicdatamanager/datamanager.js~datamanager#schema",
-    "class/framework/basicDataManager/DataManager.js~DataManager.html#instance-member-schema",
-    "framework/basicDataManager/DataManager.js~DataManager#schema",
+    "framework/datamanager/datamanager.js~datamanager#schema",
+    "class/framework/dataManager/DataManager.js~DataManager.html#instance-member-schema",
+    "framework/dataManager/DataManager.js~DataManager#schema",
     "member"
   ],
   [
-    "framework/basicdatamanager/mobject.js",
-    "file/framework/basicDataManager/MObject.js.html",
-    "framework/basicDataManager/MObject.js",
+    "framework/datamanager/mobject.js",
+    "file/framework/dataManager/MObject.js.html",
+    "framework/dataManager/MObject.js",
     "file"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobject#constructor",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-constructor-constructor",
-    "framework/basicDataManager/MObject.js~MObject#constructor",
+    "framework/datamanager/mobject.js~mobject#constructor",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-constructor-constructor",
+    "framework/dataManager/MObject.js~MObject#constructor",
     "method"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobject#data",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-member-data",
-    "framework/basicDataManager/MObject.js~MObject#data",
+    "framework/datamanager/mobject.js~mobject#data",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-member-data",
+    "framework/dataManager/MObject.js~MObject#data",
     "member"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobject#get",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-method-get",
-    "framework/basicDataManager/MObject.js~MObject#get",
+    "framework/datamanager/mobject.js~mobject#get",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-get",
+    "framework/dataManager/MObject.js~MObject#get",
     "method"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobject#getklass",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-method-getKlass",
-    "framework/basicDataManager/MObject.js~MObject#getKlass",
+    "framework/datamanager/mobject.js~mobject#getklass",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-getKlass",
+    "framework/dataManager/MObject.js~MObject#getKlass",
     "method"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobject#init",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-method-init",
-    "framework/basicDataManager/MObject.js~MObject#init",
+    "framework/datamanager/mobject.js~mobject#gettype",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-getType",
+    "framework/dataManager/MObject.js~MObject#getType",
     "method"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobject#klass",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-member-klass",
-    "framework/basicDataManager/MObject.js~MObject#klass",
+    "framework/datamanager/mobject.js~mobject#init",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-init",
+    "framework/dataManager/MObject.js~MObject#init",
+    "method"
+  ],
+  [
+    "framework/datamanager/mobject.js~mobject#notifybeforearraychanged",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-notifyBeforeArrayChanged",
+    "framework/dataManager/MObject.js~MObject#notifyBeforeArrayChanged",
+    "method"
+  ],
+  [
+    "framework/datamanager/mobject.js~mobject#proxy",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-member-proxy",
+    "framework/dataManager/MObject.js~MObject#proxy",
     "member"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobject#notifyarraychanged",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-method-notifyArrayChanged",
-    "framework/basicDataManager/MObject.js~MObject#notifyArrayChanged",
-    "method"
-  ],
-  [
-    "framework/basicdatamanager/mobject.js~mobject#proxy",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-member-proxy",
-    "framework/basicDataManager/MObject.js~MObject#proxy",
+    "framework/datamanager/mobject.js~mobject#schema",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-member-schema",
+    "framework/dataManager/MObject.js~MObject#schema",
     "member"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobject#schema",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-member-schema",
-    "framework/basicDataManager/MObject.js~MObject#schema",
-    "member"
-  ],
-  [
-    "framework/basicdatamanager/mobject.js~mobject#set",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-method-set",
-    "framework/basicDataManager/MObject.js~MObject#set",
+    "framework/datamanager/mobject.js~mobject#set",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-set",
+    "framework/dataManager/MObject.js~MObject#set",
     "method"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobject#setthisproxy",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-method-setThisProxy",
-    "framework/basicDataManager/MObject.js~MObject#setThisProxy",
+    "framework/datamanager/mobject.js~mobject#setthisproxy",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-setThisProxy",
+    "framework/dataManager/MObject.js~MObject#setThisProxy",
     "method"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobject#tostring",
-    "class/framework/basicDataManager/MObject.js~MObject.html#instance-method-toString",
-    "framework/basicDataManager/MObject.js~MObject#toString",
+    "framework/datamanager/mobject.js~mobject#tojson",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-toJSON",
+    "framework/dataManager/MObject.js~MObject#toJSON",
     "method"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobjecthandler#get",
-    "class/framework/basicDataManager/MObject.js~MObjectHandler.html#instance-method-get",
-    "framework/basicDataManager/MObject.js~MObjectHandler#get",
+    "framework/datamanager/mobject.js~mobject#tostring",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-toString",
+    "framework/dataManager/MObject.js~MObject#toString",
     "method"
   ],
   [
-    "framework/basicdatamanager/mobject.js~mobjecthandler#set",
-    "class/framework/basicDataManager/MObject.js~MObjectHandler.html#instance-method-set",
-    "framework/basicDataManager/MObject.js~MObjectHandler#set",
+    "framework/datamanager/mobject.js~mobjecthandler#get",
+    "class/framework/dataManager/MObject.js~MObjectHandler.html#instance-method-get",
+    "framework/dataManager/MObject.js~MObjectHandler#get",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldfactory.js",
-    "file/framework/basicDataManager/fields/MFieldFactory.js.html",
-    "framework/basicDataManager/fields/MFieldFactory.js",
+    "framework/datamanager/mobject.js~mobjecthandler#set",
+    "class/framework/dataManager/MObject.js~MObjectHandler.html#instance-method-set",
+    "framework/dataManager/MObject.js~MObjectHandler#set",
+    "method"
+  ],
+  [
+    "framework/datamanager/fields/mfieldfactory.js",
+    "file/framework/dataManager/fields/MFieldFactory.js.html",
+    "framework/dataManager/fields/MFieldFactory.js",
     "file"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js",
-    "file/framework/basicDataManager/fields/MFieldMulti.js.html",
-    "framework/basicDataManager/fields/MFieldMulti.js",
+    "framework/datamanager/fields/mfieldmulti.js",
+    "file/framework/dataManager/fields/MFieldMulti.js.html",
+    "framework/dataManager/fields/MFieldMulti.js",
     "file"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arrayhandler#get",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayHandler.html#instance-method-get",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayHandler#get",
+    "framework/datamanager/fields/mfieldmulti.js~arrayhandler#get",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html#instance-method-get",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayHandler#get",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#[symbol.iterator]",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-[Symbol.iterator]",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#[Symbol.iterator]",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#[symbol.iterator]",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-[Symbol.iterator]",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#[Symbol.iterator]",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#concat",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-concat",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#concat",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#concat",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-concat",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#concat",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#constructor",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-constructor-constructor",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#constructor",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#constructor",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-constructor-constructor",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#constructor",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#copywithin",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-copyWithin",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#copyWithin",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#copywithin",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-copyWithin",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#copyWithin",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#entries",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-entries",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#entries",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#entries",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-entries",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#entries",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#every",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-every",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#every",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#every",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-every",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#every",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#fill",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-fill",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#fill",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#fill",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-fill",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#fill",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#filter",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-filter",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#filter",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#filter",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-filter",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#filter",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#find",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-find",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#find",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#find",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-find",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#find",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#findindex",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-findIndex",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#findIndex",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#findindex",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-findIndex",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#findIndex",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#foreach",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-forEach",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#forEach",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#foreach",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-forEach",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#forEach",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#get",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-get",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#get",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#get",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-get",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#get",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#getvalue",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-getValue",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#getValue",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#getvalue",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-getValue",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#getValue",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#getvalues",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-getValues",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#getValues",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#getvalues",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-getValues",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#getValues",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#includes",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-includes",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#includes",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#includes",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-includes",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#includes",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#indexof",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-indexOf",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#indexOf",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#indexof",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-indexOf",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#indexOf",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#itemsidx",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-itemsIdx",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#itemsIdx",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#itemsidx",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-itemsIdx",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#itemsIdx",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#iterator",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-iterator",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#iterator",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#iterator",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-iterator",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#iterator",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#join",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-join",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#join",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#join",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-join",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#join",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#keys",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-keys",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#keys",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#keys",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-keys",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#keys",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#lastindexof",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-lastIndexOf",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#lastIndexOf",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#lastindexof",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-lastIndexOf",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#lastIndexOf",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#length",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-length",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#length",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#length",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-length",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#length",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#map",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-map",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#map",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#map",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-map",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#map",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#pop",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-pop",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#pop",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#pop",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-pop",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#pop",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#push",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-push",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#push",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#push",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-push",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#push",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#reduce",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-reduce",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#reduce",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#reduce",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-reduce",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#reduce",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#reduceright",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-reduceRight",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#reduceRight",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#reduceright",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-reduceRight",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#reduceRight",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#reverse",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-reverse",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#reverse",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#reverse",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-reverse",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#reverse",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#setvalue",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-setValue",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#setValue",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#setvalue",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-setValue",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#setValue",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#shift",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-shift",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#shift",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#shift",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-shift",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#shift",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#slice",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-slice",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#slice",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#slice",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-slice",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#slice",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#some",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-some",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#some",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#some",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-some",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#some",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#sort",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-sort",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#sort",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#sort",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-sort",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#sort",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#splice",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-splice",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#splice",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#splice",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-splice",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#splice",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#superklass",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-superKlass",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#superKlass",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#superklass",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-superKlass",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#superKlass",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#unshift",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-unshift",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#unshift",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#tostring",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-toString",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#toString",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#validate",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-validate",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#validate",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#unshift",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-unshift",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#unshift",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~arraymfield#value",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-value",
-    "framework/basicDataManager/fields/MFieldMulti.js~ArrayMField#value",
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#validate",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-validate",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#validate",
+    "method"
+  ],
+  [
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#value",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-value",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#value",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~enummfield#constructor",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~EnumMField.html#instance-constructor-constructor",
-    "framework/basicDataManager/fields/MFieldMulti.js~EnumMField#constructor",
+    "framework/datamanager/fields/mfieldmulti.js~enummfield#constructor",
+    "class/framework/dataManager/fields/MFieldMulti.js~EnumMField.html#instance-constructor-constructor",
+    "framework/dataManager/fields/MFieldMulti.js~EnumMField#constructor",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~enummfield#validate",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~EnumMField.html#instance-method-validate",
-    "framework/basicDataManager/fields/MFieldMulti.js~EnumMField#validate",
+    "framework/datamanager/fields/mfieldmulti.js~enummfield#validate",
+    "class/framework/dataManager/fields/MFieldMulti.js~EnumMField.html#instance-method-validate",
+    "framework/dataManager/fields/MFieldMulti.js~EnumMField#validate",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~oneofmfield#constructor",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~OneOfMField.html#instance-constructor-constructor",
-    "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#constructor",
+    "framework/datamanager/fields/mfieldmulti.js~oneofmfield#constructor",
+    "class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html#instance-constructor-constructor",
+    "framework/dataManager/fields/MFieldMulti.js~OneOfMField#constructor",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~oneofmfield#getvalue",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~OneOfMField.html#instance-method-getValue",
-    "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#getValue",
+    "framework/datamanager/fields/mfieldmulti.js~oneofmfield#getvalue",
+    "class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html#instance-method-getValue",
+    "framework/dataManager/fields/MFieldMulti.js~OneOfMField#getValue",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~oneofmfield#setvalue",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~OneOfMField.html#instance-method-setValue",
-    "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#setValue",
+    "framework/datamanager/fields/mfieldmulti.js~oneofmfield#setvalue",
+    "class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html#instance-method-setValue",
+    "framework/dataManager/fields/MFieldMulti.js~OneOfMField#setValue",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~oneofmfield#superklass",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~OneOfMField.html#instance-member-superKlass",
-    "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#superKlass",
+    "framework/datamanager/fields/mfieldmulti.js~oneofmfield#superklass",
+    "class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html#instance-member-superKlass",
+    "framework/dataManager/fields/MFieldMulti.js~OneOfMField#superKlass",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~oneofmfield#validate",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~OneOfMField.html#instance-method-validate",
-    "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#validate",
+    "framework/datamanager/fields/mfieldmulti.js~oneofmfield#validate",
+    "class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html#instance-method-validate",
+    "framework/dataManager/fields/MFieldMulti.js~OneOfMField#validate",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldmulti.js~oneofmfield#value",
-    "class/framework/basicDataManager/fields/MFieldMulti.js~OneOfMField.html#instance-member-value",
-    "framework/basicDataManager/fields/MFieldMulti.js~OneOfMField#value",
+    "framework/datamanager/fields/mfieldmulti.js~oneofmfield#value",
+    "class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html#instance-member-value",
+    "framework/dataManager/fields/MFieldMulti.js~OneOfMField#value",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js",
-    "file/framework/basicDataManager/fields/MFieldSingle.js.html",
-    "framework/basicDataManager/fields/MFieldSingle.js",
+    "framework/datamanager/fields/mfieldsingle.js",
+    "file/framework/dataManager/fields/MFieldSingle.js.html",
+    "framework/dataManager/fields/MFieldSingle.js",
     "file"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~booleanmfield#constructor",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~BooleanMField.html#instance-constructor-constructor",
-    "framework/basicDataManager/fields/MFieldSingle.js~BooleanMField#constructor",
+    "framework/datamanager/fields/mfieldsingle.js~booleanmfield#constructor",
+    "class/framework/dataManager/fields/MFieldSingle.js~BooleanMField.html#instance-constructor-constructor",
+    "framework/dataManager/fields/MFieldSingle.js~BooleanMField#constructor",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~booleanmfield#validate",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~BooleanMField.html#instance-method-validate",
-    "framework/basicDataManager/fields/MFieldSingle.js~BooleanMField#validate",
+    "framework/datamanager/fields/mfieldsingle.js~booleanmfield#validate",
+    "class/framework/dataManager/fields/MFieldSingle.js~BooleanMField.html#instance-method-validate",
+    "framework/dataManager/fields/MFieldSingle.js~BooleanMField#validate",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~integermfield#constructor",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~IntegerMField.html#instance-constructor-constructor",
-    "framework/basicDataManager/fields/MFieldSingle.js~IntegerMField#constructor",
+    "framework/datamanager/fields/mfieldsingle.js~integermfield#constructor",
+    "class/framework/dataManager/fields/MFieldSingle.js~IntegerMField.html#instance-constructor-constructor",
+    "framework/dataManager/fields/MFieldSingle.js~IntegerMField#constructor",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~integermfield#type",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~IntegerMField.html#instance-member-type",
-    "framework/basicDataManager/fields/MFieldSingle.js~IntegerMField#type",
+    "framework/datamanager/fields/mfieldsingle.js~integermfield#type",
+    "class/framework/dataManager/fields/MFieldSingle.js~IntegerMField.html#instance-member-type",
+    "framework/dataManager/fields/MFieldSingle.js~IntegerMField#type",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~integermfield#validate",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~IntegerMField.html#instance-method-validate",
-    "framework/basicDataManager/fields/MFieldSingle.js~IntegerMField#validate",
+    "framework/datamanager/fields/mfieldsingle.js~integermfield#validate",
+    "class/framework/dataManager/fields/MFieldSingle.js~IntegerMField.html#instance-method-validate",
+    "framework/dataManager/fields/MFieldSingle.js~IntegerMField#validate",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~mfield#constructor",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MField.html#instance-constructor-constructor",
-    "framework/basicDataManager/fields/MFieldSingle.js~MField#constructor",
+    "framework/datamanager/fields/mfieldsingle.js~mfield#constructor",
+    "class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-constructor-constructor",
+    "framework/dataManager/fields/MFieldSingle.js~MField#constructor",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~mfield#gettype",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MField.html#instance-method-getType",
-    "framework/basicDataManager/fields/MFieldSingle.js~MField#getType",
+    "framework/datamanager/fields/mfieldsingle.js~mfield#gettype",
+    "class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-method-getType",
+    "framework/dataManager/fields/MFieldSingle.js~MField#getType",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~mfield#getvalue",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MField.html#instance-method-getValue",
-    "framework/basicDataManager/fields/MFieldSingle.js~MField#getValue",
+    "framework/datamanager/fields/mfieldsingle.js~mfield#getvalue",
+    "class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-method-getValue",
+    "framework/dataManager/fields/MFieldSingle.js~MField#getValue",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~mfield#schema",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MField.html#instance-member-schema",
-    "framework/basicDataManager/fields/MFieldSingle.js~MField#schema",
+    "framework/datamanager/fields/mfieldsingle.js~mfield#schema",
+    "class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-member-schema",
+    "framework/dataManager/fields/MFieldSingle.js~MField#schema",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~mfield#setvalue",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MField.html#instance-method-setValue",
-    "framework/basicDataManager/fields/MFieldSingle.js~MField#setValue",
+    "framework/datamanager/fields/mfieldsingle.js~mfield#setvalue",
+    "class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-method-setValue",
+    "framework/dataManager/fields/MFieldSingle.js~MField#setValue",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~mfield#tostring",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MField.html#instance-method-toString",
-    "framework/basicDataManager/fields/MFieldSingle.js~MField#toString",
+    "framework/datamanager/fields/mfieldsingle.js~mfield#tostring",
+    "class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-method-toString",
+    "framework/dataManager/fields/MFieldSingle.js~MField#toString",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~mfield#type",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MField.html#instance-member-type",
-    "framework/basicDataManager/fields/MFieldSingle.js~MField#type",
+    "framework/datamanager/fields/mfieldsingle.js~mfield#type",
+    "class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-member-type",
+    "framework/dataManager/fields/MFieldSingle.js~MField#type",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~mfield#value",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MField.html#instance-member-value",
-    "framework/basicDataManager/fields/MFieldSingle.js~MField#value",
+    "framework/datamanager/fields/mfieldsingle.js~mfield#validate",
+    "class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-method-validate",
+    "framework/dataManager/fields/MFieldSingle.js~MField#validate",
+    "method"
+  ],
+  [
+    "framework/datamanager/fields/mfieldsingle.js~mfield#value",
+    "class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-member-value",
+    "framework/dataManager/fields/MFieldSingle.js~MField#value",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~mobjectmfield#constructor",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MObjectMField.html#instance-constructor-constructor",
-    "framework/basicDataManager/fields/MFieldSingle.js~MObjectMField#constructor",
+    "framework/datamanager/fields/mfieldsingle.js~mobjectmfield#constructor",
+    "class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-constructor-constructor",
+    "framework/dataManager/fields/MFieldSingle.js~MObjectMField#constructor",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~mobjectmfield#superklass",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MObjectMField.html#instance-member-superKlass",
-    "framework/basicDataManager/fields/MFieldSingle.js~MObjectMField#superKlass",
+    "framework/datamanager/fields/mfieldsingle.js~mobjectmfield#superklass",
+    "class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-member-superKlass",
+    "framework/dataManager/fields/MFieldSingle.js~MObjectMField#superKlass",
     "member"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~mobjectmfield#validate",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~MObjectMField.html#instance-method-validate",
-    "framework/basicDataManager/fields/MFieldSingle.js~MObjectMField#validate",
+    "framework/datamanager/fields/mfieldsingle.js~mobjectmfield#validate",
+    "class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-method-validate",
+    "framework/dataManager/fields/MFieldSingle.js~MObjectMField#validate",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~numbermfield#constructor",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~NumberMField.html#instance-constructor-constructor",
-    "framework/basicDataManager/fields/MFieldSingle.js~NumberMField#constructor",
+    "framework/datamanager/fields/mfieldsingle.js~numbermfield#constructor",
+    "class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html#instance-constructor-constructor",
+    "framework/dataManager/fields/MFieldSingle.js~NumberMField#constructor",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~numbermfield#validate",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~NumberMField.html#instance-method-validate",
-    "framework/basicDataManager/fields/MFieldSingle.js~NumberMField#validate",
+    "framework/datamanager/fields/mfieldsingle.js~numbermfield#validate",
+    "class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html#instance-method-validate",
+    "framework/dataManager/fields/MFieldSingle.js~NumberMField#validate",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~stringmfield#constructor",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~StringMField.html#instance-constructor-constructor",
-    "framework/basicDataManager/fields/MFieldSingle.js~StringMField#constructor",
+    "framework/datamanager/fields/mfieldsingle.js~stringmfield#constructor",
+    "class/framework/dataManager/fields/MFieldSingle.js~StringMField.html#instance-constructor-constructor",
+    "framework/dataManager/fields/MFieldSingle.js~StringMField#constructor",
     "method"
   ],
   [
-    "framework/basicdatamanager/fields/mfieldsingle.js~stringmfield#validate",
-    "class/framework/basicDataManager/fields/MFieldSingle.js~StringMField.html#instance-method-validate",
-    "framework/basicDataManager/fields/MFieldSingle.js~StringMField#validate",
+    "framework/datamanager/fields/mfieldsingle.js~stringmfield#validate",
+    "class/framework/dataManager/fields/MFieldSingle.js~StringMField.html#instance-method-validate",
+    "framework/dataManager/fields/MFieldSingle.js~StringMField#validate",
     "method"
   ],
   [
-    "framework/basicdatamanager/schemainterpreter.js",
-    "file/framework/basicDataManager/schemaInterpreter.js.html",
-    "framework/basicDataManager/schemaInterpreter.js",
+    "framework/mixins/locking.js",
+    "file/framework/mixins/Locking.js.html",
+    "framework/mixins/Locking.js",
     "file"
   ],
   [
-    "framework/basicdatamanager/schemainterpreter.js~schemainterpreter#currentklass",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html#instance-member-currentKlass",
-    "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#currentKlass",
-    "member"
-  ],
-  [
-    "framework/basicdatamanager/schemainterpreter.js~schemainterpreter#currentsubklasses",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html#instance-member-currentSubKlasses",
-    "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#currentSubKlasses",
-    "member"
-  ],
-  [
-    "framework/basicdatamanager/schemainterpreter.js~schemainterpreter#klasspaths",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html#instance-member-klassPaths",
-    "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#klassPaths",
-    "member"
-  ],
-  [
-    "framework/basicdatamanager/schemainterpreter.js~schemainterpreter#klassschemas",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html#instance-member-klassSchemas",
-    "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#klassSchemas",
-    "member"
-  ],
-  [
-    "framework/basicdatamanager/schemainterpreter.js~schemainterpreter#klasses",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html#instance-member-klasses",
-    "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#klasses",
-    "member"
-  ],
-  [
-    "framework/basicdatamanager/schemainterpreter.js~schemainterpreter#parsedefinitions",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html#instance-method-parseDefinitions",
-    "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseDefinitions",
-    "method"
-  ],
-  [
-    "framework/basicdatamanager/schemainterpreter.js~schemainterpreter#parseobject",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html#instance-method-parseObject",
-    "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseObject",
-    "method"
-  ],
-  [
-    "framework/basicdatamanager/schemainterpreter.js~schemainterpreter#parseproperties",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html#instance-method-parseProperties",
-    "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseProperties",
-    "method"
-  ],
-  [
-    "framework/basicdatamanager/schemainterpreter.js~schemainterpreter#parseschema",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html#instance-method-parseSchema",
-    "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseSchema",
-    "method"
-  ],
-  [
-    "framework/basicdatamanager/schemainterpreter.js~schemainterpreter#parsetype",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html#instance-method-parseType",
-    "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseType",
-    "method"
-  ],
-  [
-    "framework/basicdatamanager/schemainterpreter.js~schemainterpreter#parsetypearray",
-    "class/framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter.html#instance-method-parseTypeArray",
-    "framework/basicDataManager/schemaInterpreter.js~SchemaInterpreter#parseTypeArray",
-    "method"
-  ],
-  [
-    "framework/mixins/lockingmobject.js",
-    "file/framework/mixins/lockingMObject.js.html",
-    "framework/mixins/lockingMObject.js",
+    "framework/mixins/logging.js",
+    "file/framework/mixins/Logging.js.html",
+    "framework/mixins/Logging.js",
     "file"
   ],
   [
-    "framework/mixins/loggingmobject.js",
-    "file/framework/mixins/loggingMObject.js.html",
-    "framework/mixins/loggingMObject.js",
-    "file"
-  ],
-  [
-    "framework/mixins/persistentmobject.js",
-    "file/framework/mixins/persistentMObject.js.html",
-    "framework/mixins/persistentMObject.js",
+    "framework/mixins/persistence.js",
+    "file/framework/mixins/Persistence.js.html",
+    "framework/mixins/Persistence.js",
     "file"
   ]
 ]

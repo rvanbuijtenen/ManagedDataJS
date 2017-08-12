@@ -1,0 +1,29 @@
+<table style="width:80%;margin:auto">
+	<tr>
+		<!-- Menu -->
+		<td id="menu" width="30%">
+			<h2>Machine Interface</h2>
+			<table width="100%">
+				<tr>
+					<td>Event sequence to Execute:</td>
+					<td><textarea id="events" style="display: block; width: 100%;"></textarea></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button id="submit-doors" event="execute" class="action btn btn-default" style="display: block; width: 100%;">Execute Events</button></td>
+				</tr>
+			</table>
+		</td>
+		<td>
+			<h2>Machine State:</h2>
+			<div id="machine-state"></div>
+			<h2>Execution Log:</h2>
+			<div id="machine-execution"></div>
+			<h2>Execution Errors:</h2>
+			<div id="machine-error"></div>
+			<h2>Machine:</h2>
+			<div id="machine-view"></div>
+		</td>
+	</tr>
+</table>
+

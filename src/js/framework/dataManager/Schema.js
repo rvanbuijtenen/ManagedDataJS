@@ -1,11 +1,16 @@
 /**
  * A Klass is a wrapper around a parsed JSON schema that contains schemas for all fields of this klass
  */
-export class Klass {
+export class KlassSchema {
 	/**
 	 * A simple constructor that initializes fields and fieldTypes
 	 */
-	constructor() {
+	constructor(klass) {
+		/**
+		 * @param {String} A string representing this klass's type
+		 */
+		this.klass = klass
+
 		/**
 		 * @type {Object} An object that maps a key to a field schema
 		 */
@@ -64,10 +69,18 @@ export class Klass {
 			throw new TypeError(propKey + " is not defined in schema")
 		}
 	}
+
+	/**
+	 * @return {String} A string representing this klass's type
+	 */
+	getKlass() {
+		return this.klass
+	}
 }
 
 /**
- * Schema is a wrapper that provides a setKlass and a getKlass method for managing schemas describing a single klass
+ * Schema is a wrapper that provides an addKlass and a getKlassByName method. These methods are used to manage an
+ * object that maps klass names to KlassSchemas. it's purpose is to group multiple KlassSchemas into a single Schema
  */
 export class Schema {
 	/**
@@ -93,7 +106,7 @@ export class Schema {
 	 * @return {Klass} The klass corresponding with the given klassName
 	 * @throws {TypeError} An error is thrown when the given klassName does not exist
 	 */ 
-	getKlass(klassName) {
+	getKlassByName(klassName) {
 		if(this.klasses.hasOwnProperty(klassName)) {
 			return this.klasses[klassName]
 		} else {
@@ -117,7 +130,7 @@ export function parseSchema(schema) {
 	}
 
 	/* Create a new instance of Schema */
-	let s = new Schema()
+	let parsedSchema = new Schema()
 
 	/* Initialize paths: an object that maps a definition path to a klass name. 
 	 * the path '#' refers to the main schema.
@@ -125,18 +138,21 @@ export function parseSchema(schema) {
 	let paths = {}
 	paths["#"] = schema.name
 
+	let hasDefinitions = false
 	/* Parse definitions if there are any */
 	if(schema.hasOwnProperty("definitions")) {
 		for(let definition in schema.definitions) {
-			parseDefinitions(schema.definitions, s, paths)
+			parseDefinitions(schema.definitions, parsedSchema, paths)
 		}
 	}
 
 	/* Parse the mainKlass */
 	let mainKlass = parseKlass(schema, schema.name, paths)
-	s.addKlass(schema.name, mainKlass)
+	parsedSchema.addKlass(schema.name, mainKlass)
 
-	return s
+	parseRelations(schema, parsedSchema, paths)
+
+	return parsedSchema
 }
 
 /**
@@ -165,7 +181,7 @@ function parseDefinitions(definitions, schema, paths) {
  */
 function parseKlass(klassSchema, klassName, paths) {
 	/* Create a new empty Klass */
-	let klass = new Klass(klassName)
+	let klass = new KlassSchema(klassName)
 
 	/* For each property: parse the property and add it to the Klass */
 	for(let property in klassSchema.properties) {
@@ -176,6 +192,389 @@ function parseKlass(klassSchema, klassName, paths) {
 	}
 
 	return klass
+}
+
+/**
+ * @param {Object} schema - A complete (raw) JSON schema
+ * @param {Schema} parsedSchema - A Schema object that contains the parsed Klasses to which relations must be added
+ * @param {Object} paths - An object that maps a path of the form "#" or "#/definitions/<klassName>" to the corresponding klassName
+ */
+function parseRelations(schema, parsedSchema, paths) {
+	/* parse relations for the main klass */
+	if(schema.hasOwnProperty("relations")) {
+		for(let relation in schema.relations) {
+			parseRelation(relation, schema.relations[relation], parsedSchema, schema.name, paths)
+		}
+	}
+
+	/* parse relations for all other classes defined in "definitions" */
+	if(schema.hasOwnProperty("definitions")) {
+		for(let definition in schema.definitions) {	
+			if(schema.definitions[definition].hasOwnProperty("relations")) {
+				for(let relation in schema.definitions[definition].relations) {
+					parseRelation(relation, schema.definitions[definition].relations[relation], parsedSchema, definition, paths)
+				}
+			}	
+		}
+	}
+}
+
+function parseRelation(relationType, relations, parsedSchema, klassName, paths) {
+	let fieldsList = []
+	let inversesList = []
+	switch(relationType) {
+		case "oneToOne": {
+			for(let relation of relations) {
+				let {field, inverses} = buildOneToOne(relation, klassName, paths)
+				fieldsList.push(field)
+				inversesList.push(inverses)
+			}
+			break;
+		}
+		case "oneToMany": {
+			for(let relation of relations) {
+				let {field, inverses} = buildOneToMany(relation, klassName, paths)
+				fieldsList.push(field)
+				inversesList.push(inverses)
+			}
+			break;
+		}
+		case "manyToMany": {
+			for(let relation of relations) {
+				let {field, inverses} = buildManyToMany(relation, klassName, paths)
+				fieldsList.push(field)
+				inversesList.push(inverses)
+			}
+			break;
+		}
+		default: {
+			throw new TypeError(relationType + "is not a valid relation type. Please use one of [oneToOne, oneToMany, manyToMany]")
+		}
+	}
+	for(let field of fieldsList) {
+		parsedSchema.klasses[klassName].addFieldSchema(field.key, field.schema, field.type)
+	}
+
+	for(let inverses of inversesList) {
+		for(let inverseKlass in inverses) {
+			parsedSchema.klasses[inverseKlass].addFieldSchema(inverses[inverseKlass].key, inverses[inverseKlass].schema, inverses[inverseKlass].type)
+		}
+	}
+}
+
+function validateRelationSchema(schema, paths) {
+	if(schema.hasOwnProperty("$ref")) {
+		if(!paths.hasOwnProperty(schema["$ref"])) {
+			throw new TypeError(schema["$ref"] + " is not a valid schema reference")
+		}
+	} else if (schema.hasOwnProperty("oneOf")) {
+		for(let item of schema.oneOf) {
+			if(item.hasOwnProperty("$ref")) {
+				if(!paths.hasOwnProperty(item["$ref"])) {
+					throw new TypeError(item["$ref"] + " is not a valid schema reference")
+				}
+			} else {
+				throw new TypeError("An item in 'oneOf' must have a '$ref' keyword referencing a schema")
+			}
+		}
+	}
+}
+
+function buildOneToOne(relation, klassName, paths) {
+	validateRelationSchema(relation, paths)
+
+	let field = {}
+	let inverses = {}
+	if(relation.hasOwnProperty("$ref")) {
+		let relatedKlass = paths[relation["$ref"]]
+		field.schema = buildObjectField(relatedKlass, relation.referred, "object")
+		field.key = relation.referrer
+		field.type = "object"
+
+		inverses[relatedKlass] = {}
+		inverses[relatedKlass].schema = buildObjectField(klassName, relation.referrer, "object")
+		inverses[relatedKlass].type = "object"
+		inverses[relatedKlass].key = relation.referred
+	} else if (relation.hasOwnProperty("oneOf")) {
+		field = {}
+		field.type="oneOf"
+		field.key=relation.referrer
+		field.schema = {
+			"oneOf": []
+		}
+		for(let item of relation.oneOf) {
+			let relatedKlass = paths[item["$ref"]]
+			field.schema.oneOf.push(buildObjectField(relatedKlass, relation.referred, "object"))
+			
+			inverses[relatedKlass] = {}
+			inverses[relatedKlass].type = "object"
+			inverses[relatedKlass].key = relation.referred
+			inverses[relatedKlass].schema = buildObjectField(relatedKlass, relation.referrer, "object")
+		}
+	}
+
+	return {field, inverses}
+}
+
+function buildOneToMany(relation, klassName, paths) {
+	validateRelationSchema(relation, paths)
+
+	let field = {}
+	let inverses = {}
+	if(relation.hasOwnProperty("$ref")) {
+		let relatedKlass = paths[relation["$ref"]]
+		field.schema = buildArrayField(relation.referred, {"type": "object", "klass": relatedKlass}, "object")
+		field.key = relation.referrer
+		field.type = "array"
+
+		inverses[relatedKlass] = {}
+		inverses[relatedKlass].schema = buildObjectField(klassName, relation.referrer, "array")
+		inverses[relatedKlass].type = "object"
+		inverses[relatedKlass].key = relation.referred
+	} else if (relation.hasOwnProperty("oneOf")) {
+		field = {}
+		field.type="array"
+		field.key = relation.referrer
+
+		let items = {
+			"oneOf": []
+		}
+
+		for(let item of relation.oneOf) {
+			let relatedKlass = paths[item["$ref"]]
+			items.oneOf.push({"type": "object", "klass": relatedKlass})
+			
+			inverses[relatedKlass] = {}
+			inverses[relatedKlass].type = "object"
+			inverses[relatedKlass].key = relation.referred
+			inverses[relatedKlass].schema = buildObjectField(klassName, relation.referrer, "array")
+		}
+
+		field.schema = buildArrayField(relation.referred, items, "object")
+	}
+
+	return {field, inverses}
+}
+
+function buildManyToMany(relation, klassName, paths) {
+	validateRelationSchema(relation, paths)
+
+	let field = {}
+	let inverses = {}
+	if(relation.hasOwnProperty("$ref")) {
+		let relatedKlass = paths[relation["$ref"]]
+		field.schema = buildArrayField(relation.referred, {type: "object", klass: relatedKlass}, "array")
+		field.key = relation.referrer
+		field.type = "array"
+
+		inverses[relatedKlass] = {}
+		inverses[relatedKlass].schema = buildArrayField(relation.referrer, {type: "object", klass: klassName}, "array")
+		inverses[relatedKlass].type = "array"
+		inverses[relatedKlass].key = relation.referred
+	} else if (relation.hasOwnProperty("oneOf")) {
+		field = {}
+		field.type="array"
+		field.key = relation.referrer
+
+		let items = {
+			"oneOf": []
+		}
+
+		for(let item of relation.oneOf) {
+			let relatedKlass = paths[item["$ref"]]
+			items.oneOf.push({"type": "object", "klass": relatedKlass})
+			
+			inverses[relatedKlass] = {}
+			inverses[relatedKlass].type = "array"
+			inverses[relatedKlass].key = relation.referred
+			inverses[relatedKlass].schema = buildArrayField(relation.referrer, {type: "object", "klass": klassName}, "array")
+		}
+
+		field.schema = buildArrayField(relation.referred, items, "array")
+	}
+
+	return {field, inverses}
+}
+
+function buildArrayField(inverseKey, items, inverseType) {
+	return {
+		"type": "array",
+		"items": items,
+		"inverseKey": inverseKey,
+		"inverseType": inverseType
+
+	}
+}
+
+function buildObjectField(klass, inverseKey, inverseType) {
+	return {
+		"type": "object",
+		"klass": klass,
+		"inverseKey": inverseKey,
+		"inverseType": inverseType
+	}
+}
+
+
+/**
+ * @param {array} relations - An array that contains all one to one relation schemas
+ * @param {Schema} parsedSchema - A Schema object that contains the parsed Klasses to which relations must be added
+ * @param {Object} paths - An object that maps a path of the form "#" or "#/definitions/<klassName>" to the corresponding klassName
+ * @param {String} klassName - the name of the klass that these relations are added to
+ */
+function parseOneToOne(relations, parsedSchema, paths, klassName) {
+	for(let relation of relations) {
+		/* validate each relation by checking if the reference is correct */
+		if(!relation.hasOwnProperty("$ref")) {
+			throw new TypeError("A relation must have a reference to the related Klass definition")
+		}
+
+		if(!paths.hasOwnProperty(relation["$ref"])) {
+			throw new TypeError("Klass "+relation["$ref"]+" is undefined")
+		}
+
+		/* Determine the other klass for this relation and create the fields that should
+		 * be added to the schema */
+		let otherKlass = paths[relation["$ref"]]
+
+		let relationField = {
+			"type": "object",
+			"klass": otherKlass,
+			"inverseKey": klassName.toLowerCase(),
+			"inverseType": "object"
+		}
+
+		let inverseField = {
+			"type": "object",
+			"klass": klassName,
+			"inverseKey": otherKlass.toLowerCase(),
+			"inverseType": "object"
+		}
+
+		/* Determine the keys used to access the relation fields. Defaults to klassName.toLowerCase() */
+		let relationKey = otherKlass.toLowerCase()
+		let inverseKey = klassName.toLowerCase()
+
+		if(relation.hasOwnProperty("referrer")) {
+			relationKey = relation.referrer
+		}
+
+		if(relation.hasOwnProperty("referred")) {
+			inverseKey = relation.referred
+		}
+
+		/* Add the fields to the schema */
+		parsedSchema.klasses[klassName].addFieldSchema(relationKey, relationField, "object")
+		parsedSchema.klasses[otherKlass].addFieldSchema(inverseKey, inverseField, "object")
+	}
+}
+
+/**
+ * @param {array} relations - An array that contains all one to many relation schemas
+ * @param {Schema} parsedSchema - A Schema object that contains the parsed Klasses to which relations must be added
+ * @param {Object} paths - An object that maps a path of the form "#" or "#/definitions/<klassName>" to the corresponding klassName
+ * @param {String} klassName - the name of the klass that these relations are added to
+ */
+function parseOneToMany(relations, parsedSchema, paths, klassName) {
+	for(let relation of relations) {
+		/* Validate each relation by checking if the reference is correct */
+		if(!relation.hasOwnProperty("$ref")) {
+			throw new TypeError("A relation must have a reference to the related Klass definition")
+		}
+
+		if(!paths.hasOwnProperty(relation["$ref"])) {
+			throw new TypeError("Klass "+relation["$ref"]+" is undefined")
+		}
+		
+		/* Determine the other klass for this relation
+		 * be added to the schema */
+		let otherKlass = paths[relation["$ref"]]
+		
+		/* Determine the keys used to access the relation fields. Defaults to klassName.toLowerCase() */
+		let relationKey = otherKlass.toLowerCase()
+		let inverseKey = klassName.toLowerCase()
+
+		/* Define the relation schemas */
+		let relationField = {
+			"type": "array",
+			"items": {"type": "object", "klass": otherKlass},
+			"inverseKey": klassName.toLowerCase(),
+			"inverseType": "object"
+		}
+
+		let inverseField = {
+			"type": "object",
+			"klass": klassName,
+			"inverseKey": otherKlass.toLowerCase(),
+			"inverseType": "array"
+		}
+
+
+		if(relation.hasOwnProperty("referrer")) {
+			relationKey = relation.referrer
+		}
+
+		if(relation.hasOwnProperty("referred")) {
+			inverseKey = relation.referred
+		}
+
+		/* Add the fields to the schema */
+		parsedSchema.klasses[klassName].addFieldSchema(relationKey, relationField, "array")
+		parsedSchema.klasses[otherKlass].addFieldSchema(inverseKey, inverseField, "object")
+	}
+}
+
+/**
+ * @param {array} relations - An array that contains all many to many relation schemas
+ * @param {Schema} parsedSchema - A Schema object that contains the parsed Klasses to which relations must be added
+ * @param {Object} paths - An object that maps a path of the form "#" or "#/definitions/<klassName>" to the corresponding klassName
+ * @param {String} klassName - the name of the klass that these relations are added to
+ */
+function parseManyToMany(relations, parsedSchema, paths, klassName) {
+	for(let relation of relations) {
+		/* validate each relation by checking if the reference is correct */
+		if(!relation.hasOwnProperty("$ref")) {
+			throw new TypeError("A relation must have a reference to the related Klass definition")
+		}
+
+		if(!paths.hasOwnProperty(relation["$ref"])) {
+			throw new TypeError("Klass "+relation["$ref"]+" is undefined")
+		}
+		
+		/* Determine the other klass for this relation and create the fields that should
+		 * be added to the schema */
+		let otherKlass = paths[relation["$ref"]]
+
+		let relationField = {
+			"type": "array",
+			"items": {"type": "object", "klass": otherKlass},
+			"inverseKey": klassName.toLowerCase(),
+			"inverseType": "array"
+		}
+
+		let inverseField = {
+			"type": "array",
+			"items": {"type": "object", "klass": klassName},
+			"inverseKey": otherKlass.toLowerCase(),
+			"inverseType": "array"
+		}
+
+		/* Determine the keys used to access the relation fields. Defaults to klassName.toLowerCase() */
+		let relationKey = otherKlass.toLowerCase()
+		let inverseKey = klassName.toLowerCase()
+
+		if(relation.hasOwnProperty("referrer")) {
+			relationKey = relation.referrer
+		}
+
+		if(relation.hasOwnProperty("referred")) {
+			inverseKey = relation.referred
+		}
+
+		/* Add the fields to the schema */
+		parsedSchema.klasses[klassName].addFieldSchema(relationKey, relationField, "array")
+		parsedSchema.klasses[otherKlass].addFieldSchema(inverseKey, inverseField, "array")
+	}
 }
 
 /**
@@ -195,7 +594,10 @@ function parseProperty(property, type, paths) {
 			if(newProp.hasOwnProperty("$ref")) {
 				/* Replace the '$ref' keyword by a klass */
 				newProp["klass"] = paths[newProp["$ref"]]
+				if(newProp.klass == undefined) {
+				}
 				delete newProp["$ref"]
+				
 			} else {
 				throw new TypeError("A property of type 'object' must have a '$ref' keyword that references the definition describing the object")
 			}

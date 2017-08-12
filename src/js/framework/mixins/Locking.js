@@ -4,10 +4,13 @@
  * generator does not work properly with mixin definition
  */
 export let Locking = (superclass) => class extends superclass {
-	constructor(schema, klass, subKlasses, ...otherArgs) {
-		super(schema, klass, subKlasses, ...otherArgs);
+	/**
+	 * @param {KlassSchema} schema - A KlassSchema describing this MObject's data
+	 */
+	constructor(schema, ...otherArgs) {
+		super(schema, ...otherArgs);
 		/**
-		 * @type{Boolean}
+		 * @type{Boolean} Indicates whether the object is locked. When locked === true the object cannot be modified
 		 */
 		this.locked = false;
 	}
@@ -35,19 +38,6 @@ export let Locking = (superclass) => class extends superclass {
 	}
 
 	/**
-	 * @param {Symbol, String} array - The array that will be modified
-	 * @return {Boolean} True if the object is not locked
-	 * @throws {TypeError}
-	 */
-	notifyBeforeArrayChanged(array) {
-		if(this.isLocked()) {
-			throw new TypeError("object is locked");
-		}
-		return true;
-	}
-
-
-	/**
 	 * Sets locked to true
 	 */
 	lock() {
@@ -66,5 +56,23 @@ export let Locking = (superclass) => class extends superclass {
 	 */
 	unlock() {
 		this.locked = false;
-	}	
+	}
+
+	/**
+	 * @param {String} method - A string representing the name of the method that was called on the managedArray
+	 * @param {Array} args - An array containing the arguments that will be passed to the method
+	 * @param {ManagedArray} array - The array that the method was invoked on
+	 *
+	 * @return {Array} - An array containing the args that were passed to this function. If the args are modified,
+	 * 					 the invoked array method will execute 'method' with the modified arguments instead.
+	 */
+	notifyArray(method, args, array) {
+		args = super.notifyArray(method, args, array)
+		let methodsWithSideEffects = ["push", "splice", "pop", "shift", "unshift"]
+		
+		if(this.isLocked() && methodsWithSideEffects.includes(method)) {
+			throw TypeError("object is locked")
+		}
+		return args
+	}
 }

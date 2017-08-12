@@ -1,0 +1,45 @@
+<table style="width:80%;margin:auto">
+	<tr>
+		<!-- Menu -->
+		<td id="menu" width="30%">
+			<h2>Graph Interface</h2>
+			<table width="100%">
+				<tr>
+					<td>Graph Name</td>
+					<td><input id="name" type="text" style="display: block; width: 100%;"></td>
+				</tr>
+				<tr>
+					<td>Line Coodinates</td>
+					<td><textarea id="line" style="display: block; width: 100%;"></textarea></td>
+				</tr>
+				<tr>
+					<td>Line Width</td>
+					<td><input id="width" type="number" min="1" max="10" style="display: block; width: 100%;"></td>
+				</tr>
+				<tr>
+					<td>Line Color</td>
+					<td>
+						<select id="color" style="display: block; width: 100%;">
+							<option value="black">black</option>
+							<option value="green">green</option>
+							<option value="red">red</option>
+							<option value="blue">blue</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button id="draw" event="draw" class="action btn btn-default" style="display: block; width: 100%;">Draw Line</button></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button id="reset" event="reset" class="action btn btn-default" style="display: block; width: 100%;">Reset Graph</button></td>
+				</tr>
+			</table>
+		</td>
+		<td>
+			<h2>Graph:</h2>
+			<div id="graph-canvas"></div>
+		</td>
+	</tr>
+</table>

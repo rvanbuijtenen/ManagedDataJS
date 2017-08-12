@@ -1,68 +1,57 @@
 {
-  "coverage": "88.79%",
-  "expectCount": 116,
-  "actualCount": 103,
+  "coverage": "94.28%",
+  "expectCount": 105,
+  "actualCount": 99,
   "files": {
-    "framework/basicDataManager/fields/MFieldMulti.js": {
-      "expectCount": 51,
-      "actualCount": 48,
+    "framework/dataManager/fields/MFieldMulti.js": {
+      "expectCount": 52,
+      "actualCount": 49,
       "undocumentLines": [
-        478,
-        113,
-        523
+        496,
+        118,
+        541
       ]
     },
-    "framework/basicDataManager/fields/MFieldSingle.js": {
-      "expectCount": 26,
+    "framework/dataManager/fields/MFieldSingle.js": {
+      "expectCount": 27,
       "actualCount": 26,
-      "undocumentLines": []
+      "undocumentLines": [
+        77
+      ]
     },
-    "framework/basicDataManager/DataManager.js": {
-      "expectCount": 6,
+    "framework/dataManager/DataManager.js": {
+      "expectCount": 5,
       "actualCount": 4,
       "undocumentLines": [
-        150,
-        155
+        150
       ]
     },
-    "framework/mixins/lockingMObject.js": {
+    "framework/mixins/Locking.js": {
       "expectCount": 1,
       "actualCount": 1,
       "undocumentLines": []
     },
-    "framework/mixins/loggingMObject.js": {
+    "framework/mixins/Logging.js": {
       "expectCount": 1,
       "actualCount": 1,
       "undocumentLines": []
     },
-    "framework/basicDataManager/fields/MFieldFactory.js": {
+    "framework/dataManager/fields/MFieldFactory.js": {
       "expectCount": 1,
       "actualCount": 1,
       "undocumentLines": []
     },
-    "framework/basicDataManager/MObject.js": {
-      "expectCount": 16,
+    "framework/dataManager/MObject.js": {
+      "expectCount": 17,
       "actualCount": 16,
-      "undocumentLines": []
+      "undocumentLines": [
+        185
+      ]
     },
-    "framework/mixins/persistentMObject.js": {
+    "framework/mixins/Persistence.js": {
       "expectCount": 1,
       "actualCount": 1,
       "undocumentLines": []
-    },
-    "framework/basicDataManager/schemaInterpreter.js": {
-      "expectCount": 13,
-      "actualCount": 5,
-      "undocumentLines": [
-        5,
-        90,
-        33,
-        29,
-        27,
-        24,
-        1,
-        129
-      ]
     }
   }
 }

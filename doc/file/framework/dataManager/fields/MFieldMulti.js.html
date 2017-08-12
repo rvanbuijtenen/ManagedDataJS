@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">framework/dataManager/fields/MFieldMulti.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/rvanbuijtenen/ManagedDataJS.git" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">dataManager</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/DataManager.js~DataManager.html">DataManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObject.html">MObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObjectHandler.html">MObjectHandler</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">dataManager/fields</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html">ArrayHandler</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html">ArrayMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~EnumMField.html">EnumMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html">OneOfMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~BooleanMField.html">BooleanMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~IntegerMField.html">IntegerMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MField.html">MField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html">MObjectMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html">NumberMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~StringMField.html">StringMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-MFieldFactory">MFieldFactory</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">mixins</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Logging">Logging</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Persistence">Persistence</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">framework/dataManager/fields/MFieldMulti.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import {MField} from &quot;./MFieldSingle&quot;
+import {MFieldFactory} from &quot;./MFieldFactory&quot;
+
+/**
+ * The ArrayHandler ensures that ArrayMfield[idx] returns ArrayMField.value[idx] when idx is an integer
+ */
+export class ArrayHandler {
+	/**
+	 * @param {Object} target - The target object.
+	 * @param {String, Symbol} propKey - The name of the property to get.
+	 * @param {Object} receiver - Either the proxy or an object that inherits from the proxy.
+	 *
+	 * @return {*} Either the value stored at the requested index or the result of Reflect.get()
+	 */
+	get(target, propKey, receiver) {
+		console.log(&quot;in array proxy get&quot;, propKey, typeof(propKey))
+		if(!propKey instanceof Symbol &amp;&amp; !isNaN(propKey) &amp;&amp; +propKey != NaN) {
+			console.log(&quot;getting&quot;, propKey)
+			return target.get(propKey)
+		} else {
+			return Reflect.get(target, propKey, receiver)
+		}
+	}
+}
+
+/**
+ * The array MField implementation is a bit different from other MField implementations.
+ * An ArrayMField must act like a regular JavaScript array and therefore it forwards all
+ * original ArrayMethods to the array stored within the value field and applies validation
+ * where neccesary. When the array has been modified, the arrayHasChanged() callback is
+ * invoked on the MObject it belongs to.
+ *
+ *
+ * the ArrayMField always returns regular javascript values or managed objects.
+ * the ArrayMField always takes regular javascript values as input.
+ * the ArrayMField.value only contains objects that are instances of MFields.
+ */
+export class ArrayMField extends MField {
+	/**
+	 * @param {Object} schema - A JSON schema that describes this MFields value
+	 * @param {MObject} superKlass - The MObject that this field belongs to
+	 */ 	
+	constructor(schema, superKlass) {
+		super(&quot;array&quot;, schema, [])
+
+		/**
+		 * The MObject that this ArrayMField belongs to
+		 * @type {MObject}
+		 */
+		this.superKlass = superKlass
+
+		/**
+		 * If we have a list of items, this parameter keeps track of which item
+		 * we need to use to validate the next element
+		 * @type {number}
+		 */
+		this.itemsIdx = 0
+
+		/**
+		 * The length of the array stored in this.value
+		 * @type {number}
+		 */
+		this.length = 0
+
+		/**
+		 * Override this[Symbol.iterator]
+		 */
+		this[Symbol.iterator] = this.iterator
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	concat(...values) {
+		[values] = this.superKlass.notifyBeforeArrayChanged(this, &quot;concat&quot;, values)
+		for(let value of values) {
+			if(value instanceof Array) {
+				this.push(...value)
+			} else {
+				this.push(value)
+			}
+		}
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	copyWithin(target, start, end) {
+		[target, start, end] = this.superKlass.notifyBeforeArrayChanged(this, &quot;copyWithin&quot;, target, start, end)
+		return this.value.copyWithin(target, start, end)
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	entries() {
+		return this.getValues().entries()
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	every(callback, thisarg) {
+		return this.getValues().every(callback, thisarg)
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	fill(value, start, end) {	
+		[value, start, end] = this.superKlass.notifyBeforeArrayChanged(this, &quot;fill&quot;, value, start, end)
+		let newArr = this.getValues().fill(value)
+		let {valid, error, fields} = this.validate(newArr)
+
+		if(valid == false) {
+			throw error
+		} else {
+			this.value = fields
+			return newArr
+		}
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	filter(callback, thisarg) {
+		return this.getValues().filter(callback, thisarg)
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	find(callback, thisarg) {
+		return this.getValues().find(callback, thisarg)
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	findIndex(callback, thisarg) {
+		return this.getValues().findIndex(callback, thisarg)
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	forEach(callback, thisarg) {
+		let arr = this.getValues()
+		arr.forEach(callback, thisarg)
+
+		let {valid, error, fields} = this.validate(arr)
+		if(valid == false) {
+			throw error
+		} else {
+			this.value = fields
+		}
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	includes(searchElement, fromIndex) {
+		if(fromIndex == undefined) {
+			return this.getValues().includes(searchElement)
+		} else {
+			return this.getValues().includes(searchElement, fromIndex)
+		}
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	indexOf(searchElement, fromIndex) {
+		if(fromIndex == undefined) {
+			return this.getValues().indexOf(searchElement)
+		} else {
+			return this.getValues().indexOf(searchElement, fromIndex)
+		}
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	join(separator) {
+		throw new Error(&quot;Managed Arrays cannot be joined into strings&quot;)
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	keys() {
+		return this.getValues().keys()
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	lastIndexOf(searchElement, fromIndex) {
+		if(fromIndex == undefined) {
+			return this.getValues().lastIndexOf(searchElement)
+		} else {
+			return this.getValues().lastIndexOf(searchElement, fromIndex)
+		}
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	map(callback, thisarg) {
+		let newArr = this.getValues().map(callback, thisarg)
+		let {valid, error, fields} = this.validate(newArr)
+
+		if(valid == false) {
+			throw new TypeError(errors)
+		} else {
+			return newArr
+		}
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	pop() {
+		this.superKlass.notifyBeforeArrayChanged(this, &quot;pop&quot;)
+		let value = this.value.pop()
+		if(value != undefined) {
+			this.length--
+			return value.getValue()
+		} else {
+			return value
+		}
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	push(...elements) {
+		[elements] = this.superKlass.notifyBeforeArrayChanged(this, &quot;push&quot;, elements)
+		console.log(elements)
+		let {valid, error, fields} = this.validate(elements)
+
+		if(valid == false) {
+			throw error
+		} else {
+			for(let field of fields) {
+				this.value.push(field)
+				this.itemsIdx = (this.itemsIdx+1)%this.schema.items.length
+				this.length++
+
+			}
+		}
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	reduce(callback, initialValue) {
+		return this.getValues().reduce(callback, initialValue)
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	reduceRight(callback, initialValue) {
+		return this.getValues().reduceRight(callback, initialValue)
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	reverse() {
+		this.superKlass.notifyBeforeArrayChanged(this, &quot;reverse&quot;)
+		this.value.reverse()
+		return this.getValues()
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	shift() {
+		this.superKlass.notifyBeforeArrayChanged(this, &quot;shift&quot;)
+		let element = this.value.shift()
+		return element.getValue()
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	slice(begin, end) {
+		return this.getValues().slice(begin, end)
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	some(callback, thisarg) {
+		return this.getValues().some(callback, thisarg)
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	sort(compareFunction) {	
+		[compareFunction] = this.superKlass.notifyBeforeArrayChanged(this, &quot;sort&quot;, compareFunction)
+		let sorted = this.getValues().sort(compareFunction)
+		let {valid, error, fields} = this.validate(sorted)
+		if(valid == false) {
+			throw error
+		} else {
+			this.value = fields
+		}
+
+	}
+
+	/**
+	 * See JavaScript Array documentation
+	 */
+	splice(start, deleteCount, ...items) {
+		[start, deleteCount, items] = this.superKlass.notifyBeforeArrayChanged(this, &quot;splice&quot;, start, deleteCount, items)
+		let {valid, error, fields} = this.validate(items)
+
+		if(valid == false) {
+			throw error
+		} else {
+			this.value.splice(start, deleteCount, ...fields)
+		}
+	}
+	
+	/**
+	 * See JavaScript Array documentation
+	 */
+	unshift(...elements) {
+		[elements] = this.superKlass.notifyBeforeArrayChanged(this, &quot;unshift&quot;, elements)
+		let {valid, error, fields} = this.validate(elements)
+
+		if(valid == false) {
+			throw new TypeError(error)
+		} else {
+			this.value.unshift(...fields)
+			this.superKlass.notifyArrayChanged(this, &quot;unshift&quot;)
+		}
+	}
+	
+	/**
+	 * @return {Iterator} Returns an iterator object for this ArrayMFields value
+	 */
+	iterator() {
+		return this.getValues()[Symbol.iterator]()
+	}
+
+	/** 
+	 * Implementation of the validate function for ArrayMField 
+	 *
+	 * @param {Array} values - An array containing the values to validate
+	 *
+	 * @return {Boolean, Error, MField} Boolean indicating whether all values where valid; if there were any validation errors we return the error. only when valid == false; An array containing valid MFields of the given values. only when valid == true
+	 */
+	validate(values) {
+		if(values == undefined) {
+			return {true, undefined, undefined}
+		}
+
+		let fields = []
+		let valid = true;
+		let error
+		let field
+
+		if(this.schema.items instanceof Array) {
+			let tmpItemsIdx = this.itemsIdx
+			for(let value of values) {
+				field = MFieldFactory(this.schema.items[tmpItemsIdx], this.superKlass)
+				tmpItemsIdx++;
+
+				try { 
+					field.setValue(value)
+				} catch (err) {
+					valid = false
+					error = err
+					break
+				}
+
+				fields.push(field)
+			}
+		} else {
+			for(let value of values) {
+				console.log(value, this.schema.items)
+				field = MFieldFactory(this.schema.items, this.superKlass)
+				console.log(field)
+				try { 
+					field.setValue(value)
+				} catch (err) {
+					valid = false
+					error = err
+					break
+				}
+
+				fields.push(field)
+			}
+		}
+		return {valid, error, fields}
+	}
+
+	/**
+	 * @param {Integer} idx - the index to retrieve from this array
+	 *
+	 * @return {*, Boolean} Get either returns the value on the given index or false
+	 */
+	get(idx) {
+		if(this.value.hasOwnProperty(idx)) {
+			return this.value[idx].getValue()
+		} else {
+			return false
+		}
+	}
+
+	/**
+	 * @return {String} A string representing this array
+	 */
+	toString() {
+		return this.getValues().toString()
+	}
+
+	/**
+	 * @return {Array} A regular JavaScript array containing this ArrayMFields values
+	 */
+	getValues() {
+		let arr = []
+		for(let val of this.value) {
+			arr.push(val.getValue())
+		}
+		return arr
+	}
+
+	/**
+	 * @return {ArrayMField} Since an ArrayMField works like a regular JavaScript array we return this instead of this.value
+	 */
+	getValue() {
+		return this
+	}
+
+	/**
+	 * setValue takes a value as argument and attempts to validate this value. If it was valid we set 
+	 * this.value to the field returned by the validate method, otherwise we throw the error that was returned
+	 * 
+	 * @param {Array} values - The value that should be set in this ArrayMField
+	 */
+	setValue(values) {
+		if(!(values instanceof Array)) {
+			throw new TypeError(&quot;value assigned to &quot;+this.schema.type+&quot;MField can only be set to that of an actual JavaScript array&quot;)
+		} else {
+			this.value = [];
+			this.push(...values)
+		}
+	}
+}
+
+
+/**
+ * Enum implementation of MField which checks the following constraints:
+ *
+ *		REQUIRED:
+ *			value		===&gt;	enum.includes(value)
+ */
+export class EnumMField extends MField {
+	/**
+	 * @param {Object} schema - A JSON schema that describes this fields value
+	 */
+	constructor(schema) {
+		super(&quot;enum&quot;, schema, schema.enum[0])
+	}
+
+	/**
+	 * @param {*} value - The value that should be validated
+	 *
+	 * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned
+	 */
+	validate(value) {
+		let {valid, error} = super.validate(value)
+		if(!this.schema.enum.includes(value)) {
+			valid = false
+			error = new TypeError(&quot;value assigned to &quot;+this.schema.type+&quot;MField must be one of &quot;+JSON.stringyfy(schema.enum))
+			return {valid, error}
+		} else {
+			return {valid, error}
+		}
+	}
+}
+
+/**
+ *	OneOF implementation of MFIeld which checks the following constraints:
+ *
+ *		REQUIRED:
+ *			value		===&gt;	value matches at least one schema in schema.oneOf
+ */
+export class OneOfMField extends MField {
+	constructor(schema, superKlass) {
+		super(&quot;oneOf&quot;, schema, schema.oneOf[0].klass)
+		/**
+		 * The MObject that this OneOfMField belongs to
+		 * @type {MObject}
+		 */
+		this.superKlass = superKlass
+	}	
+
+	/**
+	 * @param {*} value - The value that should be validated
+	 *
+	 * @return {Boolean, Error, MField} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned. If it was valid, the valid MField is returned
+	 */
+	validate(value) {
+		let {valid, error} = super.validate(value)
+		let field
+
+		for(let schema of this.schema.oneOf) {
+			try{
+				field = MFieldFactory(schema, this.superKlass)
+				field.setValue(value)
+				valid = true
+				return {valid, error, field}
+			} catch (err) {
+				/* do nothing, try next value */
+			}
+		}
+		valid = false
+		error = new TypeError(&quot;value assigned to &quot;+this.schema.type+&quot;MField does not match any of the schemas defined in oneOf&quot;)
+		return {valid, error, field}
+	}
+
+	/**
+	 * setValue takes a value as argument and attempts to validate this value. If it was valid we set 
+	 * this.value to the field returned by the validate method, otherwise we throw the error that was returned
+	 * 
+	 * @param {*} value - The value that should be set in this MField
+	 */
+	setValue(value) {
+		let {valid, error, field} = this.validate(value)
+
+		if(valid == false) {
+			throw error
+		} else {
+			this.value = field
+		}
+	}
+	
+	/**
+	 * @return {*} This OneOfMFields value
+	 */
+	getValue() {
+		return this.value.getValue()
+	}
+}</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

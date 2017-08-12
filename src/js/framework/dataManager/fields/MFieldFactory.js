@@ -56,7 +56,9 @@ export function MFieldFactory(schema, superKlass) {
 				break
 			}
 			case "array": {
-				return new Proxy(new ArrayMField(schema, superKlass), new ArrayHandler())
+				let array = new Proxy(new ArrayMField(schema, superKlass), new ArrayHandler())
+				array.setThisProxy(array)
+				return array
 				break
 			}
 		}

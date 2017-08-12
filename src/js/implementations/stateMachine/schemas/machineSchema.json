@@ -1,0 +1,32 @@
+{
+	"name": "Machine",
+	"type": "object",
+	"properties": {
+		"name": {"type": "string"},
+		"start": {"type": "object", "$ref": "#/definitions/State"}
+	},
+	"relations": {
+		"oneToMany": [{"$ref": "#/definitions/State", "referrer": "states", "referred": "machine"}]
+	},
+	"definitions": {
+		"State": {
+			"properties": {
+				"name": {"type": "string"}
+			},
+			"relations": {
+				"oneToMany": [
+					{"$ref": "#/definitions/Transition", "referrer": "transitions_in", "referred": "to"},
+					{"$ref": "#/definitions/Transition", "referrer": "transitions_out", "referred": "from"}
+				]
+			}
+		},
+		"Transition": {
+			"properties": {
+				"event": {
+					"type": "array",
+					"items": {"type": "string"}
+				}
+			}
+		}
+	}
+}

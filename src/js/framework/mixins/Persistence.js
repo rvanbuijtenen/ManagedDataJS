@@ -14,23 +14,19 @@ import {ArrayMField} from "../dataManager/fields/MFieldMulti"
  */
 export let Persistence = (superclass) => class extends superclass {
 	/**
-	 * Constructor for a persistent MObject
-	 *
-	 * @param {Object} schema - A schema describing the data property of this managed object
-	 * @param {String} klass - A string representing the klass name of tihs managed object
-	 * @param {DataManager} factory - A DataManager that this Persistent MObject can use to create new managed objects
-	 * @param {String} id - An id to use when saving this MObjet
+	 * @param {DataManager} factory - An instance of DataManager that this persistent MObject can use
+	 * to construct new MObjects when loading
 	 */
-	constructor(schema, klass, factory, id, ...otherArgs) {
-		super(schema, klass, ...otherArgs);
-		/**
-		 * @type {DataManager}
-		 */
-		this.factory = factory;
-		/**
-		 * @type {String}
-		 */
-		this.id = id;
+	setFactory(factory) {
+		this.factory = factory
+	}
+
+	/**
+	 * @param {String} id - An ID used to identify, save and load this MObject. Must be unique
+	 */
+	setId(id) {
+		console.log("setting id:", id)
+		this.id = id
 	}
 
 	/**
@@ -48,7 +44,11 @@ export let Persistence = (superclass) => class extends superclass {
 	 * @return {String} the id used to save this Persistent MObject
 	 */
 	getId() {
-		return this.id;
+		if(this.hasOwnProperty("id")) {
+			return this.id;
+		} else {
+			throw new TypeError("No id has been set for MObject " + this.toString())
+		}
 	}
 
 	/**
@@ -122,7 +122,7 @@ export let Persistence = (superclass) => class extends superclass {
 		}
 
 		/* check if this item has been saved already */
-		let loadedItem = JSON.parse(localStorage.getItem(this.id));
+		let loadedItem = JSON.parse(localStorage.getItem(this.getId()));
 		if(loadedItem && loadedItem.updated_at >= time) {
 			return;
 		}
@@ -132,7 +132,7 @@ export let Persistence = (superclass) => class extends superclass {
 		saveItem.updated_at = now
 
 		/* save the item */
-		localStorage.setItem(this.id, JSON.stringify(saveItem));
+		localStorage.setItem(this.getId(), JSON.stringify(saveItem));
 
 		/* go over each property and if its managed data, call that items save function */
 		for(let prop in this.data) {
@@ -187,7 +187,7 @@ export let Persistence = (superclass) => class extends superclass {
 			loadedItems.push(this.proxy)
 		}
 
-		let item = JSON.parse(localStorage.getItem(this.id))
+		let item = JSON.parse(localStorage.getItem(this.getId()))
 		delete item.updated_at
 		if(item != undefined) {
 			for(let propKey in item) {
@@ -219,7 +219,6 @@ export let Persistence = (superclass) => class extends superclass {
 	 * @return {Array} An array containing the loaded properties
 	 */
 	loadArray(prop, loadedItems) {
-		console.log(prop, prop.hasOwnProperty("klass"), prop instanceof Array)
 		let arr = []
 		for(let item of prop) {
 			if(item.hasOwnProperty("klass")) {
@@ -238,8 +237,12 @@ export let Persistence = (superclass) => class extends superclass {
 	 * @param {Array} prop - A serialized MObject
 	 * @param {Array} loadeditems - An array containing all items that were loaded so far
 	 * @return {MObject} The loaded MObject 
+	 * @throws {TypeError} An error is thrown if no DataManager is set. MObjects cannot be constructed without a DataManager.
 	 */
 	loadObject(prop, loadedItems) {
+		if(!this.hasOwnProperty("factory")) {
+			throw new TypeError("MObjects cannot be loaded from localStorage without a DataManager capable of constructing the saved MObject")
+		}
 		/* Check if the object was loaded before*/
 		for(let item of loadedItems) {
 			if(item.getId() == prop.id) {
@@ -247,25 +250,10 @@ export let Persistence = (superclass) => class extends superclass {
 			}
 		}
 
-		/* Check if the object we're loading has any inverse properties */
-		let properties = this.factory.schema.getKlass(prop.klass).fields
-		let inverseKey = "";
-		for(let property in properties) {
-			if(properties[property].hasOwnProperty("inverse")) {
-				inverseKey = property;
-			}
-		}
-
-		/* If there was an inverse property, provide the proper init object to the constructor of the MObject */
-		if(inverseKey != "") {
-			let init = {};
-			init[inverseKey] = this.proxy;
-			let newObj = new this.factory[prop.klass](init, this.factory, prop.id)
-			newObj.load(loadedItems);
-			return newObj;
-		}
 		/* Otherwise: create a simple empty MObject and tell it to load its data*/
-		let newObj = new this.factory[prop.klass]({}, this.factory, prop.id);
+		let newObj = new this.factory[prop.klass]({});
+		newObj.setFactory(this.factory)
+		newObj.setId(prop.id)
 		newObj.load(loadedItems);
 		return newObj;
 	}

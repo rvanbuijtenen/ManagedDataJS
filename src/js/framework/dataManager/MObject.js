@@ -45,6 +45,7 @@ export class MObjectHandler {
 	}
 }
 
+
 /**
  * MObject implements the basic functionality for managed data:
  * 
@@ -58,10 +59,10 @@ export class MObject {
 	/**
 	 * Constructor function for a managed object
 	 *
-	 * @param {Object} schema - A schema describing the data property of this managed object
+	 * @param {KlassSchema} schema - A KlassSchema describing the data property of this managed object
 	 * @param {String} klass - A string representing the klass name of tihs managed object
 	 */
-	constructor(schema, klass) {
+	constructor(schema) {
 		/**
 		 * @type {Object}
 		 */
@@ -71,13 +72,9 @@ export class MObject {
 		 * @type {Object}
 		 */
 		this.proxy = {};
-		/**
-		 * @type {String}
-		 */
-		this.klass = klass;
 
 		/**
-		 * @type {Schema}
+		 * @type {KlassSchema}
 		 */
 		this.schema = schema;
 	}
@@ -89,8 +86,8 @@ export class MObject {
 	 * @param {Object} inits - An object containing the initial values for this MObject
 	 */
 	init(inits) {
-		console.log(this.schema)
 		for(let propKey in this.schema.fields) {
+			/* Initialize an empty MField for each field defined in schema */
 			this.data[propKey] = MFieldFactory(
 									this.schema.getFieldSchema(propKey),
 									this.proxy
@@ -98,12 +95,19 @@ export class MObject {
 		}
 
 		for(let propKey in inits) {
+			/* Set all provided initial values. The MField will throw an error if a value is invalid */
 			this.set(propKey, inits[propKey]);
 		}
 	}
 
 	/**
-	 * @param {Object} proxy - The proxy wrapped around this MObject
+	 * A MObject needs to know its own proxy, since we need to pass a proxied reference of the MObject 
+	 * that an MObjectMField belongs to, and non-proxied MObjects may never be interacted with except through 'this'.
+	 * So in order to ensure proper inverse relations, and MObjectMField must have a proxied reference to the object
+	 * that it belongs to. Setting the proxy must be done by the factory function.
+	 *
+	 * @param {Proxy} proxy - The proxy wrapped around this MObject
+	 * @throws {TypeError} The given proxy must be the proxy wrapped around this, otherwise an error is thrown
 	 */
 	setThisProxy(proxy) {
 		if(!proxy === this) {
@@ -116,11 +120,13 @@ export class MObject {
 	 * @return {String} A string representing the klass that this MObject implements
 	 */
 	getKlass() {
-		return this.klass;
+		return this.schema.getKlass()
 	}
 
 	/**
 	 * @param {String, Symbol} propKey - The property key of the managed field that we want to access
+	 * @return {*} The value of the requested property, if it exists.
+	 * @throws {TypeError} An error is thrown if the field does not exist in this MObject's schema
 	 */
 	get(propKey) {
 		if(this.schema.hasFieldSchema(propKey)) {
@@ -163,25 +169,38 @@ export class MObject {
 	 * @param {ArrayMField} array - The array that was modified
 	 * 
 	 * @return {Symbol} - The property key that points to the changed array
+	 * @throws {TypeError} If no property key can be found for the changed array an error is thrown.
 	 */
-	notifyArrayChanged(array) {
-		let propKey = undefined;
-		for(let key in this.data) {
-			if(this.data[key].getType() == "array" && this.data[key] == array) {
-				propKey = key;
-			}
-		}
-		if(propKey == undefined) {
-			throw new TypeError("something went wrong");
-		}
-
-		return propKey;
+	notifyArray(method, args, array) {
+		return args
 	}
 
 	/**
 	 * @return {String} A string representing the managed object
 	 */
 	toString() {
-		return "[managedObject "+this.klass+"]"
+		return "[managedObject "+this.schema.getKlass()+"]"
+	}
+
+	/**
+	 * @return {String} A string representing the managed object
+	 */
+	toJSON() {
+		return this.toString()
+	}
+
+	/**
+	 * @return {String} A stringn representing the managed object
+	 */
+	[Symbol.toPrimitive]() {
+		return this.toString()
+	}
+
+	[Symbol.iterator]() {
+		let data = {};
+		for(let propKey in this.data) {
+			data[propKey] = this.data[propKey].getValue()
+		}
+		return data[Symbol.iterator]()
 	}
 }

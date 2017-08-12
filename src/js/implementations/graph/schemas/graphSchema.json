@@ -1,0 +1,57 @@
+{
+	"name": "Graph",
+	"properties": {"name": {"type": "string"}},
+	"relations": {
+		"oneToMany": [{"$ref": "#/definitions/Line", "referrer": "lines", "referred": "graph"}]
+	},
+	"definitions": {
+		"Line": {
+			"properties": {
+				"color": {"enum": ["black", "green", "blue", "red"]},
+				"width": {
+					"type": "integer",
+					"minimum": 1,
+					"maximum": 10
+				},
+				"start": {"type": "object", "$ref": "#/definitions/Point"}
+			},
+			"relations": {
+				"oneToMany": [
+					{
+						"oneOf": [
+							{"$ref": "#/definitions/LinearLine"}, 
+							{"$ref": "#/definitions/QuadraticLine"}, 
+							{"$ref": "#/definitions/BezierLine"}],
+						"referrer": "segments",
+						"referred": "belongs_to"
+					}
+				]
+			}
+		},
+		"Point": {
+			"properties":{
+				"x": {"type": "integer"},
+				"y": {"type": "integer"}
+			}
+		},
+		"LinearLine": {
+			"properties": {
+				"from": {"type": "object", "$ref": "#/definitions/Point"},
+				"to": {"type": "object", "$ref": "#/definitions/Point"}
+			}
+		},
+		"QuadraticLine": {
+			"properties": {
+				"from": {"type": "object", "$ref": "#/definitions/Point"},
+				"control": {"type": "object", "$ref": "#/definitions/Point"},
+				"to": {"type": "object", "$ref": "#/definitions/Point"}
+			}
+		},
+		"BezierLine": {
+			"from": {"type": "object", "$ref": "#/definitions/Point"},
+			"control1": {"type": "object", "$ref": "#/definitions/Point"},
+			"control2": {"type": "object", "$ref": "#/definitions/Point"},
+			"from": {"type": "object", "$ref": "#/definitions/Point"}
+		}
+	}
+}
