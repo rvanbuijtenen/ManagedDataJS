@@ -1,8 +1,10 @@
 # ManagedDataJS
 
 # Installation:
-node.js@6.11.2
-npm@3.10.10
+
+Nodejs version: node.js@6.11.2
+
+NPM version: npm@3.10.10
 
 Clean install:
 download node https://nodejs.org/dist/v6.11.2/
