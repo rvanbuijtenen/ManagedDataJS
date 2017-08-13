@@ -38,7 +38,9 @@ $  npm -v
 $  cd ManagedDataJS
 
 $  npm install
+
 $  npm run webpack
+
 $  npm run start
 
 #### Open the browser at localhost:8080 to view examples and documentation
