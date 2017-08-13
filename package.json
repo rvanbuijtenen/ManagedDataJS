@@ -4,10 +4,10 @@
   "description": "An implementation of Managed Data in Javascript using ES6 proxies",
   "main": "index.js",
   "scripts": {
-    "babel": "babel --presets es2015 src/js/main.js -o build/main.bundle.js",
-    "start": "http-server -p 8081",
+    "babel": "./node_modules/.bin/babel --presets es2015 src/js/main.js -o build/main.bundle.js",
+    "start": "./node_modules/.bin/http-server -p 8081",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "webpack": "webpack --watch"
+    "webpack": "./node_modules/.bin/webpack --watch"
   },
   "repository": {
     "type": "git",
@@ -18,18 +18,14 @@
   "bugs": {
     "url": "https://github.com/rvanbuijtenen/ManagedDataJS/issues"
   },
-  "devDependencies": {
-    "ajv": "^5.0.1",
+  "dependencies": {
+    "require.js": "^1.0.0",
     "babel-cli": "^6.24.1",
     "babel-core": "^6.24.1",
     "babel-loader": "^7.0.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
     "http-server": "^0.10.0",
-    "import-fresh": "^2.0.0",
-    "randexp": "^0.4.5",
-    "taffydb": "^2.7.3",
-    "uuid": "^3.0.1",
     "webpack": "^2.5.0"
   }
 }

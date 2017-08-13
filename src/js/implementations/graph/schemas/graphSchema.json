@@ -12,8 +12,7 @@
 					"type": "integer",
 					"minimum": 1,
 					"maximum": 10
-				},
-				"start": {"type": "object", "$ref": "#/definitions/Point"}
+				}
 			},
 			"relations": {
 				"oneToMany": [
@@ -43,15 +42,17 @@
 		"QuadraticLine": {
 			"properties": {
 				"from": {"type": "object", "$ref": "#/definitions/Point"},
-				"control": {"type": "object", "$ref": "#/definitions/Point"},
+				"control1": {"type": "object", "$ref": "#/definitions/Point"},
 				"to": {"type": "object", "$ref": "#/definitions/Point"}
 			}
 		},
 		"BezierLine": {
-			"from": {"type": "object", "$ref": "#/definitions/Point"},
-			"control1": {"type": "object", "$ref": "#/definitions/Point"},
-			"control2": {"type": "object", "$ref": "#/definitions/Point"},
-			"from": {"type": "object", "$ref": "#/definitions/Point"}
+			"properties": {
+				"from": {"type": "object", "$ref": "#/definitions/Point"},
+				"control1": {"type": "object", "$ref": "#/definitions/Point"},
+				"control2": {"type": "object", "$ref": "#/definitions/Point"},
+				"to": {"type": "object", "$ref": "#/definitions/Point"}
+			}
 		}
 	}
 }

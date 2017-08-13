@@ -62,12 +62,12 @@ export default function runMachine(type, viewElement) {
 }
 
 function makeGraph(manager) {
-	return manager.Graph({"name": "graph"})
+	return manager.Graph()
 }
 
 function makePersistentGraph(manager) {
-	let graph = manager.Graph({"name": "graph"})
-	graph.setId("graph")
+	let graph = manager.Graph()
+	graph.setId("")
 	graph.setFactory(manager)
 	return graph
 }

@@ -251,7 +251,7 @@ export let Persistence = (superclass) => class extends superclass {
 		}
 
 		/* Otherwise: create a simple empty MObject and tell it to load its data*/
-		let newObj = new this.factory[prop.klass]({});
+		let newObj = new this.factory[prop.klass]();
 		newObj.setFactory(this.factory)
 		newObj.setId(prop.id)
 		newObj.load(loadedItems);

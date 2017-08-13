@@ -161,15 +161,17 @@ export class MObject {
 	}
 
 	/**
-	 * By default the modification methods of managed arrays bypasses
-	 * the set trap. Because of this, arrays notify their superKlass when they change.
-	 * This way an MObject can still implement its functionality whenever an array field
-	 * is modified by extending this function.
-	 *
+	 * Methods invoked on managed array fields cannot be trapped by this MObjects proxy.
+	 * Therefore the array invokes the notifyArray callback when one of it's methods are invoked.
+	 * This allows the managed object and possible mixins to perform reflective behaviour on arrays, 
+	 * as wel as regular data.
+	 * 
+	 * @param {String} method - A string used to access the invoked method on the array that invoked this methid
+	 * @param {Array} args - An array containing the arguments given to the method 
 	 * @param {ArrayMField} array - The array that was modified
 	 * 
-	 * @return {Symbol} - The property key that points to the changed array
-	 * @throws {TypeError} If no property key can be found for the changed array an error is thrown.
+	 * @return {Array} The arguments given to notifyArray. Mixins can override this method 
+	 * to intercept and possibly modify the arguments.
 	 */
 	notifyArray(method, args, array) {
 		return args
@@ -190,12 +192,15 @@ export class MObject {
 	}
 
 	/**
-	 * @return {String} A stringn representing the managed object
+	 * @return {String} A strinng representing the managed object
 	 */
 	[Symbol.toPrimitive]() {
 		return this.toString()
 	}
 
+	/**
+	 * @return {Object} An interable instance of this object
+	 */
 	[Symbol.iterator]() {
 		let data = {};
 		for(let propKey in this.data) {

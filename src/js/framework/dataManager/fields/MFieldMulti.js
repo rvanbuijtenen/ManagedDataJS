@@ -217,13 +217,7 @@ export class ArrayMField extends MField {
 	 */
 	map(callback, thisarg) {
 		let newArr = this.getValues().map(callback, thisarg)
-		let {valid, error, fields} = this.validate(newArr)
-
-		if(valid == false) {
-			throw new TypeError(errors)
-		} else {
-			return newArr
-		}
+		return newArr
 	}
 	
 	/**
@@ -232,7 +226,7 @@ export class ArrayMField extends MField {
 	pop() {
 		let field = this.value.pop()
 		if(field != undefined) {
-			this.length--
+			this.length = this.value.length
 			if(this.schema.hasOwnProperty("inverseKey")) {
 				field.value[this.schema.inverseKey] = null
 			}
@@ -266,8 +260,7 @@ export class ArrayMField extends MField {
 					}
 				}
 				this.itemsIdx = (this.itemsIdx+1)%this.schema.items.length
-				this.length++
-
+				this.length = this.value.length
 			}
 		}
 	}
@@ -306,6 +299,8 @@ export class ArrayMField extends MField {
 				element[this.schema.inverseKey].remove(this.superKlass)
 			}
 		}
+
+		this.length = this.value.length
 		return element.getValue()
 	}
 	
@@ -378,6 +373,8 @@ export class ArrayMField extends MField {
 				}
 			}
 		}
+
+		this.length = this.value.length
 	}
 	
 	/**
@@ -405,6 +402,8 @@ export class ArrayMField extends MField {
 				}
 			}
 		}
+
+		this.length = this.value.length
 	}
 	
 	/**
@@ -483,6 +482,7 @@ export class ArrayMField extends MField {
 	 * @return {*, Boolean} Get either returns the value on the given index or false
 	 */
 	get(idx) {
+		console.log(idx, this.value)
 		return this.value[idx].getValue()
 	}
 
