@@ -10,9 +10,9 @@ NPM version: npm@3.10.10
 
 #### Clean install:
 
-$  download node https://nodejs.org/dist/v6.11.2/
+download node https://nodejs.org/dist/v6.11.2/
 
-$  extract and copy the directories [bin, include, lib, share] to /usr/[bin, include, lib, share]
+extract and copy the directories [bin, include, lib, share] to /usr/[bin, include, lib, share]
 
 
 #### Replace the broken symbolic link to npm:
