@@ -1,6 +1,6 @@
 # ManagedDataJS
 
-INSTALL:
+# Installation:
 node.js@6.11.2
 npm@3.10.10
 
