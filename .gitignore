@@ -1,3 +1,5 @@
 /build/*
 /node_modules/*
-
+.webpack.*
+/screenshots/*
+package-lock.json
