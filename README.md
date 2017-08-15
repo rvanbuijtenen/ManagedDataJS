@@ -16,30 +16,30 @@ extract and copy the directories [bin, include, lib, share] to /usr/[bin, includ
 
 #### Replace the broken symbolic link to npm:
 
-'''shell
+```shell
 sudo rm /usr/bin/npm
 sudo ln -s /usr/lib/node_modules/npm/bin/npm-cli.js /usr/bin/npm
-'''
+```
 
 #### check node and npm version:
 
-'''shell
+```shell
 node -v
 v6.11.2
 
 npm -v
 3.10.10
-'''
+```
 
 #### clone repository, install dependencies, compile js and run server:
 
-'''shell
+```shell
 git clone https://github.com/rvanbuijtenen/ManagedDataJS.git
 cd ManagedDataJS
 npm install
 npm run webpack
 npm run start
-'''
+```
 
 #### Open the browser at localhost:8080 to view examples and documentation
 
