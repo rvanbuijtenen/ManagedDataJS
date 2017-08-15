@@ -7,7 +7,7 @@
       "expectCount": 13,
       "actualCount": 12,
       "undocumentLines": [
-        58
+        52
       ]
     },
     "framework/dataManager/MObject.js": {

@@ -52,29 +52,27 @@ export class MObjectHandler {
  * It provides a set() and get() method for managed fields that will be invoked by the proxy
  * wrapped around this object. Managed fields are stored in the 'data' property of an MObject.
  *
- * Furthermore, it provides a notifyArrayChanged() callback that will be invoekd whenever an
- * ArrayMField changes its state.
+ * Furthermore, it provides a notifyArray() callback that will be invoked whenever a method on an ArrayMField
+ * contained in the MObject's fields is called
  */
 export class MObject {
 	/**
 	 * Constructor function for a managed object
 	 *
-	 * @param {KlassSchema} schema - A KlassSchema describing the data property of this managed object
-	 * @param {String} klass - A string representing the klass name of tihs managed object
+	 * @param {KlassSchema} schema - A parsed KlassSchema describing the MObject's fields
 	 */
 	constructor(schema) {
 		/**
-		 * @type {Object}
+		 * @type {Object} The data field contains all MFields described in this MObject's schema
 		 */
 		this.data = {};
 		/**
-		 * this.proxy may only contain a pointer to the proxy wrapped around this instance of MObject
-		 * @type {Object}
+		 * @type {Proxy} The MObject must know what it's own proxy is when initializing MFields
 		 */
 		this.proxy = {};
 
 		/**
-		 * @type {KlassSchema}
+		 * @type {KlassSchema} A parsed KlassSchema describing the MObject's fields
 		 */
 		this.schema = schema;
 	}
@@ -102,9 +100,7 @@ export class MObject {
 
 	/**
 	 * A MObject needs to know its own proxy, since we need to pass a proxied reference of the MObject 
-	 * that an MObjectMField belongs to, and non-proxied MObjects may never be interacted with except through 'this'.
-	 * So in order to ensure proper inverse relations, and MObjectMField must have a proxied reference to the object
-	 * that it belongs to. Setting the proxy must be done by the factory function.
+	 * that object, oneOf and array fields belong to since an MObject may never be accessed directly, except through "this".
 	 *
 	 * @param {Proxy} proxy - The proxy wrapped around this MObject
 	 * @throws {TypeError} The given proxy must be the proxy wrapped around this, otherwise an error is thrown
@@ -141,6 +137,7 @@ export class MObject {
 	 * @param {*} value - The value that we want to set the managed field to
 	 *
 	 * @return {Boolean} True if setting was succesfull
+	 * @throws {TypeError} An error is thrown if the field does not exist in this MObject's schema
 	 */
 	set(propKey, value) {
 		if(this.schema.hasFieldSchema(propKey)) {
@@ -161,14 +158,14 @@ export class MObject {
 	}
 
 	/**
-	 * Methods invoked on managed array fields cannot be trapped by this MObjects proxy.
-	 * Therefore the array invokes the notifyArray callback when one of it's methods are invoked.
+	 * Methods invoked on managed array fields cannot be trapped by this MObjects proxy,
+	 * therefore the array invokes the notifyArray callback when one of it's methods are invoked.
 	 * This allows the managed object and possible mixins to perform reflective behaviour on arrays, 
 	 * as wel as regular data.
 	 * 
-	 * @param {String} method - A string used to access the invoked method on the array that invoked this methid
-	 * @param {Array} args - An array containing the arguments given to the method 
-	 * @param {ArrayMField} array - The array that was modified
+	 * @param {String} method - A string used to access the invoked method on the array that invoked this callback
+	 * @param {Array} args - An array containing the arguments given to the array's method 
+	 * @param {ArrayMField} array - The array that invoked the callback
 	 * 
 	 * @return {Array} The arguments given to notifyArray. Mixins can override this method 
 	 * to intercept and possibly modify the arguments.
@@ -199,7 +196,7 @@ export class MObject {
 	}
 
 	/**
-	 * @return {Object} An interable instance of this object
+	 * @return {Object} An interable instance of this object's data field
 	 */
 	[Symbol.iterator]() {
 		let data = {};

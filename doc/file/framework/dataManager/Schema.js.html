@@ -55,31 +55,34 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">framework/dataManager/Schema.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
- * A Klass is a wrapper around a parsed JSON schema that contains schemas for all fields of this klass
+ * An instance of KlassSchema describes an MObjects fields, fieldTypes and field relations.
  */
 export class KlassSchema {
 	/**
-	 * A simple constructor that initializes fields and fieldTypes
+	 * A simple constructor that initializes fields and fieldTypes. It takes a string representing
+	 * the klass&apos;s name as argument.
+	 *
+	 * @param {String} klass - A string representing the klass&apos;s name
 	 */
 	constructor(klass) {
 		/**
-		 * @param {String} A string representing this klass&apos;s type
+		 * @type {String} A string representiing the klass&apos;s name
 		 */
 		this.klass = klass
 
 		/**
-		 * @type {Object} An object that maps a key to a field schema
+		 * @type {Object} An object that maps property keys to field schemas
 		 */
 		this.fields = {}
 
 		/**
-		 * @type{Object} an object that maps a key to a string representing the fields type
+		 * @type{Object} an object that maps property keys to field types
 		 */
 		this.fieldTypes = {}
 	}
 
 	/**
-	 * @param {String} propKey - The key of the field that we want to set the schema for
+	 * @param {String, Symbol} propKey - The key of the field that we want to set the schema for
 	 * @param {Object} field - A parsed JSON schema representing a single property
 	 * @param {String} type - The type of the field that we want to set
 	 */
@@ -89,7 +92,7 @@ export class KlassSchema {
 	}
 
 	/**
-	 * @param {String} propKey - The key of the field that we want to retrieve the schema of
+	 * @param {String, Symbol} propKey - The key of the field that we want to retrieve the schema of
 	 * @return {Object} - A parsed JSON schema representing the requested property
 	 * @throws {TypeError} - An error is thrown if the requested field does not exist
 	 */
@@ -102,7 +105,7 @@ export class KlassSchema {
 	}
 
 	/**
-	 * @param {String} propKey - The key of the field that we want to retrieve the schema of
+	 * @param {String, Symbol} propKey - The key of the field that we want to know if it exists
 	 * @return {Boolean} - True if the field exists, false otherwise
 	 */
 	hasFieldSchema(propKey) {
@@ -114,7 +117,7 @@ export class KlassSchema {
 	}
 
 	/**
-	 * @param {String} propKey - The key of the field that we want to retrieve the type of
+	 * @param {String, Symbol} propKey - The key of the field that we want to retrieve the type of
 	 * @return {String} - the type of the requested field
 	 * @throws {TypeError} - An error is thrown if the requested field does not exist
 	 */

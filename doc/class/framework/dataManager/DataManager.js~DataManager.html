@@ -54,13 +54,13 @@
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {DataManager} from &apos;<span><a href="file/framework/dataManager/DataManager.js.html#lineNumber72">ManagedDataJS/framework/dataManager/DataManager.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {DataManager} from &apos;<span><a href="file/framework/dataManager/DataManager.js.html#lineNumber64">ManagedDataJS/framework/dataManager/DataManager.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/framework/dataManager/DataManager.js.html#lineNumber72">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/framework/dataManager/DataManager.js.html#lineNumber64">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -80,11 +80,11 @@
 
   
   
-  <div class="description" data-ice="description"><p>The DataManager consists of a constructor that receives a schema and optionally a number of mixins as input.</p>
-<p>The schema is parsed and for each klass a factory function is assigned to this[klassName]</p>
-<p>Finally a proxy is wrapped around this instance of the basicRecord factory that
-ensures factory.klassName(inits, args) call is forwarded to the factory function as
-factory(klassName, inits, args)</p>
+  <div class="description" data-ice="description"><p>The DataManager provides the main interface for ManagedData. When given a schema (and optionally a number of mixins)
+the data manager provides factory functions for each Klass defined in the schema. These factory functions are accessible
+under a string or symbol that is equal to the Klass. Example:</p>
+<p>let manager = new DataManager(schema, mixin1, mixin2)
+let obj = new manager.Klass(inits)</p>
 </div>
   
 
@@ -283,7 +283,7 @@ schema map to DataManager.factory</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/DataManager.js.html#lineNumber78">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/DataManager.js.html#lineNumber70">source</a></span></span>
     </span>
   </h3>
 
@@ -354,7 +354,7 @@ objects constructed by the basic data manager</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/DataManager.js.html#lineNumber103">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/DataManager.js.html#lineNumber95">source</a></span></span>
     </span>
   </h3>
 
@@ -399,7 +399,7 @@ schema map to DataManager.factory</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/DataManager.js.html#lineNumber83">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/DataManager.js.html#lineNumber75">source</a></span></span>
     </span>
   </h3>
 
@@ -443,7 +443,7 @@ schema map to DataManager.factory</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/DataManager.js.html#lineNumber95">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/DataManager.js.html#lineNumber87">source</a></span></span>
     </span>
   </h3>
 
@@ -490,7 +490,7 @@ schema map to DataManager.factory</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/DataManager.js.html#lineNumber115">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/DataManager.js.html#lineNumber107">source</a></span></span>
     </span>
   </h3>
 

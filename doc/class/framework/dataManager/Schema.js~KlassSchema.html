@@ -80,7 +80,7 @@
 
   
   
-  <div class="description" data-ice="description"><p>A Klass is a wrapper around a parsed JSON schema that contains schemas for all fields of this klass</p>
+  <div class="description" data-ice="description"><p>An instance of KlassSchema describes an MObjects fields, fieldTypes and field relations.</p>
 </div>
   
 
@@ -113,13 +113,13 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-constructor-constructor">constructor</a></span></span><span class="code" data-ice="signature">()</span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-constructor-constructor">constructor</a></span></span><span class="code" data-ice="signature">(klass: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>A simple constructor that initializes fields and fieldTypes</p>
+        <div data-ice="description"><p>A simple constructor that initializes fields and fieldTypes.</p>
 </div>
       </div>
     </td>
@@ -155,7 +155,7 @@
       <div>
         
         
-        <div data-ice="description"><p>@type{Object} an object that maps a key to a string representing the fields type</p>
+        <div data-ice="description"><p>@type{Object} an object that maps property keys to field types</p>
 </div>
       </div>
     </td>
@@ -206,7 +206,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-member-klass">klass</a></span></span><span class="code" data-ice="signature">(A: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-member-klass">klass</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
         </p>
       </div>
       <div>
@@ -241,7 +241,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-method-addFieldSchema">addFieldSchema</a></span></span><span class="code" data-ice="signature">(propKey: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, field: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>, type: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-method-addFieldSchema">addFieldSchema</a></span></span><span class="code" data-ice="signature">(propKey: <span>String, Symbol</span>, field: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>, type: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
         </p>
       </div>
       <div>
@@ -269,7 +269,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-method-getFieldSchema">getFieldSchema</a></span></span><span class="code" data-ice="signature">(propKey: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-method-getFieldSchema">getFieldSchema</a></span></span><span class="code" data-ice="signature">(propKey: <span>String, Symbol</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></span>
         </p>
       </div>
       <div>
@@ -297,7 +297,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-method-getFieldType">getFieldType</a></span></span><span class="code" data-ice="signature">(propKey: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-method-getFieldType">getFieldType</a></span></span><span class="code" data-ice="signature">(propKey: <span>String, Symbol</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
         </p>
       </div>
       <div>
@@ -353,7 +353,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-method-hasFieldSchema">hasFieldSchema</a></span></span><span class="code" data-ice="signature">(propKey: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span></span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html#instance-method-hasFieldSchema">hasFieldSchema</a></span></span><span class="code" data-ice="signature">(propKey: <span>String, Symbol</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span></span>
         </p>
       </div>
       <div>
@@ -385,23 +385,41 @@
     
     
     
-    <span class="code" data-ice="name">constructor</span><span class="code" data-ice="signature">()</span>
+    <span class="code" data-ice="name">constructor</span><span class="code" data-ice="signature">(klass: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber8">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber11">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>A simple constructor that initializes fields and fieldTypes</p>
+  <div data-ice="description"><p>A simple constructor that initializes fields and fieldTypes. It takes a string representing
+the klass&apos;s name as argument.</p>
 </div>
 
   
 
-  <div data-ice="properties">
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">klass</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>A string representing the klass&apos;s name</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
 </div>
 
   
@@ -436,14 +454,14 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber22">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber25">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>@type{Object} an object that maps a key to a string representing the fields type</p>
+  <div data-ice="description"><p>@type{Object} an object that maps property keys to field types</p>
 </div>
 
   
@@ -480,7 +498,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber17">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber20">source</a></span></span>
     </span>
   </h3>
 
@@ -519,11 +537,11 @@
     
     
     
-    <span class="code" data-ice="name">klass</span><span class="code" data-ice="signature">(A: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span>*</span></span>
+    <span class="code" data-ice="name">klass</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber12">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber15">source</a></span></span>
     </span>
   </h3>
 
@@ -565,11 +583,11 @@
     
     
     
-    <span class="code" data-ice="name">addFieldSchema</span><span class="code" data-ice="signature">(propKey: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, field: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>, type: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+    <span class="code" data-ice="name">addFieldSchema</span><span class="code" data-ice="signature">(propKey: <span>String, Symbol</span>, field: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>, type: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber30">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber33">source</a></span></span>
     </span>
   </h3>
 
@@ -590,7 +608,7 @@
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">propKey</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="type" class="code"><span>String, Symbol</span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>The key of the field that we want to set the schema for</p>
 </td>
@@ -639,11 +657,11 @@
     
     
     
-    <span class="code" data-ice="name">getFieldSchema</span><span class="code" data-ice="signature">(propKey: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></span>
+    <span class="code" data-ice="name">getFieldSchema</span><span class="code" data-ice="signature">(propKey: <span>String, Symbol</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber40">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber43">source</a></span></span>
     </span>
   </h3>
 
@@ -664,7 +682,7 @@
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">propKey</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="type" class="code"><span>String, Symbol</span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>The key of the field that we want to retrieve the schema of</p>
 </td>
@@ -724,11 +742,11 @@
     
     
     
-    <span class="code" data-ice="name">getFieldType</span><span class="code" data-ice="signature">(propKey: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+    <span class="code" data-ice="name">getFieldType</span><span class="code" data-ice="signature">(propKey: <span>String, Symbol</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber65">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber68">source</a></span></span>
     </span>
   </h3>
 
@@ -749,7 +767,7 @@
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">propKey</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="type" class="code"><span>String, Symbol</span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>The key of the field that we want to retrieve the type of</p>
 </td>
@@ -813,7 +831,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber76">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber79">source</a></span></span>
     </span>
   </h3>
 
@@ -865,11 +883,11 @@
     
     
     
-    <span class="code" data-ice="name">hasFieldSchema</span><span class="code" data-ice="signature">(propKey: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span></span>
+    <span class="code" data-ice="name">hasFieldSchema</span><span class="code" data-ice="signature">(propKey: <span>String, Symbol</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber52">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber55">source</a></span></span>
     </span>
   </h3>
 
@@ -890,9 +908,9 @@
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">propKey</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="type" class="code"><span>String, Symbol</span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>The key of the field that we want to retrieve the schema of</p>
+      <td data-ice="description"><p>The key of the field that we want to know if it exists</p>
 </td>
     </tr>
 </tbody>

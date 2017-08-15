@@ -1,29 +1,32 @@
 /**
- * A Klass is a wrapper around a parsed JSON schema that contains schemas for all fields of this klass
+ * An instance of KlassSchema describes an MObjects fields, fieldTypes and field relations.
  */
 export class KlassSchema {
 	/**
-	 * A simple constructor that initializes fields and fieldTypes
+	 * A simple constructor that initializes fields and fieldTypes. It takes a string representing
+	 * the klass's name as argument.
+	 *
+	 * @param {String} klass - A string representing the klass's name
 	 */
 	constructor(klass) {
 		/**
-		 * @param {String} A string representing this klass's type
+		 * @type {String} A string representiing the klass's name
 		 */
 		this.klass = klass
 
 		/**
-		 * @type {Object} An object that maps a key to a field schema
+		 * @type {Object} An object that maps property keys to field schemas
 		 */
 		this.fields = {}
 
 		/**
-		 * @type{Object} an object that maps a key to a string representing the fields type
+		 * @type{Object} an object that maps property keys to field types
 		 */
 		this.fieldTypes = {}
 	}
 
 	/**
-	 * @param {String} propKey - The key of the field that we want to set the schema for
+	 * @param {String, Symbol} propKey - The key of the field that we want to set the schema for
 	 * @param {Object} field - A parsed JSON schema representing a single property
 	 * @param {String} type - The type of the field that we want to set
 	 */
@@ -33,7 +36,7 @@ export class KlassSchema {
 	}
 
 	/**
-	 * @param {String} propKey - The key of the field that we want to retrieve the schema of
+	 * @param {String, Symbol} propKey - The key of the field that we want to retrieve the schema of
 	 * @return {Object} - A parsed JSON schema representing the requested property
 	 * @throws {TypeError} - An error is thrown if the requested field does not exist
 	 */
@@ -46,7 +49,7 @@ export class KlassSchema {
 	}
 
 	/**
-	 * @param {String} propKey - The key of the field that we want to retrieve the schema of
+	 * @param {String, Symbol} propKey - The key of the field that we want to know if it exists
 	 * @return {Boolean} - True if the field exists, false otherwise
 	 */
 	hasFieldSchema(propKey) {
@@ -58,7 +61,7 @@ export class KlassSchema {
 	}
 
 	/**
-	 * @param {String} propKey - The key of the field that we want to retrieve the type of
+	 * @param {String, Symbol} propKey - The key of the field that we want to retrieve the type of
 	 * @return {String} - the type of the requested field
 	 * @throws {TypeError} - An error is thrown if the requested field does not exist
 	 */
@@ -79,8 +82,8 @@ export class KlassSchema {
 }
 
 /**
- * Schema is a wrapper that provides an addKlass and a getKlassByName method. These methods are used to manage an
- * object that maps klass names to KlassSchemas. it's purpose is to group multiple KlassSchemas into a single Schema
+ * A schema wraps multiple KlassSchemas together into a single schema. It provides an interface
+ * for adding and retrieving klassSchemas.
  */
 export class Schema {
 	/**
@@ -88,22 +91,22 @@ export class Schema {
 	 */
 	constructor() {
 		/**
-		 * @type {Object} An object that maps klass names to Klass instances
+		 * @type {Object} An object that maps klass names to KlassSchema instances
 		 */
 		this.klasses = {}
 	}
 
 	/**
-	 * @param {String} klassName - A string representing the klass name that we want to add
-	 * @param {Klass} klass - The klass that we want to add
+	 * @param {String, Symbol} klassName - A string representing the klass name that we want to add
+	 * @param {KlassSchema} klass - The klass that we want to add
 	 */
 	addKlass(klassName, klass) {
 		this.klasses[klassName] = klass
 	}
 
 	/**
-	 * @param {String} klassName - The klass that we want to retrieve
-	 * @return {Klass} The klass corresponding with the given klassName
+	 * @param {String, Symbol} klassName - The klass that we want to retrieve
+	 * @return {KlassSchema} The KlassSchema corresponding with the given klassName
 	 * @throws {TypeError} An error is thrown when the given klassName does not exist
 	 */ 
 	getKlassByName(klassName) {
@@ -116,7 +119,18 @@ export class Schema {
 }
 
 /**
- * @param {Object} schema - A JSON schema
+ * parseSchema takes a raw JSON schema as argument and uses it to construct a Schema instance that is
+ * is suitable for DataManagers to use to construct MObjects. The parseSchema function does not modify
+ * the original schema.
+ *
+ * A schema:
+ *		- must have a "name" property, indicating the main Klass's name
+ *		- must have a "properties" property, containing field schemas. Properties can be an empty Object
+ *		- can have a "definitions" property, containing extra Klass definitions. A definition is almost
+ *				the same as the schema itself, with the exception that it does not have a "name" property.
+ * 				A definition also can't contain more nested definitions.
+ *
+ * @param {Object} schema - A raw JSON schema
  * @return {Schema} A parsed JSON schema
  */
 export function parseSchema(schema) {

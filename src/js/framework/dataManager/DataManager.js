@@ -2,7 +2,7 @@ import {MObject, MObjectHandler} from "./MObject";
 import {parseSchema} from "./Schema";
 
 /**
- * mix is an anonymous function that returns a new MixinBuilder for the superclass
+ * mix is an anonymous function that returns a new MixinBuilder for the given superclass
  *
  * @param {Class} superclass - an ES6 class definition that should be extended with mixins
  * @return {MixinBuilder} An instance of MixinBuilder for the given superclass
@@ -11,7 +11,8 @@ let mix = (superclass) => new MixinBuilder(superclass);
 
 /**
  * MixinBuilder is a class that dynamically constructs a prototype chain for the superclass
- * given to its constructor.
+ * given to its constructor. This is done by reducing a list of mixins, where a mixin is a 
+ * function taking that takes a class as argument and returns a dynamic extension of that class.
  */
 class MixinBuilder {  
 
@@ -43,17 +44,10 @@ class MixinBuilder {
 }
 
 /**
- * The factory function constructs a new instance of an MObject with the appropriate
- * mixins applied to it.
- *
- * @param {String} klass - A string representing the klass of the managed object.
- * @param {Object} inits - An object containing initial values for the managed object
- * @param {*} [otherArg1,otherArg...,otherArgN] - Any other parameters passed to the factory are 
- * considered other arguments. These other arguments are passed to the constructor of the managed object 
- * and are meant to be used by mixins. Each mixin can then extract its required extra parameters from the otherArgs
- *
- * @return {MObject} A proxied managed object that matches the schema and implements all mixin functionality
- */ 
+ * The FactoryHandler traps constructor calls and converts this to a regular function call.
+ * This is done in order to allow the 'new' syntax to be used when created MObjects from the
+ * DataManager
+ */
 class FactoryHandler {
 	construct(target, argumentsList, newTarget) {
 		return target.apply(target, null, argumentsList)
@@ -61,14 +55,12 @@ class FactoryHandler {
 }
 
 /**
- * The DataManager consists of a constructor that receives a schema and optionally a number of mixins as input.
+ * The DataManager provides the main interface for ManagedData. When given a schema (and optionally a number of mixins)
+ * the data manager provides factory functions for each Klass defined in the schema. These factory functions are accessible
+ * under a string or symbol that is equal to the Klass. Example:
  *
- * The schema is parsed and for each klass a factory function is assigned to this[klassName]
- *
- * Finally a proxy is wrapped around this instance of the basicRecord factory that
- * ensures factory.klassName(inits, args) call is forwarded to the factory function as
- * factory(klassName, inits, args)
- */
+ * let manager = new DataManager(schema, mixin1, mixin2)
+ * let obj = new manager.Klass(inits) */
 export class DataManager {
 	/**
 	 * @param {Object} schema - A raw JSON schema describing the objects that should be constructed by this data manager
@@ -76,17 +68,17 @@ export class DataManager {
 	 * objects constructed by the basic data manager
 	 */
 	constructor(schema, ...mixins) {
-        /**
-         * An array of mixins for the managed objects created by this data manager
-         * @type {Array}
-         */
-        this.mixins = []
+		/**
+		 * An array of mixins for the managed objects created by this data manager
+		 * @type {Array}
+		 */
+		this.mixins = []
 
-        /* set mixins for the factory function. If the basic data manager did not receive
-         * any mixins we set it to an empty array */
-        if(mixins.length > 0 && mixins[0] != undefined) {
-            this.mixins = mixins;
-        }
+		/* set mixins for the factory function. If the basic data manager did not receive
+		 * any mixins we set it to an empty array */
+		if(mixins.length > 0 && mixins[0] != undefined) {
+			this.mixins = mixins;
+		}
 
 		/**
 		 * The schema property holds the parsed schema that can be used by the factory function
@@ -115,10 +107,10 @@ export class DataManager {
 	factory(inits) {
 		let mobjClass = {};
 		if(this.mixins.length > 0) {
-	        mobjClass = (class extends mix(MObject).with(...this.mixins){});
-	    } else {
-	        mobjClass = (class extends MObject {});
-	    }
+			mobjClass = (class extends mix(MObject).with(...this.mixins){});
+		} else {
+			mobjClass = (class extends MObject {});
+		}
 
 		let mobj = new mobjClass(this.schema);
 		let mObjProxy = new Proxy(mobj, new MObjectHandler());

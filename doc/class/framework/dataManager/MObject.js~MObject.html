@@ -83,8 +83,8 @@
   <div class="description" data-ice="description"><p>MObject implements the basic functionality for managed data:</p>
 <p>It provides a set() and get() method for managed fields that will be invoked by the proxy
 wrapped around this object. Managed fields are stored in the &apos;data&apos; property of an MObject.</p>
-<p>Furthermore, it provides a notifyArrayChanged() callback that will be invoekd whenever an
-ArrayMField changes its state.</p>
+<p>Furthermore, it provides a notifyArray() callback that will be invoked whenever a method on an ArrayMField
+contained in the MObject&apos;s fields is called</p>
 </div>
   
 
@@ -117,7 +117,7 @@ ArrayMField changes its state.</p>
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObject.html#instance-constructor-constructor">constructor</a></span></span><span class="code" data-ice="signature">(schema: <span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span>, klass: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObject.html#instance-constructor-constructor">constructor</a></span></span><span class="code" data-ice="signature">(schema: <span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span>)</span>
         </p>
       </div>
       <div>
@@ -181,14 +181,13 @@ ArrayMField changes its state.</p>
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObject.html#instance-member-proxy">proxy</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObject.html#instance-member-proxy">proxy</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a></span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>this.proxy may only contain a pointer to the proxy wrapped around this instance of MObject</p>
-</div>
+        
       </div>
     </td>
     <td>
@@ -421,7 +420,10 @@ value if this was provided in the inits parameter</p>
       <div>
         
         
-        <div data-ice="description"><p>Methods invoked on managed array fields cannot be trapped by this MObjects proxy.</p>
+        <div data-ice="description"><p>Methods invoked on managed array fields cannot be trapped by this MObjects proxy,
+therefore the array invokes the notifyArray callback when one of it&apos;s methods are invoked.
+This allows the managed object and possible mixins to perform reflective behaviour on arrays, 
+as wel as regular data.</p>
 </div>
       </div>
     </td>
@@ -479,7 +481,7 @@ value if this was provided in the inits parameter</p>
         
         
         <div data-ice="description"><p>A MObject needs to know its own proxy, since we need to pass a proxied reference of the MObject 
-that an MObjectMField belongs to, and non-proxied MObjects may never be interacted with except through &apos;this&apos;.</p>
+that object, oneOf and array fields belong to since an MObject may never be accessed directly, except through &quot;this&quot;.</p>
 </div>
       </div>
     </td>
@@ -562,11 +564,11 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
     
     
     
-    <span class="code" data-ice="name">constructor</span><span class="code" data-ice="signature">(schema: <span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span>, klass: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+    <span class="code" data-ice="name">constructor</span><span class="code" data-ice="signature">(schema: <span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber65">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber64">source</a></span></span>
     </span>
   </h3>
 
@@ -590,14 +592,7 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
       <td data-ice="name" class="code" data-depth="0">schema</td>
       <td data-ice="type" class="code"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>A KlassSchema describing the data property of this managed object</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">klass</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>A string representing the klass name of tihs managed object</p>
+      <td data-ice="description"><p>A parsed KlassSchema describing the MObject&apos;s fields</p>
 </td>
     </tr>
 </tbody>
@@ -637,7 +632,7 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber69">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber68">source</a></span></span>
     </span>
   </h3>
 
@@ -676,19 +671,18 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
     
     
     
-    <span class="code" data-ice="name">proxy</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></span>
+    <span class="code" data-ice="name">proxy</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber74">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber72">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>this.proxy may only contain a pointer to the proxy wrapped around this instance of MObject</p>
-</div>
+  
 
   
 
@@ -724,7 +718,7 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber79">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber77">source</a></span></span>
     </span>
   </h3>
 
@@ -770,7 +764,7 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber204">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber201">source</a></span></span>
     </span>
   </h3>
 
@@ -790,7 +784,7 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
       <tbody>
         <tr>
           <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>An interable instance of this object</p>
+          <td class="return-desc" data-ice="returnDescription"><p>An interable instance of this object&apos;s data field</p>
 </td>
         </tr>
       </tbody>
@@ -826,7 +820,7 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber197">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber194">source</a></span></span>
     </span>
   </h3>
 
@@ -882,7 +876,7 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber131">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber127">source</a></span></span>
     </span>
   </h3>
 
@@ -967,7 +961,7 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber122">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber118">source</a></span></span>
     </span>
   </h3>
 
@@ -1023,7 +1017,7 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber159">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber156">source</a></span></span>
     </span>
   </h3>
 
@@ -1096,7 +1090,7 @@ that an MObjectMField belongs to, and non-proxied MObjects may never be interact
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber88">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber86">source</a></span></span>
     </span>
   </h3>
 
@@ -1158,15 +1152,15 @@ value if this was provided in the inits parameter</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber176">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber173">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Methods invoked on managed array fields cannot be trapped by this MObjects proxy.
-Therefore the array invokes the notifyArray callback when one of it&apos;s methods are invoked.
+  <div data-ice="description"><p>Methods invoked on managed array fields cannot be trapped by this MObjects proxy,
+therefore the array invokes the notifyArray callback when one of it&apos;s methods are invoked.
 This allows the managed object and possible mixins to perform reflective behaviour on arrays, 
 as wel as regular data.</p>
 </div>
@@ -1185,21 +1179,21 @@ as wel as regular data.</p>
       <td data-ice="name" class="code" data-depth="0">method</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>A string used to access the invoked method on the array that invoked this methid</p>
+      <td data-ice="description"><p>A string used to access the invoked method on the array that invoked this callback</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">args</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>An array containing the arguments given to the method</p>
+      <td data-ice="description"><p>An array containing the arguments given to the array&apos;s method</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">array</td>
       <td data-ice="type" class="code"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html">ArrayMField</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>The array that was modified</p>
+      <td data-ice="description"><p>The array that invoked the callback</p>
 </td>
     </tr>
 </tbody>
@@ -1250,7 +1244,7 @@ to intercept and possibly modify the arguments.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber145">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber142">source</a></span></span>
     </span>
   </h3>
 
@@ -1307,7 +1301,19 @@ to intercept and possibly modify the arguments.</p>
 
   
 
-  
+  <div data-ice="throwWrap">
+    <h4>Throw:</h4>
+    <table>
+      <tbody>
+      
+      <tr class="throw" data-ice="throw">
+        <td><p data-ice="throwName"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError">TypeError</a></span></p></td>
+        <td data-ice="throwDesc"><p>An error is thrown if the field does not exist in this MObject&apos;s schema</p>
+</td>
+      </tr>
+</tbody>
+    </table>
+  </div>
 
   
 
@@ -1330,7 +1336,7 @@ to intercept and possibly modify the arguments.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber112">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber108">source</a></span></span>
     </span>
   </h3>
 
@@ -1338,9 +1344,7 @@ to intercept and possibly modify the arguments.</p>
   
   
   <div data-ice="description"><p>A MObject needs to know its own proxy, since we need to pass a proxied reference of the MObject 
-that an MObjectMField belongs to, and non-proxied MObjects may never be interacted with except through &apos;this&apos;.
-So in order to ensure proper inverse relations, and MObjectMField must have a proxied reference to the object
-that it belongs to. Setting the proxy must be done by the factory function.</p>
+that object, oneOf and array fields belong to since an MObject may never be accessed directly, except through &quot;this&quot;.</p>
 </div>
 
   
@@ -1406,7 +1410,7 @@ that it belongs to. Setting the proxy must be done by the factory function.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber190">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber187">source</a></span></span>
     </span>
   </h3>
 
@@ -1462,7 +1466,7 @@ that it belongs to. Setting the proxy must be done by the factory function.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber183">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/MObject.js.html#lineNumber180">source</a></span></span>
     </span>
   </h3>
 
