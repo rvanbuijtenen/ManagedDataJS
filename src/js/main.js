@@ -1,5 +1,6 @@
 import runMachine from "./implementations/stateMachine"
 import runGraph from "./implementations/graph"
+import runDocumentation from "./implementations/documentation"
 
 
 // http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
@@ -44,6 +45,10 @@ document.getElementById('loggingLockingDoors').addEventListener('click', () => {
 
 document.getElementById('loggingGmailValidator').addEventListener('click', () => {
     runMachine("gmailValidator", $("#content"))
+});
+
+document.getElementById('documentation').addEventListener('click', () => {
+    runDocumentation($("#content"))
 });
 
 //document.getElementById('test').addEventListener('click', () => {

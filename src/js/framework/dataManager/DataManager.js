@@ -2,39 +2,6 @@ import {MObject, MObjectHandler} from "./MObject";
 import {parseSchema} from "./Schema";
 
 /**
- * The BasicHandler implements a trap for the get method. It checks whether the
- * property is a function, and if it is it inserts the klass name of the object
- * into the arguments for the function. We do this because any function invoked
- * on the data manager is a constructor function that must know which klass it is constructing
- */
-let BasicHandler = {
-	/**
-	 * @param {Object} target - The target object.
-	 * @param {String, Symbol} propKey - The name of the property to get.
-	 * @param {Object} receiver - Either the proxy or an object that inherits from the proxy.
-	 *
-	 * @return {*} Either the value of the requested property or a function that executes the requested 
-	 * property after inserting the property key as its first argument
-	 */
-	get(target, propKey, receiver){
-		/* if an attribute was accessed, simply return the value */
-		var propValue = target[propKey];
-		if (typeof propValue != "function"){
-			return propValue;
-		}
-		else{
-			/* return a function that inserts the property key into the arguements and then executes the 
-			 * method call on the target */
-			return function(){
-				//arguments.unshift(propKey);
-				[].unshift.call(arguments, propKey);
-				return propValue.apply(target, arguments, propKey);
-			}
-		}
-	}
-}
-
-/**
  * mix is an anonymous function that returns a new MixinBuilder for the superclass
  *
  * @param {Class} superclass - an ES6 class definition that should be extended with mixins
@@ -87,24 +54,10 @@ class MixinBuilder {
  *
  * @return {MObject} A proxied managed object that matches the schema and implements all mixin functionality
  */ 
-let factory = function(klass, inits, ...otherArgs) {
-	let schema = this.schema.getKlassByName(klass)
-
-	let mobjClass = {};
-	if(this.mixins.length > 0) {
-        mobjClass = (class extends mix(MObject).with(...this.mixins){});
-    } else {
-        mobjClass = (class extends MObject {});
-    }
-
-	let mobj = new mobjClass(schema, ...otherArgs);
-	let mObjProxy = new Proxy(mobj, new MObjectHandler());
-
-	/* The MObject needs a pointer to its own proxy for when an inverse field is found */
-	mObjProxy.setThisProxy(mObjProxy);
-	mObjProxy.init(inits);
-		
-	return mObjProxy;
+class FactoryHandler {
+	construct(target, argumentsList, newTarget) {
+		return target.apply(target, null, argumentsList)
+	}
 }
 
 /**
@@ -119,7 +72,7 @@ let factory = function(klass, inits, ...otherArgs) {
 export class DataManager {
 	/**
 	 * @param {Object} schema - A raw JSON schema describing the objects that should be constructed by this data manager
-	 * @param {Function} [mixin1,mixin...,mixinN] - an arbitrary number of mixins that should be used to extend managed
+	 * @param {...Function} [mixin1,mixin...,mixinN] - an arbitrary number of mixins that should be used to extend managed
 	 * objects constructed by the basic data manager
 	 */
 	constructor(schema, ...mixins) {
@@ -136,22 +89,44 @@ export class DataManager {
         }
 
 		/**
+		 * The schema property holds the parsed schema that can be used by the factory function
 		 * @type {Schema}
 		 */
 		this.schema = parseSchema(schema);
 
-		/* 
-		 * @type {Function}
-		 */
-		for(var klass in this.schema.klasses) {
-			/*
-			 * @type {Function} 
+		for(let klass in this.schema.klasses) {
+			/**
+			 * Strings and Symbols corresponding with a klass defined in the DataManager's
+			 * schema map to DataManager.factory
+			 * @type {Function}
 			 */
-			this[klass] = factory;
+			this[klass] = new Proxy(this.factory.bind({
+				schema: this.schema.getKlassByName(klass),
+				mixins: this.mixins,
+				klass: klass
+			}), new FactoryHandler())
 		}
+	}
 
-		/* wrap the dataManager behind a proxy */
-		return new Proxy(this, BasicHandler);
+	/**
+	 * @param {Object} inits - An object containing initial values for the MObject
+	 * @return MObject - A proxied MObject
+	 */
+	factory(inits) {
+		let mobjClass = {};
+		if(this.mixins.length > 0) {
+	        mobjClass = (class extends mix(MObject).with(...this.mixins){});
+	    } else {
+	        mobjClass = (class extends MObject {});
+	    }
+
+		let mobj = new mobjClass(this.schema);
+		let mObjProxy = new Proxy(mobj, new MObjectHandler());
+
+		/* The MObject needs a pointer to its own proxy for when an inverse field is found */
+		mObjProxy.setThisProxy(mObjProxy);
+		mObjProxy.init(inits);
+			
+		return mObjProxy;
 	}
 }
-

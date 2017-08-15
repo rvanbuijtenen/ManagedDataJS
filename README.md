@@ -33,7 +33,9 @@ $  npm -v
 3.10.10
 
 
-#### install dependencies, compile js and run server:
+#### clone repository, install dependencies, compile js and run server:
+
+$  git clone https://github.com/rvanbuijtenen/ManagedDataJS.git
 
 $  cd ManagedDataJS
 

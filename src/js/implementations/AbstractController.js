@@ -7,4 +7,6 @@ export default class AbstractController {
 	}
 
 	viewLoaded() {}
+
+	handleLink(to) {}
 }

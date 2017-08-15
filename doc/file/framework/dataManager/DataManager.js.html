@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">framework/dataManager/DataManager.js | ManagedDataJS</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="An implementation of Managed Data in Javascript using ES6 proxies"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="ManagedDataJS"><meta property="twitter:description" content="An implementation of Managed Data in Javascript using ES6 proxies"></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+<a style="position:relative; top:3px;" href="https://github.com/rvanbuijtenen/ManagedDataJS.git"><img width="20px" src="./image/github.png"></a></header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#datamanager">dataManager</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/DataManager.js~DataManager.html">DataManager</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObject.html">MObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObjectHandler.html">MObjectHandler</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~Schema.html">Schema</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSchema">parseSchema</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#datamanager-fields">dataManager/fields</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html">ArrayHandler</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html">ArrayMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~EnumMField.html">EnumMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html">OneOfMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~BooleanMField.html">BooleanMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~IntegerMField.html">IntegerMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MField.html">MField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html">MObjectMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html">NumberMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~StringMField.html">StringMField</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-MFieldFactory">MFieldFactory</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Logging">Logging</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Persistence">Persistence</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">framework/dataManager/DataManager.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import {MObject, MObjectHandler} from &quot;./MObject&quot;;
+import {parseSchema} from &quot;./Schema&quot;;
+
+/**
+ * mix is an anonymous function that returns a new MixinBuilder for the superclass
+ *
+ * @param {Class} superclass - an ES6 class definition that should be extended with mixins
+ * @return {MixinBuilder} An instance of MixinBuilder for the given superclass
+ */
+let mix = (superclass) =&gt; new MixinBuilder(superclass);
+
+/**
+ * MixinBuilder is a class that dynamically constructs a prototype chain for the superclass
+ * given to its constructor.
+ */
+class MixinBuilder {  
+
+	/**
+	 * @param {Class} superclass - an ES6 class definition that should be extended with mixins
+	 */
+	constructor(superclass) {
+		/**
+		 * @type {Class}
+		 */
+		this.superclass = superclass;
+	}
+
+	/**
+	 * with takes an arbitrary number of mixins as argument. A mixin is defined as follows:
+	 *
+	 * (superclass) =&gt; class extends superclass {}
+	 *
+	 * This definition results in an anonymous class that extends the given superclass. This way
+	 * we can reduce an array of mixins starting with this mixinBuilder&apos;s  superclass.
+	 *
+	 * @param {Function} mixin1,mixin...,mixinN - an arbitrary number of mixins that the superclass should be extended with
+	 *
+	 * @return {Class} this mixinBuilders superclass extended with all given mixins
+	 */
+	with(...mixins) {
+		return mixins.reduce((c, mixin) =&gt; mixin(c), this.superclass);
+	}
+}
+
+/**
+ * The factory function constructs a new instance of an MObject with the appropriate
+ * mixins applied to it.
+ *
+ * @param {String} klass - A string representing the klass of the managed object.
+ * @param {Object} inits - An object containing initial values for the managed object
+ * @param {*} [otherArg1,otherArg...,otherArgN] - Any other parameters passed to the factory are 
+ * considered other arguments. These other arguments are passed to the constructor of the managed object 
+ * and are meant to be used by mixins. Each mixin can then extract its required extra parameters from the otherArgs
+ *
+ * @return {MObject} A proxied managed object that matches the schema and implements all mixin functionality
+ */ 
+class FactoryHandler {
+	construct(target, argumentsList, newTarget) {
+		return target.apply(target, null, argumentsList)
+	}
+}
+
+/**
+ * The DataManager consists of a constructor that receives a schema and optionally a number of mixins as input.
+ *
+ * The schema is parsed and for each klass a factory function is assigned to this[klassName]
+ *
+ * Finally a proxy is wrapped around this instance of the basicRecord factory that
+ * ensures factory.klassName(inits, args) call is forwarded to the factory function as
+ * factory(klassName, inits, args)
+ */
+export class DataManager {
+	/**
+	 * @param {Object} schema - A raw JSON schema describing the objects that should be constructed by this data manager
+	 * @param {...Function} [mixin1,mixin...,mixinN] - an arbitrary number of mixins that should be used to extend managed
+	 * objects constructed by the basic data manager
+	 */
+	constructor(schema, ...mixins) {
+        /**
+         * An array of mixins for the managed objects created by this data manager
+         * @type {Array}
+         */
+        this.mixins = []
+
+        /* set mixins for the factory function. If the basic data manager did not receive
+         * any mixins we set it to an empty array */
+        if(mixins.length &gt; 0 &amp;&amp; mixins[0] != undefined) {
+            this.mixins = mixins;
+        }
+
+		/**
+		 * The schema property holds the parsed schema that can be used by the factory function
+		 * @type {Schema}
+		 */
+		this.schema = parseSchema(schema);
+
+		for(let klass in this.schema.klasses) {
+			/**
+			 * Strings and Symbols corresponding with a klass defined in the DataManager&apos;s
+			 * schema map to DataManager.factory
+			 * @type {Function}
+			 */
+			this[klass] = new Proxy(this.factory.bind({
+				schema: this.schema.getKlassByName(klass),
+				mixins: this.mixins,
+				klass: klass
+			}), new FactoryHandler())
+		}
+	}
+
+	/**
+	 * @param {Object} inits - An object containing initial values for the MObject
+	 * @return MObject - A proxied MObject
+	 */
+	factory(inits) {
+		let mobjClass = {};
+		if(this.mixins.length &gt; 0) {
+	        mobjClass = (class extends mix(MObject).with(...this.mixins){});
+	    } else {
+	        mobjClass = (class extends MObject {});
+	    }
+
+		let mobj = new mobjClass(this.schema);
+		let mObjProxy = new Proxy(mobj, new MObjectHandler());
+
+		/* The MObject needs a pointer to its own proxy for when an inverse field is found */
+		mObjProxy.setThisProxy(mObjProxy);
+		mObjProxy.init(inits);
+			
+		return mObjProxy;
+	}
+}</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.0.1)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

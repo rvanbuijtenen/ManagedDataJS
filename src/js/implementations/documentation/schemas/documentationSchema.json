@@ -1,0 +1,32 @@
+{
+	"name": "Documentation",
+	"properties": {},
+	"relations": {
+		"oneToMany": [{"$ref": "#/definitions/Module", "referrer": "modules", "referred": "documentation"}]
+	},
+	"definitions": {
+		"Module": {
+			"properties": {
+				"name": {"type": "string"},
+				"indexTemplate": {"type": "string"}
+			},
+			"relations": {
+				"oneToMany": [
+					{"oneOf": [{"$ref": "#/definitions/Class"}, {"$ref": "#/definitions/Function"}], "referrer": "members", "referred": "belongs_to"}
+				]
+			}
+		},
+		"Class": {
+			"properties": {
+				"name": {"type": "string"},
+				"template": {"type": "string"}
+			}
+		},
+		"Function": {
+			"properties": {
+				"name": {"type": "string"},
+				"template": {"type": "string"}
+			}
+		}
+	}
+}

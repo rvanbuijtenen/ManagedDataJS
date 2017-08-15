@@ -1,0 +1,69 @@
+{
+  "coverage": "90.84%",
+  "expectCount": 153,
+  "actualCount": 139,
+  "files": {
+    "framework/dataManager/DataManager.js": {
+      "expectCount": 13,
+      "actualCount": 12,
+      "undocumentLines": [
+        58
+      ]
+    },
+    "framework/dataManager/MObject.js": {
+      "expectCount": 19,
+      "actualCount": 19,
+      "undocumentLines": []
+    },
+    "framework/dataManager/Schema.js": {
+      "expectCount": 29,
+      "actualCount": 29,
+      "undocumentLines": []
+    },
+    "framework/dataManager/fields/MFieldFactory.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "framework/dataManager/fields/MFieldMulti.js": {
+      "expectCount": 56,
+      "actualCount": 49,
+      "undocumentLines": [
+        84,
+        85,
+        131,
+        416,
+        420,
+        569,
+        614
+      ]
+    },
+    "framework/dataManager/fields/MFieldSingle.js": {
+      "expectCount": 32,
+      "actualCount": 26,
+      "undocumentLines": [
+        77,
+        88,
+        359,
+        363,
+        365,
+        392
+      ]
+    },
+    "framework/mixins/Locking.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "framework/mixins/Logging.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "framework/mixins/Persistence.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    }
+  }
+}

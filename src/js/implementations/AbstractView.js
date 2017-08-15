@@ -3,21 +3,35 @@ export default class AbstractView {
 		console.log("abstract view")
 		$.ajaxSetup ({cache: false});
 		this.renderElement = renderElement
-		this.renderElement.load("src/js/implementations/templates/"+templateName, this.initActions.bind(this))
+		this.renderElement.load("src/js/implementations/templates/"+templateName, this.init.bind(this))
 	}
 
 	setController(controller) {
 		this.controller = controller
 	}
 
+	init() {
+		this.initActions()
+		this.initLinks()		
+		this.controller.viewLoaded()
+	}
+
 	initActions() {
 		this.renderElement.find($(".action")).each((idx, element) => {
-			console.log($("#"+element.id).attr("event"), this.controller)
 			element.addEventListener("click", () => {
-				console.log("asdfasdf")
 				this.controller[$("#"+element.id).attr("event")]()
 			})
 		})
-		this.controller.viewLoaded()
+	}
+
+	initLinks() {
+		this.renderElement.find($(".link")).each((idx, element) => {
+			element.addEventListener("click", () => {
+				this.renderElement.find($(".active")).removeClass("active")
+				console.log(element)
+				this.controller["handleLink"](element.textContent)
+				element.className += " active"
+			})
+		})
 	}
 }
