@@ -1,0 +1,18 @@
+{
+	"source": "./src/js/framework", 
+	"destination": "./doc",
+	"plugins": [
+    	{"name": "esdoc-ecmascript-proposal-plugin", "option": {"all": true}},  
+    	{
+    		"name": "esdoc-standard-plugin",
+    		"option": {
+		        "lint": {"enable": false}
+		    }
+		},
+    	{"name": "esdoc-coverage-plugin", "option": {"enable": true}},
+    	{"name": "esdoc-accessor-plugin", "option": {"access": ["public", "protected", "private"], "autoPrivate": true}},
+    	{"name": "esdoc-type-inference-plugin", "option": {"enable": true}},
+    	{"name": "esdoc-external-ecmascript-plugin", "option": {"enable": true}},
+    	{"name": "esdoc-undocumented-identifier-plugin", "option": {"enable": true}}
+  	]
+}

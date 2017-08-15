@@ -3,3 +3,5 @@
 .webpack.*
 /screenshots/*
 package-lock.json
+*.swp
+*.log
