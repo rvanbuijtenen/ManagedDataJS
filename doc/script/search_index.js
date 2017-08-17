@@ -1050,21 +1050,9 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "framework/datamanager/fields/mfieldsingle.js~mobjectmfield#addrelatedobject",
-    "class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-method-addRelatedObject",
-    "framework/dataManager/fields/MFieldSingle.js~MObjectMField#addRelatedObject",
-    "method"
-  ],
-  [
     "framework/datamanager/fields/mfieldsingle.js~mobjectmfield#constructor",
     "class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-constructor-constructor",
     "framework/dataManager/fields/MFieldSingle.js~MObjectMField#constructor",
-    "method"
-  ],
-  [
-    "framework/datamanager/fields/mfieldsingle.js~mobjectmfield#removerelatedobject",
-    "class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-method-removeRelatedObject",
-    "framework/dataManager/fields/MFieldSingle.js~MObjectMField#removeRelatedObject",
     "method"
   ],
   [
@@ -1084,12 +1072,6 @@ window.esdocSearchIndex = [
     "class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-method-validate",
     "framework/dataManager/fields/MFieldSingle.js~MObjectMField#validate",
     "method"
-  ],
-  [
-    "framework/datamanager/fields/mfieldsingle.js~mobjectmfield#value",
-    "class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-member-value",
-    "framework/dataManager/fields/MFieldSingle.js~MObjectMField#value",
-    "member"
   ],
   [
     "framework/datamanager/fields/mfieldsingle.js~numbermfield#constructor",

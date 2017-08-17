@@ -69,10 +69,9 @@ import {ArrayHandler, ArrayMField, EnumMField, OneOfMField} from &quot;./MFieldM
  *		EnumMField
  *		OneOfMField
  *
- * This function abstracts the MField implementation away from the user
- * as all outside functionality is provided by the base MField class
- * Note that there is one exception: The array MField, which has some additionional
- * Behaviour.
+ * This function abstracts the MField creation away from the user. It takes a schema and a superKlass
+ * and uses that to create the correct MField for that schema. The field can then be managed through the
+ * interface of MField.
  *
  * @param {Object} schema - A (partial) JSON schema that describes the field that should be constructed
  * @param {MObject} superKlass - The MObject that this field belongs to

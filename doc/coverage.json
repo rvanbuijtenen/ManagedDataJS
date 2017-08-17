@@ -1,7 +1,7 @@
 {
-  "coverage": "90.84%",
-  "expectCount": 153,
-  "actualCount": 139,
+  "coverage": "93.33%",
+  "expectCount": 150,
+  "actualCount": 140,
   "files": {
     "framework/dataManager/DataManager.js": {
       "expectCount": 13,
@@ -29,25 +29,21 @@
       "expectCount": 56,
       "actualCount": 49,
       "undocumentLines": [
-        84,
-        85,
-        131,
-        416,
-        420,
-        569,
-        614
+        90,
+        91,
+        137,
+        422,
+        426,
+        573,
+        618
       ]
     },
     "framework/dataManager/fields/MFieldSingle.js": {
-      "expectCount": 32,
-      "actualCount": 26,
+      "expectCount": 29,
+      "actualCount": 27,
       "undocumentLines": [
         77,
-        88,
-        359,
-        363,
-        365,
-        392
+        88
       ]
     },
     "framework/mixins/Locking.js": {

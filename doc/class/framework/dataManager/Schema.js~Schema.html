@@ -80,8 +80,8 @@
 
   
   
-  <div class="description" data-ice="description"><p>Schema is a wrapper that provides an addKlass and a getKlassByName method. These methods are used to manage an
-object that maps klass names to KlassSchemas. it&apos;s purpose is to group multiple KlassSchemas into a single Schema</p>
+  <div class="description" data-ice="description"><p>A schema wraps multiple KlassSchemas together into a single schema. It provides an interface
+for adding and retrieving klassSchemas.</p>
 </div>
   
 
@@ -185,7 +185,7 @@ object that maps klass names to KlassSchemas. it&apos;s purpose is to group mult
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~Schema.html#instance-method-addKlass">addKlass</a></span></span><span class="code" data-ice="signature">(klassName: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, klass: <span>Klass</span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~Schema.html#instance-method-addKlass">addKlass</a></span></span><span class="code" data-ice="signature">(klassName: <span>String, Symbol</span>, klass: <span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span>)</span>
         </p>
       </div>
       <div>
@@ -213,7 +213,7 @@ object that maps klass names to KlassSchemas. it&apos;s purpose is to group mult
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~Schema.html#instance-method-getKlassByName">getKlassByName</a></span></span><span class="code" data-ice="signature">(klassName: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span>Klass</span></span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/Schema.js~Schema.html#instance-method-getKlassByName">getKlassByName</a></span></span><span class="code" data-ice="signature">(klassName: <span>String, Symbol</span>): <span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></span>
         </p>
       </div>
       <div>
@@ -338,7 +338,7 @@ object that maps klass names to KlassSchemas. it&apos;s purpose is to group mult
     
     
     
-    <span class="code" data-ice="name">addKlass</span><span class="code" data-ice="signature">(klassName: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, klass: <span>Klass</span>)</span>
+    <span class="code" data-ice="name">addKlass</span><span class="code" data-ice="signature">(klassName: <span>String, Symbol</span>, klass: <span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span>)</span>
     <span class="right-info">
       
       
@@ -363,14 +363,14 @@ object that maps klass names to KlassSchemas. it&apos;s purpose is to group mult
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">klassName</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="type" class="code"><span>String, Symbol</span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>A string representing the klass name that we want to add</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">klass</td>
-      <td data-ice="type" class="code"><span>Klass</span></td>
+      <td data-ice="type" class="code"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>The klass that we want to add</p>
 </td>
@@ -405,7 +405,7 @@ object that maps klass names to KlassSchemas. it&apos;s purpose is to group mult
     
     
     
-    <span class="code" data-ice="name">getKlassByName</span><span class="code" data-ice="signature">(klassName: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span>Klass</span></span>
+    <span class="code" data-ice="name">getKlassByName</span><span class="code" data-ice="signature">(klassName: <span>String, Symbol</span>): <span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></span>
     <span class="right-info">
       
       
@@ -430,7 +430,7 @@ object that maps klass names to KlassSchemas. it&apos;s purpose is to group mult
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">klassName</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="type" class="code"><span>String, Symbol</span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>The klass that we want to retrieve</p>
 </td>
@@ -445,8 +445,8 @@ object that maps klass names to KlassSchemas. it&apos;s purpose is to group mult
     <table>
       <tbody>
         <tr>
-          <td class="return-type code" data-ice="returnType"><span>Klass</span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>The klass corresponding with the given klassName</p>
+          <td class="return-type code" data-ice="returnType"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>The KlassSchema corresponding with the given klassName</p>
 </td>
         </tr>
       </tbody>

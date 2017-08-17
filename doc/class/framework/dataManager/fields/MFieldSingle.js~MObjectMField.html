@@ -54,13 +54,13 @@
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {MObjectMField} from &apos;<span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber344">ManagedDataJS/framework/dataManager/fields/MFieldSingle.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {MObjectMField} from &apos;<span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber319">ManagedDataJS/framework/dataManager/fields/MFieldSingle.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber344">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber319">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -80,12 +80,9 @@
 
   
   
-  <div class="description" data-ice="description"><p>MObject implementation of MField which checks the following constraints:</p>
-<pre><code><code class="source-code prettyprint">REQUIRED:
-    value                  ===&gt;    value instanceof MObject &amp;&amp; value.klass == schema.klass
-OPTIONAL:
-    inverse                 ===&gt;    (value[inverse] == this || value[inverse].includes(this))</code>
-</code></pre></div>
+  <div class="description" data-ice="description"><p>MObject implementation of MField. Besides validating, an MObjectMField also manages relations with other
+fields </p>
+</div>
   
 
   
@@ -167,34 +164,6 @@ OPTIONAL:
       
     </td>
   </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-member-value">value</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
 </tbody>
 </table>
 </div>
@@ -216,69 +185,15 @@ OPTIONAL:
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-method-addRelatedObject">addRelatedObject</a></span></span><span class="code" data-ice="signature">(other: <span>*</span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-method-setValue">setValue</a></span></span><span class="code" data-ice="signature">(value: <span><a href="class/framework/dataManager/MObject.js~MObject.html">MObject</a></span>)</span>
         </p>
       </div>
       <div>
         
         
-        
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-method-removeRelatedObject">removeRelatedObject</a></span></span><span class="code" data-ice="signature">(other: <span>*</span>)</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MObjectMField.html#instance-method-setValue">setValue</a></span></span><span class="code" data-ice="signature">(value: <span>*</span>)</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
+        <div data-ice="description"><p>setValue checks if the object has any relations, and if it does this object is added
+to the related object.</p>
+</div>
       </div>
     </td>
     <td>
@@ -306,7 +221,8 @@ OPTIONAL:
       <div>
         
         
-        
+        <div data-ice="description"><p>Validates whether the given value is an MObject of a klass matching its schema</p>
+</div>
       </div>
     </td>
     <td>
@@ -598,7 +514,7 @@ OPTIONAL:
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber349">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber324">source</a></span></span>
     </span>
   </h3>
 
@@ -668,7 +584,7 @@ OPTIONAL:
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber356">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber331">source</a></span></span>
     </span>
   </h3>
 
@@ -700,15 +616,18 @@ OPTIONAL:
   
   
 </div>
+</div>
+<div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
+
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-value">
+  <h3 data-ice="anchor" id="instance-method-setValue">
     <span class="access" data-ice="access">public</span>
     
     
     
     
     
-    <span class="code" data-ice="name">value</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="code" data-ice="name">setValue</span><span class="code" data-ice="signature">(value: <span><a href="class/framework/dataManager/MObject.js~MObject.html">MObject</a></span>)</span>
     <span class="right-info">
       
       
@@ -719,173 +638,8 @@ OPTIONAL:
   
   
   
-  <div data-ice="description"><p>The initial value for this MField</p>
-</div>
-
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-member-value">MField#value</a></span></div>
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-</div>
-<div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
-
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-addRelatedObject">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">addRelatedObject</span><span class="code" data-ice="signature">(other: <span>*</span>)</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber359">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">other</td>
-      <td data-ice="type" class="code"><span>*</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-removeRelatedObject">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">removeRelatedObject</span><span class="code" data-ice="signature">(other: <span>*</span>)</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber363">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">other</td>
-      <td data-ice="type" class="code"><span>*</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-setValue">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">setValue</span><span class="code" data-ice="signature">(value: <span>*</span>)</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber392">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>setValue takes a value as argument and attempts to validate this value. If it was valid we set 
-this.value to the value, and otherwise we throw the error returned by the validate method</p>
+  <div data-ice="description"><p>setValue checks if the object has any relations, and if it does this object is added
+to the related object.</p>
 </div>
 
   <div data-ice="override"><h4>Override:</h4><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-method-setValue">MField#setValue</a></span></div>
@@ -900,9 +654,10 @@ this.value to the value, and otherwise we throw the error returned by the valida
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">value</td>
-      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="type" class="code"><span><a href="class/framework/dataManager/MObject.js~MObject.html">MObject</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
+      <td data-ice="description"><p>An MObject that should be set as value of this MField</p>
+</td>
     </tr>
 </tbody>
   </table>
@@ -938,14 +693,15 @@ this.value to the value, and otherwise we throw the error returned by the valida
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber374">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldSingle.js.html#lineNumber341">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Validates whether the given value is an MObject of a klass matching its schema</p>
+</div>
 
   <div data-ice="override"><h4>Override:</h4><span><a href="class/framework/dataManager/fields/MFieldSingle.js~MField.html#instance-method-validate">MField#validate</a></span></div>
 

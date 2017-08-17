@@ -47,10 +47,6 @@ document.getElementById('loggingGmailValidator').addEventListener('click', () =>
     runMachine("gmailValidator", $("#content"))
 });
 
-document.getElementById('documentation').addEventListener('click', () => {
-    runDocumentation($("#content"))
-});
-
 //document.getElementById('test').addEventListener('click', () => {
 	/*let schema = require("./implementations/relations/relations.json")
 

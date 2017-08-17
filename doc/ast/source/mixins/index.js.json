@@ -1,28 +1,28 @@
 {
   "type": "File",
   "start": 0,
-  "end": 149,
+  "end": 215,
   "loc": {
     "start": {
       "line": 1,
       "column": 0
     },
     "end": {
-      "line": 5,
+      "line": 8,
       "column": 38
     }
   },
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 149,
+    "end": 215,
     "loc": {
       "start": {
         "line": 1,
         "column": 0
       },
       "end": {
-        "line": 5,
+        "line": 8,
         "column": 38
       }
     },
@@ -283,20 +283,40 @@
             "rawValue": "./Persistence",
             "raw": "\"./Persistence\""
           },
-          "value": "./Persistence"
-        }
+          "value": "./Persistence",
+          "leadingComments": null,
+          "trailingComments": null
+        },
+        "trailingComments": [
+          {
+            "type": "CommentBlock",
+            "value": "*\n * Exports Locking, Logging and Persistence as one module\n ",
+            "start": 111,
+            "end": 176,
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 0
+              },
+              "end": {
+                "line": 7,
+                "column": 3
+              }
+            }
+          }
+        ]
       },
       {
         "type": "ExportNamedDeclaration",
-        "start": 111,
-        "end": 149,
+        "start": 177,
+        "end": 215,
         "loc": {
           "start": {
-            "line": 5,
+            "line": 8,
             "column": 0
           },
           "end": {
-            "line": 5,
+            "line": 8,
             "column": 38
           }
         },
@@ -304,78 +324,80 @@
         "specifiers": [
           {
             "type": "ExportSpecifier",
-            "start": 119,
-            "end": 126,
+            "start": 185,
+            "end": 192,
             "loc": {
               "start": {
-                "line": 5,
+                "line": 8,
                 "column": 8
               },
               "end": {
-                "line": 5,
+                "line": 8,
                 "column": 15
               }
             },
             "local": {
               "type": "Identifier",
-              "start": 119,
-              "end": 126,
+              "start": 185,
+              "end": 192,
               "loc": {
                 "start": {
-                  "line": 5,
+                  "line": 8,
                   "column": 8
                 },
                 "end": {
-                  "line": 5,
+                  "line": 8,
+                  "column": 15
+                },
+                "identifierName": "Locking"
+              },
+              "name": "Locking",
+              "leadingComments": null
+            },
+            "exported": {
+              "type": "Identifier",
+              "start": 185,
+              "end": 192,
+              "loc": {
+                "start": {
+                  "line": 8,
+                  "column": 8
+                },
+                "end": {
+                  "line": 8,
                   "column": 15
                 },
                 "identifierName": "Locking"
               },
               "name": "Locking"
             },
-            "exported": {
-              "type": "Identifier",
-              "start": 119,
-              "end": 126,
-              "loc": {
-                "start": {
-                  "line": 5,
-                  "column": 8
-                },
-                "end": {
-                  "line": 5,
-                  "column": 15
-                },
-                "identifierName": "Locking"
-              },
-              "name": "Locking"
-            }
+            "leadingComments": null
           },
           {
             "type": "ExportSpecifier",
-            "start": 128,
-            "end": 135,
+            "start": 194,
+            "end": 201,
             "loc": {
               "start": {
-                "line": 5,
+                "line": 8,
                 "column": 17
               },
               "end": {
-                "line": 5,
+                "line": 8,
                 "column": 24
               }
             },
             "local": {
               "type": "Identifier",
-              "start": 128,
-              "end": 135,
+              "start": 194,
+              "end": 201,
               "loc": {
                 "start": {
-                  "line": 5,
+                  "line": 8,
                   "column": 17
                 },
                 "end": {
-                  "line": 5,
+                  "line": 8,
                   "column": 24
                 },
                 "identifierName": "Logging"
@@ -384,15 +406,15 @@
             },
             "exported": {
               "type": "Identifier",
-              "start": 128,
-              "end": 135,
+              "start": 194,
+              "end": 201,
               "loc": {
                 "start": {
-                  "line": 5,
+                  "line": 8,
                   "column": 17
                 },
                 "end": {
-                  "line": 5,
+                  "line": 8,
                   "column": 24
                 },
                 "identifierName": "Logging"
@@ -402,29 +424,29 @@
           },
           {
             "type": "ExportSpecifier",
-            "start": 137,
-            "end": 148,
+            "start": 203,
+            "end": 214,
             "loc": {
               "start": {
-                "line": 5,
+                "line": 8,
                 "column": 26
               },
               "end": {
-                "line": 5,
+                "line": 8,
                 "column": 37
               }
             },
             "local": {
               "type": "Identifier",
-              "start": 137,
-              "end": 148,
+              "start": 203,
+              "end": 214,
               "loc": {
                 "start": {
-                  "line": 5,
+                  "line": 8,
                   "column": 26
                 },
                 "end": {
-                  "line": 5,
+                  "line": 8,
                   "column": 37
                 },
                 "identifierName": "Persistence"
@@ -433,15 +455,15 @@
             },
             "exported": {
               "type": "Identifier",
-              "start": 137,
-              "end": 148,
+              "start": 203,
+              "end": 214,
               "loc": {
                 "start": {
-                  "line": 5,
+                  "line": 8,
                   "column": 26
                 },
                 "end": {
-                  "line": 5,
+                  "line": 8,
                   "column": 37
                 },
                 "identifierName": "Persistence"
@@ -450,12 +472,47 @@
             }
           }
         ],
-        "source": null
+        "source": null,
+        "leadingComments": [
+          {
+            "type": "CommentBlock",
+            "value": "*\n * Exports Locking, Logging and Persistence as one module\n ",
+            "start": 111,
+            "end": 176,
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 0
+              },
+              "end": {
+                "line": 7,
+                "column": 3
+              }
+            }
+          }
+        ]
       }
     ],
     "directives": []
   },
-  "comments": [],
+  "comments": [
+    {
+      "type": "CommentBlock",
+      "value": "*\n * Exports Locking, Logging and Persistence as one module\n ",
+      "start": 111,
+      "end": 176,
+      "loc": {
+        "start": {
+          "line": 5,
+          "column": 0
+        },
+        "end": {
+          "line": 7,
+          "column": 3
+        }
+      }
+    }
+  ],
   "tokens": [
     {
       "type": {
@@ -929,6 +986,22 @@
       }
     },
     {
+      "type": "CommentBlock",
+      "value": "*\n * Exports Locking, Logging and Persistence as one module\n ",
+      "start": 111,
+      "end": 176,
+      "loc": {
+        "start": {
+          "line": 5,
+          "column": 0
+        },
+        "end": {
+          "line": 7,
+          "column": 3
+        }
+      }
+    },
+    {
       "type": {
         "label": "export",
         "keyword": "export",
@@ -943,15 +1016,15 @@
         "updateContext": null
       },
       "value": "export",
-      "start": 111,
-      "end": 117,
+      "start": 177,
+      "end": 183,
       "loc": {
         "start": {
-          "line": 5,
+          "line": 8,
           "column": 0
         },
         "end": {
-          "line": 5,
+          "line": 8,
           "column": 6
         }
       }
@@ -968,15 +1041,15 @@
         "postfix": false,
         "binop": null
       },
-      "start": 118,
-      "end": 119,
+      "start": 184,
+      "end": 185,
       "loc": {
         "start": {
-          "line": 5,
+          "line": 8,
           "column": 7
         },
         "end": {
-          "line": 5,
+          "line": 8,
           "column": 8
         }
       }
@@ -994,15 +1067,15 @@
         "binop": null
       },
       "value": "Locking",
-      "start": 119,
-      "end": 126,
+      "start": 185,
+      "end": 192,
       "loc": {
         "start": {
-          "line": 5,
+          "line": 8,
           "column": 8
         },
         "end": {
-          "line": 5,
+          "line": 8,
           "column": 15
         }
       }
@@ -1020,15 +1093,15 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 126,
-      "end": 127,
+      "start": 192,
+      "end": 193,
       "loc": {
         "start": {
-          "line": 5,
+          "line": 8,
           "column": 15
         },
         "end": {
-          "line": 5,
+          "line": 8,
           "column": 16
         }
       }
@@ -1046,15 +1119,15 @@
         "binop": null
       },
       "value": "Logging",
-      "start": 128,
-      "end": 135,
+      "start": 194,
+      "end": 201,
       "loc": {
         "start": {
-          "line": 5,
+          "line": 8,
           "column": 17
         },
         "end": {
-          "line": 5,
+          "line": 8,
           "column": 24
         }
       }
@@ -1072,15 +1145,15 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 135,
-      "end": 136,
+      "start": 201,
+      "end": 202,
       "loc": {
         "start": {
-          "line": 5,
+          "line": 8,
           "column": 24
         },
         "end": {
-          "line": 5,
+          "line": 8,
           "column": 25
         }
       }
@@ -1098,15 +1171,15 @@
         "binop": null
       },
       "value": "Persistence",
-      "start": 137,
-      "end": 148,
+      "start": 203,
+      "end": 214,
       "loc": {
         "start": {
-          "line": 5,
+          "line": 8,
           "column": 26
         },
         "end": {
-          "line": 5,
+          "line": 8,
           "column": 37
         }
       }
@@ -1123,15 +1196,15 @@
         "postfix": false,
         "binop": null
       },
-      "start": 148,
-      "end": 149,
+      "start": 214,
+      "end": 215,
       "loc": {
         "start": {
-          "line": 5,
+          "line": 8,
           "column": 37
         },
         "end": {
-          "line": 5,
+          "line": 8,
           "column": 38
         }
       }
@@ -1149,15 +1222,15 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 149,
-      "end": 149,
+      "start": 215,
+      "end": 215,
       "loc": {
         "start": {
-          "line": 5,
+          "line": 8,
           "column": 38
         },
         "end": {
-          "line": 5,
+          "line": 8,
           "column": 38
         }
       }

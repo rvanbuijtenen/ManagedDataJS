@@ -1490,7 +1490,7 @@
     "__docId__": 84,
     "kind": "file",
     "name": "framework/dataManager/Schema.js",
-    "content": "/**\n * An instance of KlassSchema describes an MObjects fields, fieldTypes and field relations.\n */\nexport class KlassSchema {\n\t/**\n\t * A simple constructor that initializes fields and fieldTypes. It takes a string representing\n\t * the klass's name as argument.\n\t *\n\t * @param {String} klass - A string representing the klass's name\n\t */\n\tconstructor(klass) {\n\t\t/**\n\t\t * @type {String} A string representiing the klass's name\n\t\t */\n\t\tthis.klass = klass\n\n\t\t/**\n\t\t * @type {Object} An object that maps property keys to field schemas\n\t\t */\n\t\tthis.fields = {}\n\n\t\t/**\n\t\t * @type{Object} an object that maps property keys to field types\n\t\t */\n\t\tthis.fieldTypes = {}\n\t}\n\n\t/**\n\t * @param {String, Symbol} propKey - The key of the field that we want to set the schema for\n\t * @param {Object} field - A parsed JSON schema representing a single property\n\t * @param {String} type - The type of the field that we want to set\n\t */\n\taddFieldSchema(propKey, field, type) {\n\t\tthis.fields[propKey] = field\n\t\tthis.fieldTypes[propKey] = type\n\t}\n\n\t/**\n\t * @param {String, Symbol} propKey - The key of the field that we want to retrieve the schema of\n\t * @return {Object} - A parsed JSON schema representing the requested property\n\t * @throws {TypeError} - An error is thrown if the requested field does not exist\n\t */\n\tgetFieldSchema(propKey) {\n\t\tif(this.fields.hasOwnProperty(propKey)) {\n\t\t\treturn this.fields[propKey]\n\t\t} else {\n\t\t\tthrow new TypeError(propKey + \" is not defined in schema\")\n\t\t}\n\t}\n\n\t/**\n\t * @param {String, Symbol} propKey - The key of the field that we want to know if it exists\n\t * @return {Boolean} - True if the field exists, false otherwise\n\t */\n\thasFieldSchema(propKey) {\n\t\tif(this.fields.hasOwnProperty(propKey)) {\n\t\t\treturn true\n\t\t} else {\n\t\t\treturn false\n\t\t}\n\t}\n\n\t/**\n\t * @param {String, Symbol} propKey - The key of the field that we want to retrieve the type of\n\t * @return {String} - the type of the requested field\n\t * @throws {TypeError} - An error is thrown if the requested field does not exist\n\t */\n\tgetFieldType(propKey) {\n\t\tif(this.fields.hasOwnProperty(propKey)) {\n\t\t\treturn this.fieldTypes[propKey]\n\t\t} else {\n\t\t\tthrow new TypeError(propKey + \" is not defined in schema\")\n\t\t}\n\t}\n\n\t/**\n\t * @return {String} A string representing this klass's type\n\t */\n\tgetKlass() {\n\t\treturn this.klass\n\t}\n}\n\n/**\n * Schema is a wrapper that provides an addKlass and a getKlassByName method. These methods are used to manage an\n * object that maps klass names to KlassSchemas. it's purpose is to group multiple KlassSchemas into a single Schema\n */\nexport class Schema {\n\t/**\n\t * A simple constructor that initializes the internal klasses property\n\t */\n\tconstructor() {\n\t\t/**\n\t\t * @type {Object} An object that maps klass names to Klass instances\n\t\t */\n\t\tthis.klasses = {}\n\t}\n\n\t/**\n\t * @param {String} klassName - A string representing the klass name that we want to add\n\t * @param {Klass} klass - The klass that we want to add\n\t */\n\taddKlass(klassName, klass) {\n\t\tthis.klasses[klassName] = klass\n\t}\n\n\t/**\n\t * @param {String} klassName - The klass that we want to retrieve\n\t * @return {Klass} The klass corresponding with the given klassName\n\t * @throws {TypeError} An error is thrown when the given klassName does not exist\n\t */ \n\tgetKlassByName(klassName) {\n\t\tif(this.klasses.hasOwnProperty(klassName)) {\n\t\t\treturn this.klasses[klassName]\n\t\t} else {\n\t\t\tthrow new TypeError(\"unknown klass: \" + klassName)\n\t\t}\n\t}\n}\n\n/**\n * @param {Object} schema - A JSON schema\n * @return {Schema} A parsed JSON schema\n */\nexport function parseSchema(schema) {\n\t/* Verify that the schema contains the required 'name' and 'properties' property */\n\tif(!schema.hasOwnProperty(\"name\")) {\n\t\tthrow new TypeError(\"A schema must have a 'name' property\")\n\t}\n\n\tif(!schema.hasOwnProperty(\"properties\")) {\n\t\tthrow new TypeError(\"A schema must have 'properties'\")\n\t}\n\n\t/* Create a new instance of Schema */\n\tlet parsedSchema = new Schema()\n\n\t/* Initialize paths: an object that maps a definition path to a klass name. \n\t * the path '#' refers to the main schema.\n\t * paths of the form '#/definitions/<klassName>' refers to a definition */\n\tlet paths = {}\n\tpaths[\"#\"] = schema.name\n\n\tlet hasDefinitions = false\n\t/* Parse definitions if there are any */\n\tif(schema.hasOwnProperty(\"definitions\")) {\n\t\tfor(let definition in schema.definitions) {\n\t\t\tparseDefinitions(schema.definitions, parsedSchema, paths)\n\t\t}\n\t}\n\n\t/* Parse the mainKlass */\n\tlet mainKlass = parseKlass(schema, schema.name, paths)\n\tparsedSchema.addKlass(schema.name, mainKlass)\n\n\tparseRelations(schema, parsedSchema, paths)\n\n\treturn parsedSchema\n}\n\n/**\n * @param {Object} definitions - A 'definitions' object from a JSON schema\n * @param {Schema} schema - A Schema where parseDefinitions can store parsed klasses\n * @param {Object} paths - An object that maps schema paths to the corresponding klass name\n */\nfunction parseDefinitions(definitions, schema, paths) {\n\t/* For each definition: map the path of that definition to the definition (klassName) */\n\tfor(let definition in definitions) {\n\t\tpaths[\"#/definitions/\" + definition] = definition\n\t}\n\n\t/* For each definition: parse the klass that it describes and add it to the schema */\n\tfor(let definition in definitions) {\n\t\tlet klass = parseKlass(definitions[definition], definition, paths) \n\t\tschema.addKlass(definition, klass)\n\t}\n}\n\n/**\n * @param {Object} klassSchema - A JSON schema describing the klass\n * @param {String} klassName - The name of this klass\n * @param {Object} paths - An object that maps schema paths to the corresponding klass name\n * @return {Klass} A parsed klass\n */\nfunction parseKlass(klassSchema, klassName, paths) {\n\t/* Create a new empty Klass */\n\tlet klass = new KlassSchema(klassName)\n\n\t/* For each property: parse the property and add it to the Klass */\n\tfor(let property in klassSchema.properties) {\n\t\tlet prop = klassSchema.properties[property]\n\t\tlet type = getType(prop)\n\n\t\tklass.addFieldSchema(property, parseProperty(prop, type, paths), type)\n\t}\n\n\treturn klass\n}\n\n/**\n * @param {Object} schema - A complete (raw) JSON schema\n * @param {Schema} parsedSchema - A Schema object that contains the parsed Klasses to which relations must be added\n * @param {Object} paths - An object that maps a path of the form \"#\" or \"#/definitions/<klassName>\" to the corresponding klassName\n */\nfunction parseRelations(schema, parsedSchema, paths) {\n\t/* parse relations for the main klass */\n\tif(schema.hasOwnProperty(\"relations\")) {\n\t\tfor(let relation in schema.relations) {\n\t\t\tparseRelation(relation, schema.relations[relation], parsedSchema, schema.name, paths)\n\t\t}\n\t}\n\n\t/* parse relations for all other classes defined in \"definitions\" */\n\tif(schema.hasOwnProperty(\"definitions\")) {\n\t\tfor(let definition in schema.definitions) {\t\n\t\t\tif(schema.definitions[definition].hasOwnProperty(\"relations\")) {\n\t\t\t\tfor(let relation in schema.definitions[definition].relations) {\n\t\t\t\t\tparseRelation(relation, schema.definitions[definition].relations[relation], parsedSchema, definition, paths)\n\t\t\t\t}\n\t\t\t}\t\n\t\t}\n\t}\n}\n\n/**\n * @param {String} relationType - String describing the type of relation. One of [\"oneToOne\", \"oneToMany\", \"manyToMany\"]\n * @param {Object} relations - A raw JSON schema for relations.\n * @param {parsedSchema} Schema - An instance of Schema that already contains all basic klass definitions.\n * @param {String} klassName - A string describing the name of the klass that these relations belong to.\n * @param {Object} paths - A javascript object that maps schema paths to klass names.\n * @throws {TypeError} When an invalid relation keyword is found in the schema, an error is thrown.\n */\nfunction parseRelation(relationType, relations, parsedSchema, klassName, paths) {\n\tlet fieldsList = []\n\tlet inversesList = []\n\tswitch(relationType) {\n\t\tcase \"oneToOne\": {\n\t\t\tfor(let relation of relations) {\n\t\t\t\tlet {field, inverses} = buildOneToOne(relation, klassName, paths)\n\t\t\t\tfieldsList.push(field)\n\t\t\t\tinversesList.push(inverses)\n\t\t\t}\n\t\t\tbreak;\n\t\t}\n\t\tcase \"oneToMany\": {\n\t\t\tfor(let relation of relations) {\n\t\t\t\tlet {field, inverses} = buildOneToMany(relation, klassName, paths)\n\t\t\t\tfieldsList.push(field)\n\t\t\t\tinversesList.push(inverses)\n\t\t\t}\n\t\t\tbreak;\n\t\t}\n\t\tcase \"manyToMany\": {\n\t\t\tfor(let relation of relations) {\n\t\t\t\tlet {field, inverses} = buildManyToMany(relation, klassName, paths)\n\t\t\t\tfieldsList.push(field)\n\t\t\t\tinversesList.push(inverses)\n\t\t\t}\n\t\t\tbreak;\n\t\t}\n\t\tdefault: {\n\t\t\tthrow new TypeError(relationType + \"is not a valid relation type. Please use one of [oneToOne, oneToMany, manyToMany]\")\n\t\t}\n\t}\n\tfor(let field of fieldsList) {\n\t\tparsedSchema.klasses[klassName].addFieldSchema(field.key, field.schema, field.type)\n\t}\n\n\tfor(let inverses of inversesList) {\n\t\tfor(let inverseKlass in inverses) {\n\t\t\tparsedSchema.klasses[inverseKlass].addFieldSchema(inverses[inverseKlass].key, inverses[inverseKlass].schema, inverses[inverseKlass].type)\n\t\t}\n\t}\n}\n\n/**\n * @param {Object} schema - A raw JSON schema describing a relation\n * @param {Object} paths - A javascript object that maps schema paths to klass names\n * @Throws {TypeError} A TypeError is thrown when the schema contains an incorrect reference\n */\nfunction validateRelationSchema(schema, paths) {\n\tif(schema.hasOwnProperty(\"$ref\")) {\n\t\tif(!paths.hasOwnProperty(schema[\"$ref\"])) {\n\t\t\tthrow new TypeError(schema[\"$ref\"] + \" is not a valid schema reference\")\n\t\t}\n\t} else if (schema.hasOwnProperty(\"oneOf\")) {\n\t\tfor(let item of schema.oneOf) {\n\t\t\tif(item.hasOwnProperty(\"$ref\")) {\n\t\t\t\tif(!paths.hasOwnProperty(item[\"$ref\"])) {\n\t\t\t\t\tthrow new TypeError(item[\"$ref\"] + \" is not a valid schema reference\")\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tthrow new TypeError(\"An item in 'oneOf' must have a '$ref' keyword referencing a schema\")\n\t\t\t}\n\t\t}\n\t}\n}\n\n/**\n * @param {Object} relation - A single schema describing a relation\n * @param {String} klassName - The klass that this relation belongs to\n * @param {Object} paths - A javascript object that maps schema paths to klass names\n * @return {Object, Object} - buildOneToOne creates the fields required for a one to \n * one relation. The first object is the field for the klass initiating the relation.\n * The second object contains an inverse field for each other klass involved in the relation.\n */\nfunction buildOneToOne(relation, klassName, paths) {\n\tvalidateRelationSchema(relation, paths)\n\n\tlet field = {}\n\tlet inverses = {}\n\tif(relation.hasOwnProperty(\"$ref\")) {\n\t\tlet relatedKlass = paths[relation[\"$ref\"]]\n\t\tfield.schema = buildObjectField(relatedKlass, relation.referred, \"object\")\n\t\tfield.key = relation.referrer\n\t\tfield.type = \"object\"\n\n\t\tinverses[relatedKlass] = {}\n\t\tinverses[relatedKlass].schema = buildObjectField(klassName, relation.referrer, \"object\")\n\t\tinverses[relatedKlass].type = \"object\"\n\t\tinverses[relatedKlass].key = relation.referred\n\t} else if (relation.hasOwnProperty(\"oneOf\")) {\n\t\tfield = {}\n\t\tfield.type=\"oneOf\"\n\t\tfield.key=relation.referrer\n\t\tfield.schema = {\n\t\t\t\"oneOf\": []\n\t\t}\n\t\tfor(let item of relation.oneOf) {\n\t\t\tlet relatedKlass = paths[item[\"$ref\"]]\n\t\t\tfield.schema.oneOf.push(buildObjectField(relatedKlass, relation.referred, \"object\"))\n\t\t\t\n\t\t\tinverses[relatedKlass] = {}\n\t\t\tinverses[relatedKlass].type = \"object\"\n\t\t\tinverses[relatedKlass].key = relation.referred\n\t\t\tinverses[relatedKlass].schema = buildObjectField(relatedKlass, relation.referrer, \"object\")\n\t\t}\n\t}\n\n\treturn {field, inverses}\n}\n\n/**\n * @param {Object} relation - A single schema describing a relation\n * @param {String} klassName - The klass that this relation belongs to\n * @param {Object} paths - A javascript object that maps schema paths to klass names\n * @return {Object, Object} - buildOneToMany creates the fields required for a one to \n * many relation. The first object is the field for the klass initiating the relation.\n * The second object contains an inverse field for each other klass involved in the relation.\n */\nfunction buildOneToMany(relation, klassName, paths) {\n\tvalidateRelationSchema(relation, paths)\n\n\tlet field = {}\n\tlet inverses = {}\n\tif(relation.hasOwnProperty(\"$ref\")) {\n\t\tlet relatedKlass = paths[relation[\"$ref\"]]\n\t\tfield.schema = buildArrayField(relation.referred, {\"type\": \"object\", \"klass\": relatedKlass}, \"object\")\n\t\tfield.key = relation.referrer\n\t\tfield.type = \"array\"\n\n\t\tinverses[relatedKlass] = {}\n\t\tinverses[relatedKlass].schema = buildObjectField(klassName, relation.referrer, \"array\")\n\t\tinverses[relatedKlass].type = \"object\"\n\t\tinverses[relatedKlass].key = relation.referred\n\t} else if (relation.hasOwnProperty(\"oneOf\")) {\n\t\tfield = {}\n\t\tfield.type=\"array\"\n\t\tfield.key = relation.referrer\n\n\t\tlet items = {\n\t\t\t\"oneOf\": []\n\t\t}\n\n\t\tfor(let item of relation.oneOf) {\n\t\t\tlet relatedKlass = paths[item[\"$ref\"]]\n\t\t\titems.oneOf.push({\"type\": \"object\", \"klass\": relatedKlass})\n\t\t\t\n\t\t\tinverses[relatedKlass] = {}\n\t\t\tinverses[relatedKlass].type = \"object\"\n\t\t\tinverses[relatedKlass].key = relation.referred\n\t\t\tinverses[relatedKlass].schema = buildObjectField(klassName, relation.referrer, \"array\")\n\t\t}\n\n\t\tfield.schema = buildArrayField(relation.referred, items, \"object\")\n\t}\n\n\treturn {field, inverses}\n}\n\n/**\n * @param {Object} relation - A single schema describing a relation\n * @param {String} klassName - The klass that this relation belongs to\n * @param {Object} paths - A javascript object that maps schema paths to klass names\n * @return {Object, Object} - buildManyToMany creates the fields required for a many to \n * many relation. The first object is the field for the klass initiating the relation.\n * The second object contains an inverse field for each other klass involved in the relation.\n */\nfunction buildManyToMany(relation, klassName, paths) {\n\tvalidateRelationSchema(relation, paths)\n\n\tlet field = {}\n\tlet inverses = {}\n\tif(relation.hasOwnProperty(\"$ref\")) {\n\t\tlet relatedKlass = paths[relation[\"$ref\"]]\n\t\tfield.schema = buildArrayField(relation.referred, {type: \"object\", klass: relatedKlass}, \"array\")\n\t\tfield.key = relation.referrer\n\t\tfield.type = \"array\"\n\n\t\tinverses[relatedKlass] = {}\n\t\tinverses[relatedKlass].schema = buildArrayField(relation.referrer, {type: \"object\", klass: klassName}, \"array\")\n\t\tinverses[relatedKlass].type = \"array\"\n\t\tinverses[relatedKlass].key = relation.referred\n\t} else if (relation.hasOwnProperty(\"oneOf\")) {\n\t\tfield = {}\n\t\tfield.type=\"array\"\n\t\tfield.key = relation.referrer\n\n\t\tlet items = {\n\t\t\t\"oneOf\": []\n\t\t}\n\n\t\tfor(let item of relation.oneOf) {\n\t\t\tlet relatedKlass = paths[item[\"$ref\"]]\n\t\t\titems.oneOf.push({\"type\": \"object\", \"klass\": relatedKlass})\n\t\t\t\n\t\t\tinverses[relatedKlass] = {}\n\t\t\tinverses[relatedKlass].type = \"array\"\n\t\t\tinverses[relatedKlass].key = relation.referred\n\t\t\tinverses[relatedKlass].schema = buildArrayField(relation.referrer, {type: \"object\", \"klass\": klassName}, \"array\")\n\t\t}\n\n\t\tfield.schema = buildArrayField(relation.referred, items, \"array\")\n\t}\n\n\treturn {field, inverses}\n}\n\n/**\n * @param {String} inverseKey - The property key used to access the inverse field in this fields value\n * @param {Array} items - An object containing the schema for the item that this array field holds.\n * @param {String} inverseType - A string, either \"object\" or \"array\". Used to identify the type of the inverse field\n * @return {Object} A regular javascript object that describes the schema for the created field\n */\nfunction buildArrayField(inverseKey, items, inverseType) {\n\treturn {\n\t\t\"type\": \"array\",\n\t\t\"items\": items,\n\t\t\"inverseKey\": inverseKey,\n\t\t\"inverseType\": inverseType\n\n\t}\n}\n\n/**\n * @param {String} klass - A string representing the klass that this object field must hold\n * @param {String} inverseKey - The property key used to access the inverse field in this fields value\n * @param {String} inverseType - A string, either \"object\" or \"array\". Used to identify the type of the inverse field\n * @return {Object} A regular javascript object that describes the schema for the created field\n */\nfunction buildObjectField(klass, inverseKey, inverseType) {\n\treturn {\n\t\t\"type\": \"object\",\n\t\t\"klass\": klass,\n\t\t\"inverseKey\": inverseKey,\n\t\t\"inverseType\": inverseType\n\t}\n}\n\n/**\n * @param {Object} property - A JSON schema describing a single property\n * @param {String} type - The type of the property\n * @param {Object} paths - An object that maps schema paths to the corresponding klass name\n * @return {Object} A parsed property\n * @throws {TypeError} - If the schema contains an invalid keyword then an error is thrown\n */\nfunction parseProperty(property, type, paths) {\n\t/* Shallow copy the given property to a new object so we don't modify the existing schema */\n\tlet newProp = { ...property }\n\n\tswitch(type) {\n\t\tcase \"object\": {\n\t\t\t/* An object must have a reference */\n\t\t\tif(newProp.hasOwnProperty(\"$ref\")) {\n\t\t\t\t/* Replace the '$ref' keyword by a klass */\n\t\t\t\tnewProp[\"klass\"] = paths[newProp[\"$ref\"]]\n\t\t\t\tif(newProp.klass == undefined) {\n\t\t\t\t}\n\t\t\t\tdelete newProp[\"$ref\"]\n\t\t\t\t\n\t\t\t} else {\n\t\t\t\tthrow new TypeError(\"A property of type 'object' must have a '$ref' keyword that references the definition describing the object\")\n\t\t\t}\n\t\t\tbreak\n\t\t}\n\t\tcase \"array\": {\n\t\t\t/* An array must define items */\n\t\t\tif(newProp.hasOwnProperty(\"items\")) {\n\t\t\t\tif(newProp.items instanceof Array) {\n\t\t\t\t\t/* Parse each item in the array */\n\t\t\t\t\tnewProp.items = parseArray(newProp.items, paths)\n\t\t\t\t} else {\n\t\t\t\t\t/* Items is a single property so we parse the property */\n\t\t\t\t\tlet type = getType(newProp.items)\n\t\t\t\t\tnewProp.items = parseProperty(newProp.items, type, paths)\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tthrow new TypeError(\"An array must define the type of its contained items in an 'items' keyword\")\n\t\t\t}\n\t\t\tbreak\n\t\t}\n\t\tcase \"oneOf\": {\n\t\t\t/* oneOf must be an array of types */\n\t\t\tif(newProp.oneOf instanceof Array) {\n\t\t\t\t/* Parse each item in the array */\n\t\t\t\tnewProp.oneOf = parseArray(newProp.oneOf, paths)\n\t\t\t} else {\n\t\t\t\tthrow new TypeError(\"The oneOf keyword must be an array of types\")\n\t\t\t}\n\t\t\tbreak\n\t\t}\n\t}\n\treturn newProp\n}\n\n/**\n * @param {Array} array - An array of JSON schema properties\n * @param {Object} paths - An object that maps schema paths to the corresponding klass name\n * @return {Array} An array containing the parsed properties\n */\nfunction parseArray(array, paths) {\n\tlet newArr = []\n\tfor(let item of array) {\n\t\t/* For each item: parse the item and add it to the new Array */\n\t\tlet type = getType(item)\n\t\tnewArr.push(parseProperty(item, type, paths))\n\t}\n\treturn newArr\n}\n\n/**\n * @param {Object} property - A JSON schema describing a single property\n * @return {String} The type of the given property\n */\nfunction getType(property) {\n\tif(property.hasOwnProperty(\"enum\")) {\n\t\treturn \"enum\"\n\t}\n\n\tif(property.hasOwnProperty(\"oneOf\")) {\n\t\treturn \"oneOf\"\n\t}\n\n\tif(property.hasOwnProperty(\"type\")) {\n\t\treturn property.type\n\t}\n}",
+    "content": "/**\n * An instance of KlassSchema describes an MObjects fields, fieldTypes and field relations.\n */\nexport class KlassSchema {\n\t/**\n\t * A simple constructor that initializes fields and fieldTypes. It takes a string representing\n\t * the klass's name as argument.\n\t *\n\t * @param {String} klass - A string representing the klass's name\n\t */\n\tconstructor(klass) {\n\t\t/**\n\t\t * @type {String} A string representiing the klass's name\n\t\t */\n\t\tthis.klass = klass\n\n\t\t/**\n\t\t * @type {Object} An object that maps property keys to field schemas\n\t\t */\n\t\tthis.fields = {}\n\n\t\t/**\n\t\t * @type{Object} an object that maps property keys to field types\n\t\t */\n\t\tthis.fieldTypes = {}\n\t}\n\n\t/**\n\t * @param {String, Symbol} propKey - The key of the field that we want to set the schema for\n\t * @param {Object} field - A parsed JSON schema representing a single property\n\t * @param {String} type - The type of the field that we want to set\n\t */\n\taddFieldSchema(propKey, field, type) {\n\t\tthis.fields[propKey] = field\n\t\tthis.fieldTypes[propKey] = type\n\t}\n\n\t/**\n\t * @param {String, Symbol} propKey - The key of the field that we want to retrieve the schema of\n\t * @return {Object} - A parsed JSON schema representing the requested property\n\t * @throws {TypeError} - An error is thrown if the requested field does not exist\n\t */\n\tgetFieldSchema(propKey) {\n\t\tif(this.fields.hasOwnProperty(propKey)) {\n\t\t\treturn this.fields[propKey]\n\t\t} else {\n\t\t\tthrow new TypeError(propKey + \" is not defined in schema\")\n\t\t}\n\t}\n\n\t/**\n\t * @param {String, Symbol} propKey - The key of the field that we want to know if it exists\n\t * @return {Boolean} - True if the field exists, false otherwise\n\t */\n\thasFieldSchema(propKey) {\n\t\tif(this.fields.hasOwnProperty(propKey)) {\n\t\t\treturn true\n\t\t} else {\n\t\t\treturn false\n\t\t}\n\t}\n\n\t/**\n\t * @param {String, Symbol} propKey - The key of the field that we want to retrieve the type of\n\t * @return {String} - the type of the requested field\n\t * @throws {TypeError} - An error is thrown if the requested field does not exist\n\t */\n\tgetFieldType(propKey) {\n\t\tif(this.fields.hasOwnProperty(propKey)) {\n\t\t\treturn this.fieldTypes[propKey]\n\t\t} else {\n\t\t\tthrow new TypeError(propKey + \" is not defined in schema\")\n\t\t}\n\t}\n\n\t/**\n\t * @return {String} A string representing this klass's type\n\t */\n\tgetKlass() {\n\t\treturn this.klass\n\t}\n}\n\n/**\n * A schema wraps multiple KlassSchemas together into a single schema. It provides an interface\n * for adding and retrieving klassSchemas.\n */\nexport class Schema {\n\t/**\n\t * A simple constructor that initializes the internal klasses property\n\t */\n\tconstructor() {\n\t\t/**\n\t\t * @type {Object} An object that maps klass names to KlassSchema instances\n\t\t */\n\t\tthis.klasses = {}\n\t}\n\n\t/**\n\t * @param {String, Symbol} klassName - A string representing the klass name that we want to add\n\t * @param {KlassSchema} klass - The klass that we want to add\n\t */\n\taddKlass(klassName, klass) {\n\t\tthis.klasses[klassName] = klass\n\t}\n\n\t/**\n\t * @param {String, Symbol} klassName - The klass that we want to retrieve\n\t * @return {KlassSchema} The KlassSchema corresponding with the given klassName\n\t * @throws {TypeError} An error is thrown when the given klassName does not exist\n\t */ \n\tgetKlassByName(klassName) {\n\t\tif(this.klasses.hasOwnProperty(klassName)) {\n\t\t\treturn this.klasses[klassName]\n\t\t} else {\n\t\t\tthrow new TypeError(\"unknown klass: \" + klassName)\n\t\t}\n\t}\n}\n\n/**\n * parseSchema takes a raw JSON schema as argument and uses it to construct a Schema instance that is\n * is suitable for DataManagers to use to construct MObjects. The parseSchema function does not modify\n * the original schema.\n *\n * @param {Object} schema - An unparsed JSON schema\n * @return {Schema} A parsed JSON schema\n */\nexport function parseSchema(schema) {\n\t/* Verify that the schema contains the required 'name' and 'properties' property */\n\tif(!schema.hasOwnProperty(\"name\")) {\n\t\tthrow new TypeError(\"A schema must have a 'name' property\")\n\t}\n\n\tif(!schema.hasOwnProperty(\"properties\")) {\n\t\tthrow new TypeError(\"A schema must have 'properties'\")\n\t}\n\n\t/* Create a new instance of Schema */\n\tlet parsedSchema = new Schema()\n\n\t/* Initialize paths: an object that maps a definition path to a klass name. \n\t * the path '#' refers to the main schema.\n\t * paths of the form '#/definitions/<klassName>' refers to a definition */\n\tlet paths = {}\n\tpaths[\"#\"] = schema.name\n\n\tlet hasDefinitions = false\n\t/* Parse definitions if there are any */\n\tif(schema.hasOwnProperty(\"definitions\")) {\n\t\tfor(let definition in schema.definitions) {\n\t\t\tparseDefinitions(schema.definitions, parsedSchema, paths)\n\t\t}\n\t}\n\n\t/* Parse the mainKlass */\n\tlet mainKlass = parseKlass(schema, schema.name, paths)\n\tparsedSchema.addKlass(schema.name, mainKlass)\n\n\tparseRelations(schema, parsedSchema, paths)\n\n\treturn parsedSchema\n}\n\n/**\n * @param {Object} definitions - A 'definitions' object from a JSON schema\n * @param {Schema} schema - A Schema where parseDefinitions can store parsed KlassSchemas\n * @param {Object} paths - An object that maps schema paths to the corresponding klass name\n */\nfunction parseDefinitions(definitions, schema, paths) {\n\t/* For each definition: map the path of that definition to the definition (klassName) */\n\tfor(let definition in definitions) {\n\t\tpaths[\"#/definitions/\" + definition] = definition\n\t}\n\n\t/* For each definition: parse the klass that it describes and add it to the schema */\n\tfor(let definition in definitions) {\n\t\tlet klass = parseKlass(definitions[definition], definition, paths) \n\t\tschema.addKlass(definition, klass)\n\t}\n}\n\n/**\n * @param {Object} klassSchema - A JSON schema describing the klass\n * @param {String} klassName - The name of this klass\n * @param {Object} paths - An object that maps schema paths to the corresponding klass name\n * @return {Klass} A parsed klass\n */\nfunction parseKlass(klassSchema, klassName, paths) {\n\t/* Create a new empty Klass */\n\tlet klass = new KlassSchema(klassName)\n\n\t/* For each property: parse the property and add it to the Klass */\n\tfor(let property in klassSchema.properties) {\n\t\tlet prop = klassSchema.properties[property]\n\t\tlet type = getType(prop)\n\n\t\tklass.addFieldSchema(property, parseProperty(prop, type, paths), type)\n\t}\n\n\treturn klass\n}\n\n/**\n * @param {Object} schema - A complete unparsed JSON schema\n * @param {Schema} parsedSchema - A Schema object that contains the parsed Klasses to which relations must be added\n * @param {Object} paths - An object that maps a path of the form \"#\" or \"#/definitions/<klassName>\" to the corresponding klassName\n */\nfunction parseRelations(schema, parsedSchema, paths) {\n\t/* parse relations for the main klass */\n\tif(schema.hasOwnProperty(\"relations\")) {\n\t\tfor(let relation in schema.relations) {\n\t\t\tparseRelation(relation, schema.relations[relation], parsedSchema, schema.name, paths)\n\t\t}\n\t}\n\n\t/* parse relations for all other classes defined in \"definitions\" */\n\tif(schema.hasOwnProperty(\"definitions\")) {\n\t\tfor(let definition in schema.definitions) {\t\n\t\t\tif(schema.definitions[definition].hasOwnProperty(\"relations\")) {\n\t\t\t\tfor(let relation in schema.definitions[definition].relations) {\n\t\t\t\t\tparseRelation(relation, schema.definitions[definition].relations[relation], parsedSchema, definition, paths)\n\t\t\t\t}\n\t\t\t}\t\n\t\t}\n\t}\n}\n\n/**\n * @param {String} relationType - String describing the type of relation. One of [\"oneToOne\", \"oneToMany\", \"manyToMany\"]\n * @param {Object} relations - A raw JSON schema for relations.\n * @param {parsedSchema} Schema - An instance of Schema that already contains all basic klass definitions.\n * @param {String} klassName - A string describing the name of the klass that these relations belong to.\n * @param {Object} paths - A javascript object that maps schema paths to klass names.\n * @throws {TypeError} When an invalid relation keyword is found in the schema, an error is thrown.\n */\nfunction parseRelation(relationType, relations, parsedSchema, klassName, paths) {\n\tlet fieldsList = []\n\tlet inversesList = []\n\t/**\n\t * Parse all relations of one type. For each relation: \n\t * build a relation field and inverses and add it to the list\n\t */\n\tswitch(relationType) {\n\t\tcase \"oneToOne\": {\n\t\t\tfor(let relation of relations) {\n\t\t\t\tlet {field, inverses} = buildOneToOne(relation, klassName, paths)\n\t\t\t\tfieldsList.push(field)\n\t\t\t\tinversesList.push(inverses)\n\t\t\t}\n\t\t\tbreak;\n\t\t}\n\t\tcase \"oneToMany\": {\n\t\t\tfor(let relation of relations) {\n\t\t\t\tlet {field, inverses} = buildOneToMany(relation, klassName, paths)\n\t\t\t\tfieldsList.push(field)\n\t\t\t\tinversesList.push(inverses)\n\t\t\t}\n\t\t\tbreak;\n\t\t}\n\t\tcase \"manyToMany\": {\n\t\t\tfor(let relation of relations) {\n\t\t\t\tlet {field, inverses} = buildManyToMany(relation, klassName, paths)\n\t\t\t\tfieldsList.push(field)\n\t\t\t\tinversesList.push(inverses)\n\t\t\t}\n\t\t\tbreak;\n\t\t}\n\t\tdefault: {\n\t\t\tthrow new TypeError(relationType + \"is not a valid relation type. Please use one of [oneToOne, oneToMany, manyToMany]\")\n\t\t}\n\t}\n\n\t/* Loop over all fields and inverse fields and add them to the schema */\n\tfor(let field of fieldsList) {\n\t\tparsedSchema.klasses[klassName].addFieldSchema(field.key, field.schema, field.type)\n\t}\n\n\tfor(let inverses of inversesList) {\n\t\tfor(let inverseKlass in inverses) {\n\t\t\tparsedSchema.klasses[inverseKlass].addFieldSchema(inverses[inverseKlass].key, inverses[inverseKlass].schema, inverses[inverseKlass].type)\n\t\t}\n\t}\n}\n\n/**\n * \n * This function validates the relation:\n *\t\t- if a reference is not defined within the paths object it is invalid\n *\t\t- if a oneOf keyword is found, each reference within the oneOf is validated against the paths object\n *\t\t- if neither of the above are present within the schema, the schema is invalid\n * \n * @param {Object} schema - A raw JSON schema describing a relation\n * @param {Object} paths - A javascript object that maps schema paths to klass names\n * @Throws {TypeError} A TypeError is thrown when the schema contains an incorrect reference\n */\nfunction validateRelationSchema(schema, paths) {\n\tif(schema.hasOwnProperty(\"$ref\")) {\n\t\tif(!paths.hasOwnProperty(schema[\"$ref\"])) {\n\t\t\tthrow new TypeError(schema[\"$ref\"] + \" is not a valid schema reference\")\n\t\t}\n\t} else if (schema.hasOwnProperty(\"oneOf\")) {\n\t\tfor(let item of schema.oneOf) {\n\t\t\tif(item.hasOwnProperty(\"$ref\")) {\n\t\t\t\tif(!paths.hasOwnProperty(item[\"$ref\"])) {\n\t\t\t\t\tthrow new TypeError(item[\"$ref\"] + \" is not a valid schema reference\")\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tthrow new TypeError(\"An item in 'oneOf' must have a '$ref' keyword referencing a schema\")\n\t\t\t}\n\t\t}\n\t} else {\n\t\tthrow new TypeError(\"A relation must have a reference of oneOf keyword\")\n\t}\n}\n\n/**\n * buildOneToOne takes a relation, a kassName which initiates the relation and a paths object that\n * maps schema paths to klass names. Based on this two or more field schemas are built:\n *\n *\t\t- One field belonging to the initiating klass\n *\t\t- One or more fields that refer to the first field. These fields are stored within an object that has indices representing klassNames that map to the corresponding schema\n *\n * @param {Object} relation - A single schema describing a relation\n * @param {String} klassName - The klass that this relation belongs to\n * @param {Object} paths - A javascript object that maps schema paths to klass names\n * @return {Object, Object} - The first object contains the field, and the second contains the inverse(s) of that field\n */\nfunction buildOneToOne(relation, klassName, paths) {\n\tvalidateRelationSchema(relation, paths)\n\n\tlet field = {}\n\tlet inverses = {}\n\tif(relation.hasOwnProperty(\"$ref\")) {\n\t\tlet relatedKlass = paths[relation[\"$ref\"]]\n\t\tfield.schema = buildObjectField(relatedKlass, relation.referred, \"object\")\n\t\tfield.key = relation.referrer\n\t\tfield.type = \"object\"\n\n\t\tinverses[relatedKlass] = {}\n\t\tinverses[relatedKlass].schema = buildObjectField(klassName, relation.referrer, \"object\")\n\t\tinverses[relatedKlass].type = \"object\"\n\t\tinverses[relatedKlass].key = relation.referred\n\t} else if (relation.hasOwnProperty(\"oneOf\")) {\n\t\tfield = {}\n\t\tfield.type=\"oneOf\"\n\t\tfield.key=relation.referrer\n\t\tfield.schema = {\n\t\t\t\"oneOf\": []\n\t\t}\n\t\tfor(let item of relation.oneOf) {\n\t\t\tlet relatedKlass = paths[item[\"$ref\"]]\n\t\t\tfield.schema.oneOf.push(buildObjectField(relatedKlass, relation.referred, \"object\"))\n\t\t\t\n\t\t\tinverses[relatedKlass] = {}\n\t\t\tinverses[relatedKlass].type = \"object\"\n\t\t\tinverses[relatedKlass].key = relation.referred\n\t\t\tinverses[relatedKlass].schema = buildObjectField(relatedKlass, relation.referrer, \"object\")\n\t\t}\n\t}\n\n\treturn {field, inverses}\n}\n\n/**\n * buildOneToMany takes a relation, a kassName which initiates the relation and a paths object that\n * maps schema paths to klass names. Based on this two or more field schemas are built:\n *\n *\t\t- One field belonging to the initiating klass\n *\t\t- One or more fields that refer to the first field. These fields are stored within an object that has indices representing klassNames that map to the corresponding schema\n *\n * @param {Object} relation - A single schema describing a relation\n * @param {String} klassName - The klass that this relation belongs to\n * @param {Object} paths - A javascript object that maps schema paths to klass names\n * @return {Object, Object} - buildOneToMany creates the fields required for a one to \n * many relation. The first object is the field for the klass initiating the relation.\n * The second object contains an inverse field for each other klass involved in the relation.\n */\nfunction buildOneToMany(relation, klassName, paths) {\n\tvalidateRelationSchema(relation, paths)\n\n\tlet field = {}\n\tlet inverses = {}\n\tif(relation.hasOwnProperty(\"$ref\")) {\n\t\tlet relatedKlass = paths[relation[\"$ref\"]]\n\t\tfield.schema = buildArrayField(relation.referred, {\"type\": \"object\", \"klass\": relatedKlass}, \"object\")\n\t\tfield.key = relation.referrer\n\t\tfield.type = \"array\"\n\n\t\tinverses[relatedKlass] = {}\n\t\tinverses[relatedKlass].schema = buildObjectField(klassName, relation.referrer, \"array\")\n\t\tinverses[relatedKlass].type = \"object\"\n\t\tinverses[relatedKlass].key = relation.referred\n\t} else if (relation.hasOwnProperty(\"oneOf\")) {\n\t\tfield = {}\n\t\tfield.type=\"array\"\n\t\tfield.key = relation.referrer\n\n\t\tlet items = {\n\t\t\t\"oneOf\": []\n\t\t}\n\n\t\tfor(let item of relation.oneOf) {\n\t\t\tlet relatedKlass = paths[item[\"$ref\"]]\n\t\t\titems.oneOf.push({\"type\": \"object\", \"klass\": relatedKlass})\n\t\t\t\n\t\t\tinverses[relatedKlass] = {}\n\t\t\tinverses[relatedKlass].type = \"object\"\n\t\t\tinverses[relatedKlass].key = relation.referred\n\t\t\tinverses[relatedKlass].schema = buildObjectField(klassName, relation.referrer, \"array\")\n\t\t}\n\n\t\tfield.schema = buildArrayField(relation.referred, items, \"object\")\n\t}\n\n\treturn {field, inverses}\n}\n\n/**\n * buildManyToMany takes a relation, a kassName which initiates the relation and a paths object that\n * maps schema paths to klass names. Based on this two or more field schemas are built:\n *\n *\t\t- One field belonging to the initiating klass\n *\t\t- One or more fields that refer to the first field. These fields are stored within an object that has indices representing klassNames that map to the corresponding schema\n *\n * @param {Object} relation - A single schema describing a relation\n * @param {String} klassName - The klass that this relation belongs to\n * @param {Object} paths - A javascript object that maps schema paths to klass names\n * @return {Object, Object} - buildManyToMany creates the fields required for a many to \n * many relation. The first object is the field for the klass initiating the relation.\n * The second object contains an inverse field for each other klass involved in the relation.\n */\nfunction buildManyToMany(relation, klassName, paths) {\n\tvalidateRelationSchema(relation, paths)\n\n\tlet field = {}\n\tlet inverses = {}\n\tif(relation.hasOwnProperty(\"$ref\")) {\n\t\tlet relatedKlass = paths[relation[\"$ref\"]]\n\t\tfield.schema = buildArrayField(relation.referred, {type: \"object\", klass: relatedKlass}, \"array\")\n\t\tfield.key = relation.referrer\n\t\tfield.type = \"array\"\n\n\t\tinverses[relatedKlass] = {}\n\t\tinverses[relatedKlass].schema = buildArrayField(relation.referrer, {type: \"object\", klass: klassName}, \"array\")\n\t\tinverses[relatedKlass].type = \"array\"\n\t\tinverses[relatedKlass].key = relation.referred\n\t} else if (relation.hasOwnProperty(\"oneOf\")) {\n\t\tfield = {}\n\t\tfield.type=\"array\"\n\t\tfield.key = relation.referrer\n\n\t\tlet items = {\n\t\t\t\"oneOf\": []\n\t\t}\n\n\t\tfor(let item of relation.oneOf) {\n\t\t\tlet relatedKlass = paths[item[\"$ref\"]]\n\t\t\titems.oneOf.push({\"type\": \"object\", \"klass\": relatedKlass})\n\t\t\t\n\t\t\tinverses[relatedKlass] = {}\n\t\t\tinverses[relatedKlass].type = \"array\"\n\t\t\tinverses[relatedKlass].key = relation.referred\n\t\t\tinverses[relatedKlass].schema = buildArrayField(relation.referrer, {type: \"object\", \"klass\": klassName}, \"array\")\n\t\t}\n\n\t\tfield.schema = buildArrayField(relation.referred, items, \"array\")\n\t}\n\n\treturn {field, inverses}\n}\n\n/**\n * buildArrayField constructs a schema for an array field based on an inverseKey (used to access the inverse of this field),\n * a list defining the items that can be stored in the array and the type of the inverse field (either \"object\" or \"array\")\n *\n * @param {String} inverseKey - The property key used to access the inverse field in this fields value\n * @param {Array} items - An object containing the schema for the item that this array field holds.\n * @param {String} inverseType - A string, either \"object\" or \"array\". Used to identify the type of the inverse field\n * @return {Object} A regular javascript object that describes the schema for the created field\n */\nfunction buildArrayField(inverseKey, items, inverseType) {\n\treturn {\n\t\t\"type\": \"array\",\n\t\t\"items\": items,\n\t\t\"inverseKey\": inverseKey,\n\t\t\"inverseType\": inverseType\n\n\t}\n}\n\n/**\n * buildObjectField constructs a schema for an object field based on the name of the klass contained in the field,\n * an inverseKey that is used to access the inverse of this field and the type of the inverse field (either \"object\" or \"array\")\n *\n * @param {String} klass - A string representing the klass that this object field must hold\n * @param {String} inverseKey - The property key used to access the inverse field in this fields value\n * @param {String} inverseType - A string, either \"object\" or \"array\". Used to identify the type of the inverse field\n * @return {Object} A regular javascript object that describes the schema for the created field\n */\nfunction buildObjectField(klass, inverseKey, inverseType) {\n\treturn {\n\t\t\"type\": \"object\",\n\t\t\"klass\": klass,\n\t\t\"inverseKey\": inverseKey,\n\t\t\"inverseType\": inverseType\n\t}\n}\n\n/**\n * parseProperty checks the schema for definitions that can contain references, and if a reference is found\n * it is replaced with a klass definitoion. The original schema is not modified. It also validates whether\n * required keywords are present.\n *\n * @param {Object} property - A JSON schema describing a single property\n * @param {String} type - The type of the property\n * @param {Object} paths - An object that maps schema paths to the corresponding klass name\n * @return {Object} A parsed property\n * @throws {TypeError} - If the schema contains an invalid keyword then an error is thrown\n */\nfunction parseProperty(property, type, paths) {\n\t/* Shallow copy the given property to a new object so we don't modify the existing schema */\n\tlet newProp = { ...property }\n\n\tswitch(type) {\n\t\tcase \"object\": {\n\t\t\t/* An object must have a reference */\n\t\t\tif(newProp.hasOwnProperty(\"$ref\")) {\n\t\t\t\t/* Replace the '$ref' keyword by a klass */\n\t\t\t\tnewProp[\"klass\"] = paths[newProp[\"$ref\"]]\n\t\t\t\tif(newProp.klass == undefined) {\n\t\t\t\t}\n\t\t\t\tdelete newProp[\"$ref\"]\n\t\t\t\t\n\t\t\t} else {\n\t\t\t\tthrow new TypeError(\"A property of type 'object' must have a '$ref' keyword that references the definition describing the object\")\n\t\t\t}\n\t\t\tbreak\n\t\t}\n\t\tcase \"array\": {\n\t\t\t/* An array must define items */\n\t\t\tif(newProp.hasOwnProperty(\"items\")) {\n\t\t\t\tif(newProp.items instanceof Array) {\n\t\t\t\t\t/* Parse each item in the array */\n\t\t\t\t\tnewProp.items = parseArray(newProp.items, paths)\n\t\t\t\t} else {\n\t\t\t\t\t/* Items is a single property so we parse the property */\n\t\t\t\t\tlet type = getType(newProp.items)\n\t\t\t\t\tnewProp.items = parseProperty(newProp.items, type, paths)\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tthrow new TypeError(\"An array must define the type of its contained items in an 'items' keyword\")\n\t\t\t}\n\t\t\tbreak\n\t\t}\n\t\tcase \"oneOf\": {\n\t\t\t/* oneOf must be an array of types */\n\t\t\tif(newProp.oneOf instanceof Array) {\n\t\t\t\t/* Parse each item in the array */\n\t\t\t\tnewProp.oneOf = parseArray(newProp.oneOf, paths)\n\t\t\t} else {\n\t\t\t\tthrow new TypeError(\"The oneOf keyword must be an array of types\")\n\t\t\t}\n\t\t\tbreak\n\t\t}\n\t}\n\treturn newProp\n}\n\n/**\n * @param {Array} array - An array of JSON schema properties\n * @param {Object} paths - An object that maps schema paths to the corresponding klass name\n * @return {Array} An array containing the parsed properties\n */\nfunction parseArray(array, paths) {\n\tlet newArr = []\n\tfor(let item of array) {\n\t\t/* For each item: parse the item and add it to the new Array */\n\t\tlet type = getType(item)\n\t\tnewArr.push(parseProperty(item, type, paths))\n\t}\n\treturn newArr\n}\n\n/**\n * @param {Object} property - A JSON schema describing a single property\n * @return {String} The type of the given property\n */\nfunction getType(property) {\n\tif(property.hasOwnProperty(\"enum\")) {\n\t\treturn \"enum\"\n\t}\n\n\tif(property.hasOwnProperty(\"oneOf\")) {\n\t\treturn \"oneOf\"\n\t}\n\n\tif(property.hasOwnProperty(\"type\")) {\n\t\treturn property.type\n\t}\n}",
     "static": true,
     "longname": "/home/gebruiker/Documenten/BSc/code/ManagedDataJS/src/js/framework/dataManager/Schema.js",
     "access": "public",
@@ -1785,7 +1785,7 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": "{Schema}",
-    "description": "Schema is a wrapper that provides an addKlass and a getKlassByName method. These methods are used to manage an\nobject that maps klass names to KlassSchemas. it's purpose is to group multiple KlassSchemas into a single Schema",
+    "description": "A schema wraps multiple KlassSchemas together into a single schema. It provides an interface\nfor adding and retrieving klassSchemas.",
     "lineNumber": 88,
     "interface": false
   },
@@ -1837,7 +1837,7 @@
       {
         "nullable": null,
         "types": [
-          "String"
+          "String, Symbol"
         ],
         "spread": false,
         "optional": false,
@@ -1847,7 +1847,7 @@
       {
         "nullable": null,
         "types": [
-          "Klass"
+          "KlassSchema"
         ],
         "spread": false,
         "optional": false,
@@ -1873,7 +1873,7 @@
       {
         "nullable": null,
         "types": [
-          "String"
+          "String, Symbol"
         ],
         "spread": false,
         "optional": false,
@@ -1884,10 +1884,10 @@
     "return": {
       "nullable": null,
       "types": [
-        "Klass"
+        "KlassSchema"
       ],
       "spread": false,
-      "description": "The klass corresponding with the given klassName"
+      "description": "The KlassSchema corresponding with the given klassName"
     },
     "throws": [
       {
@@ -1911,8 +1911,8 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": "{parseSchema}",
-    "description": "",
-    "lineNumber": 125,
+    "description": "parseSchema takes a raw JSON schema as argument and uses it to construct a Schema instance that is\nis suitable for DataManagers to use to construct MObjects. The parseSchema function does not modify\nthe original schema.",
+    "lineNumber": 129,
     "params": [
       {
         "nullable": null,
@@ -1922,7 +1922,7 @@
         "spread": false,
         "optional": false,
         "name": "schema",
-        "description": "A JSON schema"
+        "description": "An unparsed JSON schema"
       }
     ],
     "return": {
@@ -1948,7 +1948,7 @@
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
     "description": "",
-    "lineNumber": 166,
+    "lineNumber": 170,
     "params": [
       {
         "nullable": null,
@@ -1968,7 +1968,7 @@
         "spread": false,
         "optional": false,
         "name": "schema",
-        "description": "A Schema where parseDefinitions can store parsed klasses"
+        "description": "A Schema where parseDefinitions can store parsed KlassSchemas"
       },
       {
         "nullable": null,
@@ -1998,7 +1998,7 @@
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
     "description": "",
-    "lineNumber": 185,
+    "lineNumber": 189,
     "params": [
       {
         "nullable": null,
@@ -2055,7 +2055,7 @@
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
     "description": "",
-    "lineNumber": 205,
+    "lineNumber": 209,
     "params": [
       {
         "nullable": null,
@@ -2065,7 +2065,7 @@
         "spread": false,
         "optional": false,
         "name": "schema",
-        "description": "A complete (raw) JSON schema"
+        "description": "A complete unparsed JSON schema"
       },
       {
         "nullable": null,
@@ -2105,7 +2105,7 @@
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
     "description": "",
-    "lineNumber": 233,
+    "lineNumber": 237,
     "params": [
       {
         "nullable": null,
@@ -2182,8 +2182,8 @@
     "export": false,
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
-    "description": "",
-    "lineNumber": 281,
+    "description": "\nThis function validates the relation:\n\t- if a reference is not defined within the paths object it is invalid\n\t- if a oneOf keyword is found, each reference within the oneOf is validated against the paths object\n\t- if neither of the above are present within the schema, the schema is invalid",
+    "lineNumber": 297,
     "unknown": [
       {
         "tagName": "@Throws",
@@ -2228,8 +2228,8 @@
     "export": false,
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
-    "description": "",
-    "lineNumber": 307,
+    "description": "buildOneToOne takes a relation, a kassName which initiates the relation and a paths object that\nmaps schema paths to klass names. Based on this two or more field schemas are built:\n\n\t- One field belonging to the initiating klass\n\t- One or more fields that refer to the first field. These fields are stored within an object that has indices representing klassNames that map to the corresponding schema",
+    "lineNumber": 329,
     "params": [
       {
         "nullable": null,
@@ -2268,7 +2268,7 @@
         "Object, Object"
       ],
       "spread": false,
-      "description": "buildOneToOne creates the fields required for a one to \none relation. The first object is the field for the klass initiating the relation.\nThe second object contains an inverse field for each other klass involved in the relation."
+      "description": "The first object contains the field, and the second contains the inverse(s) of that field"
     },
     "ignore": true
   },
@@ -2285,8 +2285,8 @@
     "export": false,
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
-    "description": "",
-    "lineNumber": 351,
+    "description": "buildOneToMany takes a relation, a kassName which initiates the relation and a paths object that\nmaps schema paths to klass names. Based on this two or more field schemas are built:\n\n\t- One field belonging to the initiating klass\n\t- One or more fields that refer to the first field. These fields are stored within an object that has indices representing klassNames that map to the corresponding schema",
+    "lineNumber": 379,
     "params": [
       {
         "nullable": null,
@@ -2342,8 +2342,8 @@
     "export": false,
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
-    "description": "",
-    "lineNumber": 399,
+    "description": "buildManyToMany takes a relation, a kassName which initiates the relation and a paths object that\nmaps schema paths to klass names. Based on this two or more field schemas are built:\n\n\t- One field belonging to the initiating klass\n\t- One or more fields that refer to the first field. These fields are stored within an object that has indices representing klassNames that map to the corresponding schema",
+    "lineNumber": 433,
     "params": [
       {
         "nullable": null,
@@ -2399,8 +2399,8 @@
     "export": false,
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
-    "description": "",
-    "lineNumber": 445,
+    "description": "buildArrayField constructs a schema for an array field based on an inverseKey (used to access the inverse of this field),\na list defining the items that can be stored in the array and the type of the inverse field (either \"object\" or \"array\")",
+    "lineNumber": 482,
     "params": [
       {
         "nullable": null,
@@ -2456,8 +2456,8 @@
     "export": false,
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
-    "description": "",
-    "lineNumber": 461,
+    "description": "buildObjectField constructs a schema for an object field based on the name of the klass contained in the field,\nan inverseKey that is used to access the inverse of this field and the type of the inverse field (either \"object\" or \"array\")",
+    "lineNumber": 501,
     "params": [
       {
         "nullable": null,
@@ -2513,8 +2513,8 @@
     "export": false,
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
-    "description": "",
-    "lineNumber": 477,
+    "description": "parseProperty checks the schema for definitions that can contain references, and if a reference is found\nit is replaced with a klass definitoion. The original schema is not modified. It also validates whether\nrequired keywords are present.",
+    "lineNumber": 521,
     "params": [
       {
         "nullable": null,
@@ -2579,7 +2579,7 @@
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
     "description": "",
-    "lineNumber": 531,
+    "lineNumber": 575,
     "params": [
       {
         "nullable": null,
@@ -2626,7 +2626,7 @@
     "importPath": "ManagedDataJS/framework/dataManager/Schema.js",
     "importStyle": null,
     "description": "",
-    "lineNumber": 545,
+    "lineNumber": 589,
     "params": [
       {
         "nullable": null,
@@ -2653,7 +2653,7 @@
     "__docId__": 114,
     "kind": "file",
     "name": "framework/dataManager/fields/MFieldFactory.js",
-    "content": "import {IntegerMField, NumberMField, StringMField, BooleanMField, MObjectMField} from \"./MFieldSingle\"\nimport {ArrayHandler, ArrayMField, EnumMField, OneOfMField} from \"./MFieldMulti\"\n\n/**\n * MField is a factory function that returns one of the following managed fields\n * based on the given schema:\n * \t\tIntegerMField\n *\t\tNumberMField\n *\t\tStringMField\n *\t\tBooleanMField\n *\t\tMObjectMField\n *\t\tArrayMField\n *\t\tEnumMField\n *\t\tOneOfMField\n *\n * This function abstracts the MField implementation away from the user\n * as all outside functionality is provided by the base MField class\n * Note that there is one exception: The array MField, which has some additionional\n * Behaviour.\n *\n * @param {Object} schema - A (partial) JSON schema that describes the field that should be constructed\n * @param {MObject} superKlass - The MObject that this field belongs to\n *\n * @return {MField} An MField that ensures its value property matches the given schema\n */\nexport function MFieldFactory(schema, superKlass) {\n\tif(schema.hasOwnProperty(\"enum\")) {\n\t\treturn new EnumMField(schema)\n\t}\n\n\tif(schema.hasOwnProperty(\"oneOf\")) {\n\t\tconsole.log(\"building oneOf field\")\n\t\treturn new OneOfMField(schema, superKlass)\n\t}\n\n\tif(schema.hasOwnProperty(\"type\")) {\n\t\tswitch(schema.type) {\n\t\t\tcase \"integer\": {\n\t\t\t\treturn new IntegerMField(schema)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"number\": {\n\t\t\t\treturn new NumberMField(schema)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"string\": {\n\t\t\t\treturn new StringMField(schema)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"boolean\": {\n\t\t\t\treturn new BooleanMField(schema)\n\t\t\t\tbreak \n\t\t\t}\n\t\t\tcase \"object\": {\n\t\t\t\treturn new MObjectMField(schema, superKlass)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"array\": {\n\t\t\t\tlet array = new Proxy(new ArrayMField(schema, superKlass), new ArrayHandler())\n\t\t\t\tarray.setThisProxy(array)\n\t\t\t\treturn array\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n}",
+    "content": "import {IntegerMField, NumberMField, StringMField, BooleanMField, MObjectMField} from \"./MFieldSingle\"\nimport {ArrayHandler, ArrayMField, EnumMField, OneOfMField} from \"./MFieldMulti\"\n\n/**\n * MField is a factory function that returns one of the following managed fields\n * based on the given schema:\n * \t\tIntegerMField\n *\t\tNumberMField\n *\t\tStringMField\n *\t\tBooleanMField\n *\t\tMObjectMField\n *\t\tArrayMField\n *\t\tEnumMField\n *\t\tOneOfMField\n *\n * This function abstracts the MField creation away from the user. It takes a schema and a superKlass\n * and uses that to create the correct MField for that schema. The field can then be managed through the\n * interface of MField.\n *\n * @param {Object} schema - A (partial) JSON schema that describes the field that should be constructed\n * @param {MObject} superKlass - The MObject that this field belongs to\n *\n * @return {MField} An MField that ensures its value property matches the given schema\n */\nexport function MFieldFactory(schema, superKlass) {\n\tif(schema.hasOwnProperty(\"enum\")) {\n\t\treturn new EnumMField(schema)\n\t}\n\n\tif(schema.hasOwnProperty(\"oneOf\")) {\n\t\tconsole.log(\"building oneOf field\")\n\t\treturn new OneOfMField(schema, superKlass)\n\t}\n\n\tif(schema.hasOwnProperty(\"type\")) {\n\t\tswitch(schema.type) {\n\t\t\tcase \"integer\": {\n\t\t\t\treturn new IntegerMField(schema)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"number\": {\n\t\t\t\treturn new NumberMField(schema)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"string\": {\n\t\t\t\treturn new StringMField(schema)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"boolean\": {\n\t\t\t\treturn new BooleanMField(schema)\n\t\t\t\tbreak \n\t\t\t}\n\t\t\tcase \"object\": {\n\t\t\t\treturn new MObjectMField(schema, superKlass)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"array\": {\n\t\t\t\tlet array = new Proxy(new ArrayMField(schema, superKlass), new ArrayHandler())\n\t\t\t\tarray.setThisProxy(array)\n\t\t\t\treturn array\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n}",
     "static": true,
     "longname": "/home/gebruiker/Documenten/BSc/code/ManagedDataJS/src/js/framework/dataManager/fields/MFieldFactory.js",
     "access": "public",
@@ -2673,8 +2673,8 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/fields/MFieldFactory.js",
     "importStyle": "{MFieldFactory}",
-    "description": "MField is a factory function that returns one of the following managed fields\nbased on the given schema:\n\t\tIntegerMField\n\tNumberMField\n\tStringMField\n\tBooleanMField\n\tMObjectMField\n\tArrayMField\n\tEnumMField\n\tOneOfMField\n\nThis function abstracts the MField implementation away from the user\nas all outside functionality is provided by the base MField class\nNote that there is one exception: The array MField, which has some additionional\nBehaviour.",
-    "lineNumber": 26,
+    "description": "MField is a factory function that returns one of the following managed fields\nbased on the given schema:\n\t\tIntegerMField\n\tNumberMField\n\tStringMField\n\tBooleanMField\n\tMObjectMField\n\tArrayMField\n\tEnumMField\n\tOneOfMField\n\nThis function abstracts the MField creation away from the user. It takes a schema and a superKlass\nand uses that to create the correct MField for that schema. The field can then be managed through the\ninterface of MField.",
+    "lineNumber": 25,
     "params": [
       {
         "nullable": null,
@@ -2710,7 +2710,7 @@
     "__docId__": 116,
     "kind": "file",
     "name": "framework/dataManager/fields/MFieldMulti.js",
-    "content": "import {MField} from \"./MFieldSingle\"\nimport {MFieldFactory} from \"./MFieldFactory\"\n\n/**\n * The ArrayHandler ensures that ArrayMfield[idx] returns ArrayMField.value[idx] when idx is an integer\n */\nexport class ArrayHandler {\n\t/**\n\t * @param {Object} target - The target object.\n\t * @param {String, Symbol} propKey - The name of the property to get.\n\t * @param {Object} receiver - Either the proxy or an object that inherits from the proxy.\n\t *\n\t * @return {*} Either the value stored at the requested index or the result of Reflect.get()\n\t */\n\tget(target, propKey, receiver) {\n\t\tif(!(typeof(propKey)==\"symbol\") && !isNaN(propKey)) {\n\t\t\ttarget.superKlass.notifyArray(\"get\", [propKey], target.proxy)\n\t\t\treturn target.get(parseInt(propKey))\n\t\t} else {\n\t\t\tlet propValue = target[propKey]\n\t\t\tif(typeof(propValue) == \"function\" && !(typeof(propKey) == \"symbol\")) {\n\t\t\t\treturn function() {\n\t\t\t\t\tlet argsArray = [...arguments]\n\t\t\t\t\targsArray = target.superKlass.notifyArray(propKey, argsArray, target.proxy)\n\t\t\t\t\t\n\t\t\t\t\twhile(arguments.length > 0) {\n\t\t\t\t\t\tArray.shift(arguments)\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tArray.unshift(arguments, ...argsArray)\n\t\t\t\t\treturn propValue.apply(target, arguments, propKey)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn Reflect.get(target, propKey, receiver)\n\t}\n}\n\n/**\n * The array MField implementation is a bit different from other MField implementations.\n * An ArrayMField must act like a regular JavaScript array and therefore it forwards all\n * original ArrayMethods to the array stored within the value field and applies validation\n * where neccesary. When the array has been modified, the arrayHasChanged() callback is\n * invoked on the MObject it belongs to.\n *\n *\n * the ArrayMField always returns regular javascript values or managed objects.\n * the ArrayMField always takes regular javascript values as input.\n * the ArrayMField.value only contains objects that are instances of MFields.\n */\nexport class ArrayMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t * @param {MObject} superKlass - The MObject that this field belongs to\n\t */ \t\n\tconstructor(schema, superKlass) {\n\t\tsuper(\"array\", schema, [])\n\n\t\t/**\n\t\t * The MObject that this ArrayMField belongs to\n\t\t * @type {MObject}\n\t\t */\n\t\tthis.superKlass = superKlass\n\n\t\t/**\n\t\t * If we have a list of items, this parameter keeps track of which item\n\t\t * we need to use to validate the next element\n\t\t * @type {number}\n\t\t */\n\t\tthis.itemsIdx = 0\n\n\t\t/**\n\t\t * The length of the array stored in this.value\n\t\t * @type {number}\n\t\t */\n\t\tthis.length = 0\n\n\t\t/**\n\t\t * Override this[Symbol.iterator]\n\t\t */\n\t\tthis[Symbol.iterator] = this.iterator\n\t}\n\n\tsetThisProxy(proxy) {\n\t\tthis.proxy = proxy\n\t}\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tconcat(...values) {\n\t\tfor(let value of values) {\n\t\t\tif(value instanceof Array) {\n\t\t\t\tthis.push(...value)\n\t\t\t} else {\n\t\t\t\tthis.push(value)\n\t\t\t}\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tcopyWithin(target, start, end) {\n\t\treturn this.value.copyWithin(target, start, end)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tentries() {\n\t\treturn this.getValues().entries()\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tevery(callback, thisarg) {\n\t\treturn this.getValues().every(callback, thisarg)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfill(value, start, end) {\t\n\t\tlet newArr = this.getValues().fill(value)\n\t\tlet {valid, error, fields} = this.validate(newArr)\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = fields\n\t\t\treturn newArr\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfilter(callback, thisarg) {\n\t\treturn this.getValues().filter(callback, thisarg)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfind(callback, thisarg) {\n\t\treturn this.getValues().find(callback, thisarg)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfindIndex(callback, thisarg) {\n\t\treturn this.getValues().findIndex(callback, thisarg)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tforEach(callback, thisarg) {\n\t\tlet arr = this.getValues()\n\t\tarr.forEach(callback, thisarg)\n\n\t\tlet {valid, error, fields} = this.validate(arr)\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = fields\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tincludes(searchElement, fromIndex = 0) {\n\t\treturn this.getValues().includes(searchElement, fromIndex)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tindexOf(searchElement, fromIndex) {\n\t\tif(fromIndex == undefined) {\n\t\t\treturn this.getValues().indexOf(searchElement)\n\t\t} else {\n\t\t\treturn this.getValues().indexOf(searchElement, fromIndex)\n\t\t}\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tjoin(separator) {\n\t\treturn this.getValues().join(separator)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tkeys() {\n\t\treturn this.getValues().keys()\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tlastIndexOf(searchElement, fromIndex) {\n\t\tif(fromIndex == undefined) {\n\t\t\treturn this.getValues().lastIndexOf(searchElement)\n\t\t} else {\n\t\t\treturn this.getValues().lastIndexOf(searchElement, fromIndex)\n\t\t}\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tmap(callback, thisarg) {\n\t\tlet newArr = this.getValues().map(callback, thisarg)\n\t\treturn newArr\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tpop() {\n\t\tlet field = this.value.pop()\n\t\tif(field != undefined) {\n\t\t\tthis.length = this.value.length\n\t\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\t\tfield.value[this.schema.inverseKey] = null\n\t\t\t}\n\t\t\treturn field.getValue()\n\t\t} else {\n\t\t\treturn field\n\t\t}\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tpush(...elements) {\n\t\tlet {valid, error, fields} = this.validate(elements)\n\t\t\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tfor(let field of fields) {\n\t\t\t\tthis.value.push(field)\n\t\t\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\t\t\tif(this.schema.inverseType == \"object\") {\n\t\t\t\t\t\tif(field.getValue()[this.schema.inverseKey] != this.superKlass) {\n\t\t\t\t\t\t\tfield.getValue()[this.schema.inverseKey] = this.superKlass\n\t\t\t\t\t\t}\n\t\t\t\t\t} else {\n\t\t\t\t\t\tif(!field.getValue()[this.schema.inverseKey].includes(this.superKlass)) {\n\t\t\t\t\t\t\tfield.getValue()[this.schema.inverseKey].push(this.superKlass)\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tthis.itemsIdx = (this.itemsIdx+1)%this.schema.items.length\n\t\t\t\tthis.length = this.value.length\n\t\t\t}\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\treduce(callback, initialValue) {\n\t\treturn this.getValues().reduce(callback, initialValue)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\treduceRight(callback, initialValue) {\n\t\treturn this.getValues().reduceRight(callback, initialValue)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\treverse() {\n\t\tthis.value.reverse()\n\t\treturn this.getValues()\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tshift() {\n\t\tlet element = this.value.shift()\n\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\tif(this.schema.inverseType == \"object\") {\n\t\t\t\telement[this.schema.inverseKey] = null\n\t\t\t} else {\n\t\t\t\telement[this.schema.inverseKey].remove(this.superKlass)\n\t\t\t}\n\t\t}\n\n\t\tthis.length = this.value.length\n\t\treturn element.getValue()\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tslice(begin, end) {\n\t\treturn this.getValues().slice(begin, end)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tsome(callback, thisarg) {\n\t\treturn this.getValues().some(callback, thisarg)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tsort(compareFunction) {\t\n\t\tlet sorted = this.getValues().sort(compareFunction)\n\t\tlet {valid, error, fields} = this.validate(sorted)\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = fields\n\t\t}\n\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tsplice(start, deleteCount=0, ...items) {\n\t\tlet {valid, error, fields} = this.validate(items)\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tlet removed_values = []\n\t\t\tif(deleteCount > 0) {\n\t\t\t\tfor(let i = start; i<(start+deleteCount)%this.value.length; i++) {\n\t\t\t\t\tremoved_values.push(this.value[i].getValue())\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tthis.value.splice(start, deleteCount, ...fields)\n\n\t\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\t\tfor(let value of removed_values) {\n\t\t\t\t\tif(this.schema.inverseType == \"object\") {\n\t\t\t\t\t\tvalue[this.schema.inverseKey]=null\n\t\t\t\t\t} else {\n\t\t\t\t\t\tif(value[this.schema.inverseKey].includes(this.superKlass)) {\n\t\t\t\t\t\t\tvalue[this.schema.inverseKey].remove(this.superKlass)\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tfor(let field of fields) {\n\t\t\t\t\tif(this.schema.inverseType == \"array\") {\n\t\t\t\t\t\tif(field.value[this.schema.inverseKey] != this.superKlass) {\n\t\t\t\t\t\t\tfield.value[this.schema.inverseKey] = this.superKlass\n\t\t\t\t\t\t}\n\t\t\t\t\t} else {\n\t\t\t\t\t\tif(!field.value[this.schema.inverseKey].includes(this.superKlass)) {\n\t\t\t\t\t\t\tfield.value[this.schema.inverseKey].push(this.superKlass)\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tthis.length = this.value.length\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tunshift(...elements) {\n\t\tlet {valid, error, fields} = this.validate(elements)\n\n\t\tif(valid == false) {\n\t\t\tthrow new TypeError(error)\n\t\t} else {\n\t\t\tthis.value.unshift(...fields)\n\t\t\t\n\t\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\t\tfor(let field of fields) {\n\t\t\t\t\tif(this.schema.inverseType == \"object\") {\n\t\t\t\t\t\tif(field.value[this.schema.inverseKey] != this.superKlass) {\n\t\t\t\t\t\t\tfield.value[this.schema.inverseKey] = this.superKlass\n\t\t\t\t\t\t}\n\t\t\t\t\t} else {\n\t\t\t\t\t\tif(!field.value[this.schema.inverseKey].includes(this.superKlass)) {\n\t\t\t\t\t\t\tfield.value[this.schema.inverseKey].push(this.superKlass)\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tthis.length = this.value.length\n\t}\n\t\n\t/**\n\t * @return {Iterator} Returns an iterator object for this ArrayMFields value\n\t */\n\titerator() {\n\t\treturn this.getValues()[Symbol.iterator]()\n\t}\n\n\taddRelatedObject(other) {\n\t\tthis.push(other)\n\t}\n\n\tremove(other) {\n\t\tlet idx = this.indexOf(other)\n\t\tif(idx != null) {\n\t\t\tthis.splice(idx, 1)\n\t\t}\n\t}\n\n\t/** \n\t * Implementation of the validate function for ArrayMField \n\t *\n\t * @param {Array} values - An array containing the values to validate\n\t *\n\t * @return {Boolean, Error, MField} Boolean indicating whether all values where valid; if there were any validation errors we return the error. only when valid == false; An array containing valid MFields of the given values. only when valid == true\n\t */\n\tvalidate(values) {\n\t\tif(values == undefined) {\n\t\t\treturn {true, undefined, undefined}\n\t\t}\n\n\t\tlet fields = []\n\t\tlet valid = true;\n\t\tlet error\n\t\tlet field\n\n\t\tif(this.schema.items instanceof Array) {\n\t\t\tlet tmpItemsIdx = this.itemsIdx\n\t\t\tfor(let value of values) {\n\t\t\t\tfield = MFieldFactory(this.schema.items[tmpItemsIdx], this.superKlass)\n\t\t\t\ttmpItemsIdx++;\n\n\t\t\t\ttry { \n\t\t\t\t\tfield.setValue(value)\n\t\t\t\t} catch (err) {\n\t\t\t\t\tvalid = false\n\t\t\t\t\terror = err\n\t\t\t\t\tbreak\n\t\t\t\t}\n\n\t\t\t\tfields.push(field)\n\t\t\t}\n\t\t} else {\n\t\t\tfor(let value of values) {\n\t\t\t\tfield = MFieldFactory(this.schema.items, this.superKlass)\n\t\t\t\ttry { \n\t\t\t\t\tfield.setValue(value)\n\t\t\t\t} catch (err) {\n\t\t\t\t\tvalid = false\n\t\t\t\t\terror = err\n\t\t\t\t\tbreak\n\t\t\t\t}\n\n\t\t\t\t\n\n\t\t\t\tfields.push(field)\n\t\t\t}\n\t\t}\n\t\treturn {valid, error, fields}\n\t}\n\n\t/**\n\t * @param {Integer} idx - the index to retrieve from this array\n\t *\n\t * @return {*, Boolean} Get either returns the value on the given index or false\n\t */\n\tget(idx) {\n\t\tconsole.log(idx, this.value)\n\t\treturn this.value[idx].getValue()\n\t}\n\n\t/**\n\t * @return {String} A string representing this array\n\t */\n\ttoString() {\n\t\treturn this.getValues().toString()\n\t}\n\n\t/**\n\t * @return {Array} A regular JavaScript array containing this ArrayMFields values\n\t */\n\tgetValues() {\n\t\tlet arr = []\n\t\tfor(let val of this.value) {\n\t\t\tarr.push(val.getValue())\n\t\t}\n\t\treturn arr\n\t}\n\n\t/**\n\t * @return {ArrayMField} Since an ArrayMField works like a regular JavaScript array we return this instead of this.value\n\t */\n\tgetValue() {\n\t\treturn this.proxy\n\t}\n\n\t/**\n\t * setValue takes a value as argument and attempts to validate this value. If it was valid we set \n\t * this.value to the field returned by the validate method, otherwise we throw the error that was returned\n\t * \n\t * @param {Array} values - The value that should be set in this ArrayMField\n\t */\n\tsetValue(values) {\n\t\tif(!(values instanceof Array)) {\n\t\t\tthrow new TypeError(\"value assigned to \"+this.schema.type+\"MField can only be set to that of an actual JavaScript array\")\n\t\t} else {\n\t\t\tthis.value = [];\n\t\t\tthis.push(...values)\n\t\t}\n\t}\n}\n\n\n/**\n * Enum implementation of MField which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue\t\t===>\tenum.includes(value)\n */\nexport class EnumMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this fields value\n\t */\n\tconstructor(schema) {\n\t\tsuper(\"enum\", schema, schema.enum[0])\n\t}\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\t\tif(!this.schema.enum.includes(value)) {\n\t\t\tvalid = false\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField must be one of \"+JSON.stringyfy(schema.enum))\n\t\t\treturn {valid, error}\n\t\t} else {\n\t\t\treturn {valid, error}\n\t\t}\n\t}\n}\n\n/**\n *\tOneOF implementation of MFIeld which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue\t\t===>\tvalue matches at least one schema in schema.oneOf\n */\nexport class OneOfMField extends MField {\n\tconstructor(schema, superKlass) {\n\t\tsuper(\"oneOf\", schema, schema.oneOf[0].klass)\n\t\t/**\n\t\t * The MObject that this OneOfMField belongs to\n\t\t * @type {MObject}\n\t\t */\n\t\tthis.superKlass = superKlass\n\t}\t\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error, MField} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned. If it was valid, the valid MField is returned\n\t */\n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\t\tlet field\n\n\t\tfor(let schema of this.schema.oneOf) {\n\t\t\ttry{\n\t\t\t\tfield = MFieldFactory(schema, this.superKlass)\n\t\t\t\tfield.setValue(value)\n\t\t\t\tvalid = true\n\t\t\t\treturn {valid, error, field}\n\t\t\t} catch (err) {\n\t\t\t\t/* do nothing, try next value */\n\t\t\t}\n\t\t}\n\t\tvalid = false\n\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match any of the schemas defined in oneOf\")\n\t\treturn {valid, error, field}\n\t}\n\n\t/**\n\t * setValue takes a value as argument and attempts to validate this value. If it was valid we set \n\t * this.value to the field returned by the validate method, otherwise we throw the error that was returned\n\t * \n\t * @param {*} value - The value that should be set in this MField\n\t */\n\tsetValue(value) {\n\t\tlet {valid, error, field} = this.validate(value)\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = field\n\t\t}\n\t}\n\t\n\t/**\n\t * @return {*} This OneOfMFields value\n\t */\n\tgetValue() {\n\t\treturn this.value.getValue()\n\t}\n}",
+    "content": "import {MField} from \"./MFieldSingle\"\nimport {MFieldFactory} from \"./MFieldFactory\"\n\n/**\n * The ArrayHanlder implements a get trap for the managed arrays that has two tasks:\n *\n *\t\t- if the property is a number, we treat it as an index of the contained array by invoking \"get\" on the target\n *\t\t- if the property is a function we return a function that invokes the notifyArray method on the target's superKlass.\n *\t\t  It then applies the method with the returned list of arguments.\n */\nexport class ArrayHandler {\n\t/**\n\t * @param {Object} target - The target object.\n\t * @param {String, Symbol} propKey - The name of the property to get.\n\t * @param {Object} receiver - Either the proxy or an object that inherits from the proxy.\n\t *\n\t * @return {*} Either the value stored at the requested index or the result of Reflect.get()\n\t */\n\tget(target, propKey, receiver) {\n\t\tif(!(typeof(propKey)==\"symbol\") && !isNaN(propKey)) {\n\t\t\ttarget.superKlass.notifyArray(\"get\", [propKey], target.proxy)\n\t\t\treturn target.get(parseInt(propKey))\n\t\t} else {\n\t\t\tlet propValue = target[propKey]\n\t\t\tif(typeof(propValue) == \"function\" && !(typeof(propKey) == \"symbol\")) {\n\t\t\t\treturn function() {\n\t\t\t\t\t/* invoke notifyArray on target's superKlass */\n\t\t\t\t\tlet argsArray = [...arguments]\n\t\t\t\t\targsArray = target.superKlass.notifyArray(propKey, argsArray, target.proxy)\n\t\t\t\t\t\n\t\t\t\t\t/* remove the old arguments, add the new arguments and then apply the original method */\n\t\t\t\t\twhile(arguments.length > 0) {\n\t\t\t\t\t\tArray.shift(arguments)\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tArray.unshift(arguments, ...argsArray)\n\t\t\t\t\treturn propValue.apply(target, arguments, propKey)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn Reflect.get(target, propKey, receiver)\n\t}\n}\n\n/**\n * The array MField implementation is a bit different from other MField implementations.\n * An ArrayMField must act like a regular JavaScript array and therefore it forwards all\n * original ArrayMethods to the array stored within the value field and applies validation\n * where neccesary. When the array has been modified, the arrayHasChanged() callback is\n * invoked on the MObject it belongs to.\n *\n * We use three simple conventions for managed arrays:\n *\t\t<ul><li>the ArrayMField never returns a Field when one of its values is returned, except when that field itself is a managedArray.</li>\n *\t\t<li>the ArrayMField always takes regular javascript values as input, except when the value is a managed array.</li>\n *\t\t<li>the ArrayMField.value only contains objects that are instances of MFields.</li></ul>\n */\nexport class ArrayMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t * @param {MObject} superKlass - The MObject that this field belongs to\n\t */ \t\n\tconstructor(schema, superKlass) {\n\t\tsuper(\"array\", schema, [])\n\n\t\t/**\n\t\t * The MObject that this ArrayMField belongs to\n\t\t * @type {MObject}\n\t\t */\n\t\tthis.superKlass = superKlass\n\n\t\t/**\n\t\t * If we have a list of items, this parameter keeps track of which item\n\t\t * we need to use to validate the next element\n\t\t * @type {number}\n\t\t */\n\t\tthis.itemsIdx = 0\n\n\t\t/**\n\t\t * The length of the array stored in this.value\n\t\t * @type {number}\n\t\t */\n\t\tthis.length = 0\n\n\t\t/**\n\t\t * Override this[Symbol.iterator]\n\t\t */\n\t\tthis[Symbol.iterator] = this.iterator\n\t}\n\n\tsetThisProxy(proxy) {\n\t\tthis.proxy = proxy\n\t}\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tconcat(...values) {\n\t\tfor(let value of values) {\n\t\t\tif(value instanceof Array) {\n\t\t\t\tthis.push(...value)\n\t\t\t} else {\n\t\t\t\tthis.push(value)\n\t\t\t}\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tcopyWithin(target, start, end) {\n\t\treturn this.value.copyWithin(target, start, end)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tentries() {\n\t\treturn this.getValues().entries()\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tevery(callback, thisarg) {\n\t\treturn this.getValues().every(callback, thisarg)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfill(value, start, end) {\t\n\t\tlet newArr = this.getValues().fill(value)\n\t\tlet {valid, error, fields} = this.validate(newArr)\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = fields\n\t\t\treturn newArr\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfilter(callback, thisarg) {\n\t\treturn this.getValues().filter(callback, thisarg)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfind(callback, thisarg) {\n\t\treturn this.getValues().find(callback, thisarg)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tfindIndex(callback, thisarg) {\n\t\treturn this.getValues().findIndex(callback, thisarg)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tforEach(callback, thisarg) {\n\t\tlet arr = this.getValues()\n\t\tarr.forEach(callback, thisarg)\n\n\t\tlet {valid, error, fields} = this.validate(arr)\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = fields\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tincludes(searchElement, fromIndex = 0) {\n\t\treturn this.getValues().includes(searchElement, fromIndex)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tindexOf(searchElement, fromIndex) {\n\t\tif(fromIndex == undefined) {\n\t\t\treturn this.getValues().indexOf(searchElement)\n\t\t} else {\n\t\t\treturn this.getValues().indexOf(searchElement, fromIndex)\n\t\t}\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tjoin(separator) {\n\t\treturn this.getValues().join(separator)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tkeys() {\n\t\treturn this.getValues().keys()\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tlastIndexOf(searchElement, fromIndex) {\n\t\tif(fromIndex == undefined) {\n\t\t\treturn this.getValues().lastIndexOf(searchElement)\n\t\t} else {\n\t\t\treturn this.getValues().lastIndexOf(searchElement, fromIndex)\n\t\t}\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tmap(callback, thisarg) {\n\t\tlet newArr = this.getValues().map(callback, thisarg)\n\t\treturn newArr\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tpop() {\n\t\tlet field = this.value.pop()\n\t\tif(field != undefined) {\n\t\t\tthis.length = this.value.length\n\t\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\t\tfield.value[this.schema.inverseKey] = null\n\t\t\t}\n\t\t\treturn field.getValue()\n\t\t} else {\n\t\t\treturn field\n\t\t}\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tpush(...elements) {\n\t\tlet {valid, error, fields} = this.validate(elements)\n\t\t\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tfor(let field of fields) {\n\t\t\t\tthis.value.push(field)\n\t\t\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\t\t\tif(this.schema.inverseType == \"object\") {\n\t\t\t\t\t\tif(field.getValue()[this.schema.inverseKey] != this.superKlass) {\n\t\t\t\t\t\t\tfield.getValue()[this.schema.inverseKey] = this.superKlass\n\t\t\t\t\t\t}\n\t\t\t\t\t} else {\n\t\t\t\t\t\tif(!field.getValue()[this.schema.inverseKey].includes(this.superKlass)) {\n\t\t\t\t\t\t\tfield.getValue()[this.schema.inverseKey].push(this.superKlass)\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tthis.itemsIdx = (this.itemsIdx+1)%this.schema.items.length\n\t\t\t\tthis.length = this.value.length\n\t\t\t}\n\t\t}\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\treduce(callback, initialValue) {\n\t\treturn this.getValues().reduce(callback, initialValue)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\treduceRight(callback, initialValue) {\n\t\treturn this.getValues().reduceRight(callback, initialValue)\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\treverse() {\n\t\tthis.value.reverse()\n\t\treturn this.getValues()\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tshift() {\n\t\tlet element = this.value.shift()\n\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\tif(this.schema.inverseType == \"object\") {\n\t\t\t\telement[this.schema.inverseKey] = null\n\t\t\t} else {\n\t\t\t\telement[this.schema.inverseKey].remove(this.superKlass)\n\t\t\t}\n\t\t}\n\n\t\tthis.length = this.value.length\n\t\treturn element.getValue()\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tslice(begin, end) {\n\t\treturn this.getValues().slice(begin, end)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tsome(callback, thisarg) {\n\t\treturn this.getValues().some(callback, thisarg)\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tsort(compareFunction) {\t\n\t\tlet sorted = this.getValues().sort(compareFunction)\n\t\tlet {valid, error, fields} = this.validate(sorted)\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = fields\n\t\t}\n\n\t}\n\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tsplice(start, deleteCount=0, ...items) {\n\t\tlet {valid, error, fields} = this.validate(items)\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tlet removed_values = []\n\t\t\tif(deleteCount > 0) {\n\t\t\t\tfor(let i = start; i<(start+deleteCount)%this.value.length; i++) {\n\t\t\t\t\tremoved_values.push(this.value[i].getValue())\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tthis.value.splice(start, deleteCount, ...fields)\n\n\t\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\t\tfor(let value of removed_values) {\n\t\t\t\t\tif(this.schema.inverseType == \"object\") {\n\t\t\t\t\t\tvalue[this.schema.inverseKey]=null\n\t\t\t\t\t} else {\n\t\t\t\t\t\tif(value[this.schema.inverseKey].includes(this.superKlass)) {\n\t\t\t\t\t\t\tvalue[this.schema.inverseKey].remove(this.superKlass)\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tfor(let field of fields) {\n\t\t\t\t\tif(this.schema.inverseType == \"array\") {\n\t\t\t\t\t\tif(field.value[this.schema.inverseKey] != this.superKlass) {\n\t\t\t\t\t\t\tfield.value[this.schema.inverseKey] = this.superKlass\n\t\t\t\t\t\t}\n\t\t\t\t\t} else {\n\t\t\t\t\t\tif(!field.value[this.schema.inverseKey].includes(this.superKlass)) {\n\t\t\t\t\t\t\tfield.value[this.schema.inverseKey].push(this.superKlass)\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tthis.length = this.value.length\n\t}\n\t\n\t/**\n\t * See JavaScript Array documentation\n\t */\n\tunshift(...elements) {\n\t\tlet {valid, error, fields} = this.validate(elements)\n\n\t\tif(valid == false) {\n\t\t\tthrow new TypeError(error)\n\t\t} else {\n\t\t\tthis.value.unshift(...fields)\n\t\t\t\n\t\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\t\tfor(let field of fields) {\n\t\t\t\t\tif(this.schema.inverseType == \"object\") {\n\t\t\t\t\t\tif(field.value[this.schema.inverseKey] != this.superKlass) {\n\t\t\t\t\t\t\tfield.value[this.schema.inverseKey] = this.superKlass\n\t\t\t\t\t\t}\n\t\t\t\t\t} else {\n\t\t\t\t\t\tif(!field.value[this.schema.inverseKey].includes(this.superKlass)) {\n\t\t\t\t\t\t\tfield.value[this.schema.inverseKey].push(this.superKlass)\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tthis.length = this.value.length\n\t}\n\t\n\t/**\n\t * @return {Iterator} Returns an iterator object for this ArrayMFields value\n\t */\n\titerator() {\n\t\treturn this.getValues()[Symbol.iterator]()\n\t}\n\n\taddRelatedObject(other) {\n\t\tthis.push(other)\n\t}\n\n\tremove(other) {\n\t\tlet idx = this.indexOf(other)\n\t\tif(idx != null) {\n\t\t\tthis.splice(idx, 1)\n\t\t}\n\t}\n\n\t/** \n\t * Implementation of the validate function for ArrayMField \n\t *\n\t * @param {Array} values - An array containing the values to validate\n\t *\n\t * @return {Boolean, Error, MField} Boolean indicating whether all values where valid; if there were any validation errors we return the error. only when valid == false; An array containing valid MFields of the given values. only when valid == true\n\t */\n\tvalidate(values) {\n\t\tif(values == undefined) {\n\t\t\treturn {true, undefined, undefined}\n\t\t}\n\n\t\tlet fields = []\n\t\tlet valid = true;\n\t\tlet error\n\t\tlet field\n\n\t\tif(this.schema.items instanceof Array) {\n\t\t\tlet tmpItemsIdx = this.itemsIdx\n\t\t\tfor(let value of values) {\n\t\t\t\tfield = MFieldFactory(this.schema.items[tmpItemsIdx], this.superKlass)\n\t\t\t\ttmpItemsIdx++;\n\n\t\t\t\ttry { \n\t\t\t\t\tfield.setValue(value)\n\t\t\t\t} catch (err) {\n\t\t\t\t\tvalid = false\n\t\t\t\t\terror = err\n\t\t\t\t\tbreak\n\t\t\t\t}\n\n\t\t\t\tfields.push(field)\n\t\t\t}\n\t\t} else {\n\t\t\tfor(let value of values) {\n\t\t\t\tfield = MFieldFactory(this.schema.items, this.superKlass)\n\t\t\t\ttry { \n\t\t\t\t\tfield.setValue(value)\n\t\t\t\t} catch (err) {\n\t\t\t\t\tvalid = false\n\t\t\t\t\terror = err\n\t\t\t\t\tbreak\n\t\t\t\t}\n\n\t\t\t\t\n\n\t\t\t\tfields.push(field)\n\t\t\t}\n\t\t}\n\t\treturn {valid, error, fields}\n\t}\n\n\t/**\n\t * @param {Integer} idx - the index to retrieve from this array\n\t *\n\t * @return {*} Get either returns the value on the given index or false\n\t */\n\tget(idx) {\n\t\tif(!this.value.hasOwnProperty(idx)) {\n\t\t\treturn undefined\n\t\t}\n\t\treturn this.value[idx].getValue()\n\t}\n\n\t/**\n\t * @return {String} A string representing this array\n\t */\n\ttoString() {\n\t\treturn this.getValues().toString()\n\t}\n\n\t/**\n\t * getValues returns an actual javascript array containing this ArrayMFields values\n\t * @return {Array} A regular JavaScript array containing this ArrayMFields values\n\t */\n\tgetValues() {\n\t\tlet arr = []\n\t\tfor(let val of this.value) {\n\t\t\tarr.push(val.getValue())\n\t\t}\n\t\treturn arr\n\t}\n\n\t/**\n\t * @return {ArrayMField} Since an ArrayMField works like a regular JavaScript array we return this instead of this.value\n\t */\n\tgetValue() {\n\t\treturn this.proxy\n\t}\n\n\t/**\n\t * setValue takes a value as argument and attempts to validate this value. If it was valid we set \n\t * this.value to the field returned by the validate method, otherwise we throw the error that was returned\n\t * \n\t * @param {Array} values - The value that should be set in this ArrayMField\n\t */\n\tsetValue(values) {\n\t\tif(!(values instanceof Array)) {\n\t\t\tthrow new TypeError(\"value assigned to \"+this.schema.type+\"MField can only be set to that of an actual JavaScript array\")\n\t\t} else {\n\t\t\tthis.value = [];\n\t\t\tthis.push(...values)\n\t\t}\n\t}\n}\n\n\n/**\n * An enum can contain only one of its schemas values. Values defined within an enum can only be primitive types.\n */\nexport class EnumMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this fields value\n\t */\n\tconstructor(schema) {\n\t\tsuper(\"enum\", schema, schema.enum[0])\n\t}\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\t\tif(!this.schema.enum.includes(value)) {\n\t\t\tvalid = false\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField must be one of \"+JSON.stringyfy(schema.enum))\n\t\t\treturn {valid, error}\n\t\t} else {\n\t\t\treturn {valid, error}\n\t\t}\n\t}\n}\n\n/**\n * A OneOf field can contain at most one of the klasses defined in its schema. These klasses\n * are stored within an MObjectField.  \n */\nexport class OneOfMField extends MField {\n\tconstructor(schema, superKlass) {\n\t\tsuper(\"oneOf\", schema, schema.oneOf[0].klass)\n\t\t/**\n\t\t * The MObject that this OneOfMField belongs to\n\t\t * @type {MObject}\n\t\t */\n\t\tthis.superKlass = superKlass\n\t}\t\n\n\t/**\n\t * @param {MObject} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error, MField} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned. If it was valid, the valid MField is returned\n\t */\n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\t\tlet field\n\n\t\tfor(let schema of this.schema.oneOf) {\n\t\t\ttry{\n\t\t\t\tfield = MFieldFactory(schema, this.superKlass)\n\t\t\t\tfield.setValue(value)\n\t\t\t\tvalid = true\n\t\t\t\treturn {valid, error, field}\n\t\t\t} catch (err) {\n\t\t\t\t/* do nothing, try next value */\n\t\t\t}\n\t\t}\n\t\tvalid = false\n\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match any of the schemas defined in oneOf\")\n\t\treturn {valid, error, field}\n\t}\n\n\t/**\n\t * setValue takes a value as argument and attempts to validate this value. If it was valid we set \n\t * this.value to the field returned by the validate method, otherwise we throw the error that was returned\n\t * \n\t * @param {*} value - The value that should be set in this MField\n\t */\n\tsetValue(value) {\n\t\tlet {valid, error, field} = this.validate(value)\n\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = field\n\t\t}\n\t}\n\t\n\t/**\n\t * @return {*} This OneOfMFields value\n\t */\n\tgetValue() {\n\t\treturn this.value.getValue()\n\t}\n}",
     "static": true,
     "longname": "/home/gebruiker/Documenten/BSc/code/ManagedDataJS/src/js/framework/dataManager/fields/MFieldMulti.js",
     "access": "public",
@@ -2728,8 +2728,8 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/fields/MFieldMulti.js",
     "importStyle": "{ArrayHandler}",
-    "description": "The ArrayHandler ensures that ArrayMfield[idx] returns ArrayMField.value[idx] when idx is an integer",
-    "lineNumber": 7,
+    "description": "The ArrayHanlder implements a get trap for the managed arrays that has two tasks:\n\n\t- if the property is a number, we treat it as an index of the contained array by invoking \"get\" on the target\n\t- if the property is a function we return a function that invokes the notifyArray method on the target's superKlass.\n\t  It then applies the method with the returned list of arguments.",
+    "lineNumber": 11,
     "interface": false
   },
   {
@@ -2743,7 +2743,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayHandler#get",
     "access": "public",
     "description": "",
-    "lineNumber": 15,
+    "lineNumber": 19,
     "params": [
       {
         "nullable": null,
@@ -2796,8 +2796,8 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/fields/MFieldMulti.js",
     "importStyle": "{ArrayMField}",
-    "description": "The array MField implementation is a bit different from other MField implementations.\nAn ArrayMField must act like a regular JavaScript array and therefore it forwards all\noriginal ArrayMethods to the array stored within the value field and applies validation\nwhere neccesary. When the array has been modified, the arrayHasChanged() callback is\ninvoked on the MObject it belongs to.\n\n\nthe ArrayMField always returns regular javascript values or managed objects.\nthe ArrayMField always takes regular javascript values as input.\nthe ArrayMField.value only contains objects that are instances of MFields.",
-    "lineNumber": 51,
+    "description": "The array MField implementation is a bit different from other MField implementations.\nAn ArrayMField must act like a regular JavaScript array and therefore it forwards all\noriginal ArrayMethods to the array stored within the value field and applies validation\nwhere neccesary. When the array has been modified, the arrayHasChanged() callback is\ninvoked on the MObject it belongs to.\n\nWe use three simple conventions for managed arrays:\n\t<ul><li>the ArrayMField never returns a Field when one of its values is returned, except when that field itself is a managedArray.</li>\n\t<li>the ArrayMField always takes regular javascript values as input, except when the value is a managed array.</li>\n\t<li>the ArrayMField.value only contains objects that are instances of MFields.</li></ul>",
+    "lineNumber": 57,
     "interface": false,
     "extends": [
       "framework/dataManager/fields/MFieldSingle.js~MField"
@@ -2814,7 +2814,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#constructor",
     "access": "public",
     "description": "",
-    "lineNumber": 56,
+    "lineNumber": 62,
     "params": [
       {
         "nullable": null,
@@ -2847,7 +2847,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#superKlass",
     "access": "public",
     "description": "The MObject that this ArrayMField belongs to",
-    "lineNumber": 63,
+    "lineNumber": 69,
     "type": {
       "nullable": null,
       "types": [
@@ -2866,7 +2866,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#itemsIdx",
     "access": "public",
     "description": "If we have a list of items, this parameter keeps track of which item\nwe need to use to validate the next element",
-    "lineNumber": 70,
+    "lineNumber": 76,
     "type": {
       "nullable": null,
       "types": [
@@ -2885,7 +2885,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#length",
     "access": "public",
     "description": "The length of the array stored in this.value",
-    "lineNumber": 76,
+    "lineNumber": 82,
     "type": {
       "nullable": null,
       "types": [
@@ -2904,7 +2904,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#[Symbol.iterator]",
     "access": "public",
     "description": "Override this[Symbol.iterator]",
-    "lineNumber": 81,
+    "lineNumber": 87,
     "type": {
       "types": [
         "*"
@@ -2922,7 +2922,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#setThisProxy",
     "access": "public",
     "description": null,
-    "lineNumber": 84,
+    "lineNumber": 90,
     "undocument": true,
     "params": [
       {
@@ -2943,7 +2943,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#proxy",
     "access": "public",
     "description": null,
-    "lineNumber": 85,
+    "lineNumber": 91,
     "undocument": true,
     "type": {
       "types": [
@@ -2962,7 +2962,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#concat",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 90,
+    "lineNumber": 96,
     "params": [
       {
         "name": "values",
@@ -2985,7 +2985,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#copyWithin",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 103,
+    "lineNumber": 109,
     "params": [
       {
         "name": "target",
@@ -3023,7 +3023,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#entries",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 110,
+    "lineNumber": 116,
     "params": [],
     "return": {
       "types": [
@@ -3042,7 +3042,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#every",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 117,
+    "lineNumber": 123,
     "params": [
       {
         "name": "callback",
@@ -3074,7 +3074,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#fill",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 124,
+    "lineNumber": 130,
     "params": [
       {
         "name": "value",
@@ -3110,7 +3110,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#value",
     "access": "public",
     "description": null,
-    "lineNumber": 131,
+    "lineNumber": 137,
     "undocument": true,
     "type": {
       "types": [
@@ -3129,7 +3129,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#filter",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 139,
+    "lineNumber": 145,
     "params": [
       {
         "name": "callback",
@@ -3161,7 +3161,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#find",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 146,
+    "lineNumber": 152,
     "params": [
       {
         "name": "callback",
@@ -3193,7 +3193,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#findIndex",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 153,
+    "lineNumber": 159,
     "params": [
       {
         "name": "callback",
@@ -3225,7 +3225,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#forEach",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 160,
+    "lineNumber": 166,
     "params": [
       {
         "name": "callback",
@@ -3253,7 +3253,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#includes",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 175,
+    "lineNumber": 181,
     "params": [
       {
         "name": "searchElement",
@@ -3288,7 +3288,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#indexOf",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 182,
+    "lineNumber": 188,
     "params": [
       {
         "name": "searchElement",
@@ -3320,7 +3320,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#join",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 193,
+    "lineNumber": 199,
     "params": [
       {
         "name": "separator",
@@ -3346,7 +3346,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#keys",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 200,
+    "lineNumber": 206,
     "params": [],
     "return": {
       "types": [
@@ -3365,7 +3365,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#lastIndexOf",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 207,
+    "lineNumber": 213,
     "params": [
       {
         "name": "searchElement",
@@ -3397,7 +3397,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#map",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 218,
+    "lineNumber": 224,
     "params": [
       {
         "name": "callback",
@@ -3429,7 +3429,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#pop",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 226,
+    "lineNumber": 232,
     "params": [],
     "return": {
       "types": [
@@ -3448,7 +3448,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#push",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 242,
+    "lineNumber": 248,
     "params": [
       {
         "name": "elements",
@@ -3471,7 +3471,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#reduce",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 271,
+    "lineNumber": 277,
     "params": [
       {
         "name": "callback",
@@ -3503,7 +3503,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#reduceRight",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 278,
+    "lineNumber": 284,
     "params": [
       {
         "name": "callback",
@@ -3535,7 +3535,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#reverse",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 285,
+    "lineNumber": 291,
     "params": [],
     "return": {
       "types": [
@@ -3554,7 +3554,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#shift",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 293,
+    "lineNumber": 299,
     "params": [],
     "return": {
       "types": [
@@ -3573,7 +3573,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#slice",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 310,
+    "lineNumber": 316,
     "params": [
       {
         "name": "begin",
@@ -3605,7 +3605,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#some",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 317,
+    "lineNumber": 323,
     "params": [
       {
         "name": "callback",
@@ -3637,7 +3637,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#sort",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 324,
+    "lineNumber": 330,
     "params": [
       {
         "name": "compareFunction",
@@ -3659,7 +3659,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#splice",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 338,
+    "lineNumber": 344,
     "params": [
       {
         "name": "start",
@@ -3697,7 +3697,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#unshift",
     "access": "public",
     "description": "See JavaScript Array documentation",
-    "lineNumber": 383,
+    "lineNumber": 389,
     "params": [
       {
         "name": "elements",
@@ -3720,7 +3720,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#iterator",
     "access": "public",
     "description": "",
-    "lineNumber": 412,
+    "lineNumber": 418,
     "return": {
       "nullable": null,
       "types": [
@@ -3742,7 +3742,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#addRelatedObject",
     "access": "public",
     "description": null,
-    "lineNumber": 416,
+    "lineNumber": 422,
     "undocument": true,
     "params": [
       {
@@ -3765,7 +3765,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#remove",
     "access": "public",
     "description": null,
-    "lineNumber": 420,
+    "lineNumber": 426,
     "undocument": true,
     "params": [
       {
@@ -3788,7 +3788,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#validate",
     "access": "public",
     "description": "Implementation of the validate function for ArrayMField ",
-    "lineNumber": 434,
+    "lineNumber": 440,
     "params": [
       {
         "nullable": null,
@@ -3821,7 +3821,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#get",
     "access": "public",
     "description": "",
-    "lineNumber": 484,
+    "lineNumber": 490,
     "params": [
       {
         "nullable": null,
@@ -3837,7 +3837,7 @@
     "return": {
       "nullable": null,
       "types": [
-        "*, Boolean"
+        "*"
       ],
       "spread": false,
       "description": "Get either returns the value on the given index or false"
@@ -3854,7 +3854,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#toString",
     "access": "public",
     "description": "",
-    "lineNumber": 492,
+    "lineNumber": 500,
     "return": {
       "nullable": null,
       "types": [
@@ -3875,8 +3875,8 @@
     "static": false,
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#getValues",
     "access": "public",
-    "description": "",
-    "lineNumber": 499,
+    "description": "getValues returns an actual javascript array containing this ArrayMFields values",
+    "lineNumber": 508,
     "return": {
       "nullable": null,
       "types": [
@@ -3898,7 +3898,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#getValue",
     "access": "public",
     "description": "",
-    "lineNumber": 510,
+    "lineNumber": 519,
     "return": {
       "nullable": null,
       "types": [
@@ -3920,7 +3920,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~ArrayMField#setValue",
     "access": "public",
     "description": "setValue takes a value as argument and attempts to validate this value. If it was valid we set \nthis.value to the field returned by the validate method, otherwise we throw the error that was returned",
-    "lineNumber": 520,
+    "lineNumber": 529,
     "params": [
       {
         "nullable": null,
@@ -3946,8 +3946,8 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/fields/MFieldMulti.js",
     "importStyle": "{EnumMField}",
-    "description": "Enum implementation of MField which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue\t\t===>\tenum.includes(value)",
-    "lineNumber": 537,
+    "description": "An enum can contain only one of its schemas values. Values defined within an enum can only be primitive types.",
+    "lineNumber": 543,
     "interface": false,
     "extends": [
       "framework/dataManager/fields/MFieldSingle.js~MField"
@@ -3964,7 +3964,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~EnumMField#constructor",
     "access": "public",
     "description": "",
-    "lineNumber": 541,
+    "lineNumber": 547,
     "params": [
       {
         "nullable": null,
@@ -3989,7 +3989,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~EnumMField#validate",
     "access": "public",
     "description": "",
-    "lineNumber": 550,
+    "lineNumber": 556,
     "params": [
       {
         "nullable": null,
@@ -4022,8 +4022,8 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/fields/MFieldMulti.js",
     "importStyle": "{OneOfMField}",
-    "description": "OneOF implementation of MFIeld which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue\t\t===>\tvalue matches at least one schema in schema.oneOf",
-    "lineNumber": 568,
+    "description": "A OneOf field can contain at most one of the klasses defined in its schema. These klasses\nare stored within an MObjectField.  ",
+    "lineNumber": 572,
     "interface": false,
     "extends": [
       "framework/dataManager/fields/MFieldSingle.js~MField"
@@ -4040,7 +4040,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~OneOfMField#constructor",
     "access": "public",
     "description": null,
-    "lineNumber": 569,
+    "lineNumber": 573,
     "undocument": true
   },
   {
@@ -4052,7 +4052,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~OneOfMField#superKlass",
     "access": "public",
     "description": "The MObject that this OneOfMField belongs to",
-    "lineNumber": 575,
+    "lineNumber": 579,
     "type": {
       "nullable": null,
       "types": [
@@ -4073,12 +4073,12 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~OneOfMField#validate",
     "access": "public",
     "description": "",
-    "lineNumber": 583,
+    "lineNumber": 587,
     "params": [
       {
         "nullable": null,
         "types": [
-          "*"
+          "MObject"
         ],
         "spread": false,
         "optional": false,
@@ -4106,7 +4106,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~OneOfMField#setValue",
     "access": "public",
     "description": "setValue takes a value as argument and attempts to validate this value. If it was valid we set \nthis.value to the field returned by the validate method, otherwise we throw the error that was returned",
-    "lineNumber": 608,
+    "lineNumber": 612,
     "params": [
       {
         "nullable": null,
@@ -4130,7 +4130,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~OneOfMField#value",
     "access": "public",
     "description": null,
-    "lineNumber": 614,
+    "lineNumber": 618,
     "undocument": true,
     "type": {
       "types": [
@@ -4149,7 +4149,7 @@
     "longname": "framework/dataManager/fields/MFieldMulti.js~OneOfMField#getValue",
     "access": "public",
     "description": "",
-    "lineNumber": 621,
+    "lineNumber": 625,
     "return": {
       "nullable": null,
       "types": [
@@ -4164,7 +4164,7 @@
     "__docId__": 182,
     "kind": "file",
     "name": "framework/dataManager/fields/MFieldSingle.js",
-    "content": "import {MObject} from \"../MObject\"\n\n/**\n * The basic MField class privides the API for data managers that\n * want to use the MFields values. By default we can invoke:\n *\t\t\n * getValue\t\treturns the internal value of the MField.\n * setValue\t\tused to set the internal value of the MField.\n * getType\t\t\treturns the type of the value stored in the MField.4\n * toString\t\treturns a string representing this fields value\n *\n * Each class that extends MField must provide the validate(value) function\n * which returns true iff the given parameter matches the schema for this MField.\n */\nexport class MField {\n\t/**\n\t * @param {String} type - A string representing the type of this MField\n\t * @param {Object} schema - A JSON schema that describes this fields value\n\t * @param {*} value - The value that should be used to initialize this MField\n\t */\n\tconstructor(type, schema, value) {\n\t\t/**\n\t\t * String representing the type of the MField's value\n\t\t * @type {String}\n\t\t */\n\t\tthis.type = type\n\n\t\t/**\n\t\t * The schema describing this value\n\t\t * @type {Schema}\n\t\t */\n\t\tthis.schema = schema\n\n\t\t/**\n\t\t * The initial value for this MField\n\t\t * @type {*}\n\t\t */\n\t\tthis.value = value\n\t}\n\n\t/**\n\t * setValue takes a value as argument and attempts to validate this value. If it was valid we set \n\t * this.value to the value, and otherwise we throw the error returned by the validate method\n\t * \n\t * @param {*} value - The value that should be set in this MField\n\t */\n\tsetValue(value) {\n\t\tlet {valid, error} = this.validate(value)\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = value\n\t\t}\n\t}\n\n\t/**\n\t * @return {*} This MFields value\n\t */\n\tgetValue() {\n\t\treturn this.value\n\t}\n\n\t/**\n\t * @return {String} A string representing this MFields type\n\t */\n\tgetType() {\n\t\treturn this.type\n\t}\n\n\t/**\n\t * @return String representing this MFields value\n\t */\n\ttoString() {\n\t\treturn this.type\n\t}\n\n\tvalidate(value) {\n\t\tlet valid = true\n\t\tlet error\n\n\t\tif(value === undefined) {\n\t\t\tvalid = false\n\t\t\terror = new TypeError(\"Cannot validate 'undefined' in MField of type \"+this.type)\n\t\t}\n\t\treturn {valid, error}\n\t}\n\n\tis(other) {\n\t\tif(other.getValue() === this.value) {\n\t\t\treturn true\n\t\t} else {\n\t\t\treturn false\n\t\t}\n\t}\n}\n\n/**\n * Number implementation of MField which checks the following constraints:\n * \t\t\n *\t\tREQUIRED:\n * \t\t\tvalue \t\t\t\t\t\t\t===>\ttypeof(value) == typeof(Number)\n *\t\tOPTIONAL:\n *\t\t\tminimum && exclusiveMinimum \t===> \tvalue > minimum\n *\t\t\tminimum \t\t\t\t\t\t===>\tvalue >= minimum\n *\t\t\tmaximum && exclusiveMaximum\t\t===>\tvalue < maximum\n *\t\t\tmaximum \t\t\t\t\t\t===>\tvalue <= maximum\n *\t\t\tmultipleOf\t\t\t\t\t\t===>\tvalue%multipleOf == 0\n *\n *\n */\nexport class NumberMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tif(schema.hasOwnProperty(\"minimum\")) {\n\t\t\tsuper(\"number\", schema, schema.minimum)\n\t\t} else {\n\t\t\tsuper(\"number\", schema, 0)\n\t\t}\n\t}\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */ \n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\n\t\tif(valid == false) {\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(typeof(value) == \"number\") {\n\t\t\tif( this.schema.hasOwnProperty(\"exclusiveMinimum\") && this.schema.hasOwnProperty(\"minimum\") && value <= this.schema.minimum) {\n\t\t\t\terror = new TypeError(\"Value assigned to \"+this.type+\"MField must be greater than \"+this.schema.minimum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t} else if(this.schema.hasOwnProperty(\"minimum\") && value < this.schema.minimum) {\n\t\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be greater than or equal to \"+this.schema.minimum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t}\n\n\t\t\tif(this.schema.hasOwnProperty(\"exclusiveMaximum\") && this.schema.hasOwnProperty(\"maximum\") && value >= this.schema.maximum) {\n\t\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be less than \"+this.schema.maximum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t} else if (this.schema.hasOwnProperty(\"maximum\") && value > this.schema.maximum) {\n\t\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be less than or equal to \"+this.schema.maximum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t}\n\n\t\t\tif(this.schema.hasOwnProperty(\"multipleOf\") && value%this.schema.multipleOf != 0) {\n\t\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be a multiple of \" + this.schema.multipleOf)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t}\n\n\n\t\t\tvalid = true\n\t\t} else {\n\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be of type \"+this.schema.type)\n\t\t}\n\t\treturn {valid, error}\n\t}\n}\n\n\n/**\n * Integer implementation of MField which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue \t===>\tvalue%1 == 0\n */\nexport class IntegerMField extends NumberMField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tsuper(schema)\n\t\t/**\n\t\t * Override NumberMFields type\n\t\t * @type {String}\n\t\t */\n\t\tthis.type = \"integer\"\n\t}\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\t\tif(valid == true) {\n\t\t\tif(value%1 == 0) {\n\t\t\t\tvalid = true\n\t\t\t} else {\n\t\t\t\tvalid = false\n\t\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be of type \"+this.schema.type)\n\t\t\t}\n\t\t}\n\t\treturn {valid, error}\n\t}\n}\n\n\n /**\n *\tString implementation of MField which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue \t\t===>\ttypeof(value) == typeof(String)\n *\t\tOPTIONAL:\n *\t\t\tminLength\t===>\tvalue.length >= minLength\n *\t\t\tmaxLength\t===>\tvalue.length <= maxLength\n *\t\t\tpattern\t\t===>\tvalue matches pattern\n *\t\t\tformat\t\t===>\tvalue is one of:\n * \n * \t\t\t\t\t\t\t\t\tdate-time\n * \t\t\t\t\t\t\t\t\temail\n * \t\t\t\t\t\t\t\t\thostname\n * \t\t\t\t\t\t\t\t\tipv4\n * \t\t\t\t\t\t\t\t\tipv6\n * \t\t\t\t\t\t\t\t\turi\n */\nexport class StringMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tsuper(\"string\", schema, \"\")\n\t}\n\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\n\t\tif(!typeof(value) === \"string\") {\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField must be a String\")\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"minLength\") && value.length < this.schema.minLength) {\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField is shorter than the minimum length of \"+this.schema.minLength)\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"maxLength\") && value.length > this.schema.maxLength + exclMax) {\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField is longer than the maximum length of \"+this.schema.maxLength)\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"pattern\") ** value.match(this.schema.pattern) == null) {\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the pattern \"+this.schema.pattern);\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"format\")) {\n\t\t\tif(this.schema.format == \"date-time\") {\n\t\t\t\tif(Date.parse(value) == NaN) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the date-time format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"email\") {\n\t\t\t\tif(/^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the email format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"hostname\") {\n\t\t\t\tif(/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the hostname format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"ipv4\") {\n\t\t\t\tif(/^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the ipv4 format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"ipv6\") {\n\t\t\t\tif(/^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))?$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the ipv6 format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"uri\") {\n\t\t\t\tif(/^([a-z][a-z0-9+.-]*):(?:\\/\\/((?:(?=((?:[a-z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*))(\\3)@)?(?=(\\[[0-9A-F:.]{2,}\\]|(?:[a-z0-9-._~!$&'()*+,;=]|%[0-9A-F]{2})*))\\5(?::(?=(\\d*))\\6)?)(\\/(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/]|%[0-9A-F]{2})*))\\8)?|(\\/?(?!\\/)(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/]|%[0-9A-F]{2})*))\\10)?)(?:\\?(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/?]|%[0-9A-F]{2})*))\\11)?(?:#(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/?]|%[0-9A-F]{2})*))\\12)?$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the uri format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tvalid = true;\n\t\treturn {valid, error}\n\t}\n}\n\n/**\n * Integer implementation of MField which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue \t===>\ttypeof(value) == typeof(Boolean)\n */\nexport class BooleanMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tsuper(\"boolean\", schema, false)\n\t}\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet valid, error = super.validate(value)\n\t\tif(value === false || value === true) {\n\t\t\treturn {valid, error}\n\t\t} else {\n\t\t\tvalid = false;\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField must be a Boolean\")\n\t\t\treturn {valid, error}\n\t\t}\n\t}\n}\n\n/**\n * MObject implementation of MField which checks the following constraints:\n *\n *\t\tREQUIRED:\n *\t\t\tvalue \t \t\t\t===>\tvalue instanceof MObject && value.klass == schema.klass\n *\t\tOPTIONAL:\n *\t\t\tinverse\t\t \t\t===>\t(value[inverse] == this || value[inverse].includes(this))\n */\nexport class MObjectMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t * @param {MObject} superKlass - The MObject that this field belongs to\n\t */ \t\n\tconstructor(schema, superKlass) {\n\t\tsuper(\"object\", schema, null)\n\n\t\t/**\n\t\t * The MObject that this OneOfMField belongs to\n\t\t * @type {MObject}\n\t\t */\n\t\tthis.superKlass = superKlass\n\t}\n\n\taddRelatedObject(other) {\n\t\tthis.setValue(other)\n\t}\n\n\tremoveRelatedObject(other) {\n\t\tif(this.value == other) {\n\t\t\tthis.value = null\n\t\t}\n\t}\n\n\t/**\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\t\tif(value == null) {\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\t/* Validate that the given value is an MObject and that it is of the right Klass */\n\t\tif(!(value instanceof MObject && value.getKlass() == this.schema.klass)) {\n\t\t\tconsole.log(value, value instanceof MObject, value.getKlass() == this.schema.klass, this.schema)\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField must be managed data\")\n\t\t\tvalid = false;\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tvalid = true\n\t\treturn {valid, error}\n\t}\n\n\tsetValue(value) {\n\t\tsuper.setValue(value)\n\n\t\tif(value == null) {\n\t\t\treturn\n\t\t}\n\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\tif(this.schema.inverseType == \"object\") {\n\t\t\t\tif(this.value[this.schema.inverseKey] != this.superKlass)\n\t\t\t\tvalue[this.schema.inverseKey] = this.superKlass\n\t\t\t} else {\n\t\t\t\tif(!(this.value[this.schema.inverseKey].includes(this.superKlass))) {\n\t\t\t\t\tthis.value[this.schema.inverseKey].push(this.superKlass)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}",
+    "content": "import {MObject} from \"../MObject\"\n\n/**\n * The basic MField class privides the API for data managers that\n * want to use the MFields values. By default we can invoke:\n *\t\t\n * getValue\t\treturns the internal value of the MField.\n * setValue\t\tused to set the internal value of the MField.\n * getType\t\t\treturns the type of the value stored in the MField.4\n * toString\t\treturns a string representing this fields value\n *\n * Each class that extends MField must provide the validate(value) function\n * which returns true iff the given parameter matches the schema for this MField.\n */\nexport class MField {\n\t/**\n\t * @param {String} type - A string representing the type of this MField\n\t * @param {Object} schema - A JSON schema that describes this fields value\n\t * @param {*} value - The value that should be used to initialize this MField\n\t */\n\tconstructor(type, schema, value) {\n\t\t/**\n\t\t * String representing the type of the MField's value\n\t\t * @type {String}\n\t\t */\n\t\tthis.type = type\n\n\t\t/**\n\t\t * The schema describing this value\n\t\t * @type {Schema}\n\t\t */\n\t\tthis.schema = schema\n\n\t\t/**\n\t\t * The initial value for this MField\n\t\t * @type {*}\n\t\t */\n\t\tthis.value = value\n\t}\n\n\t/**\n\t * setValue takes a value as argument and attempts to validate this value. If it was valid we set \n\t * this.value to the value, and otherwise we throw the error returned by the validate method\n\t * \n\t * @param {*} value - The value that should be set in this MField\n\t */\n\tsetValue(value) {\n\t\tlet {valid, error} = this.validate(value)\n\t\tif(valid == false) {\n\t\t\tthrow error\n\t\t} else {\n\t\t\tthis.value = value\n\t\t}\n\t}\n\n\t/**\n\t * @return {*} This MFields value\n\t */\n\tgetValue() {\n\t\treturn this.value\n\t}\n\n\t/**\n\t * @return {String} A string representing this MFields type\n\t */\n\tgetType() {\n\t\treturn this.type\n\t}\n\n\t/**\n\t * @return String representing this MFields value\n\t */\n\ttoString() {\n\t\treturn this.type\n\t}\n\n\tvalidate(value) {\n\t\tlet valid = true\n\t\tlet error\n\n\t\tif(value === undefined) {\n\t\t\tvalid = false\n\t\t\terror = new TypeError(\"Cannot validate 'undefined' in MField of type \"+this.type)\n\t\t}\n\t\treturn {valid, error}\n\t}\n\n\tis(other) {\n\t\tif(other.getValue() === this.value) {\n\t\t\treturn true\n\t\t} else {\n\t\t\treturn false\n\t\t}\n\t}\n}\n\n/**\n * Number implementation of MField which checks various schema constraint. See validate method.\n *\n */\nexport class NumberMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tif(schema.hasOwnProperty(\"minimum\")) {\n\t\t\tsuper(\"number\", schema, schema.minimum)\n\t\t} else {\n\t\t\tsuper(\"number\", schema, 0)\n\t\t}\n\t}\n\n\t/**\n\t * Validate checks if the type of the value is a number. If it is, and additional constraints are present within the schema these are checked as well.\n\t * See the schema reference for more information on the constraints.\n\t * \n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */ \n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\n\t\tif(valid == false) {\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(typeof(value) == \"number\") {\n\t\t\tif( this.schema.hasOwnProperty(\"exclusiveMinimum\") && this.schema.hasOwnProperty(\"minimum\") && value <= this.schema.minimum) {\n\t\t\t\terror = new TypeError(\"Value assigned to \"+this.type+\"MField must be greater than \"+this.schema.minimum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t} else if(this.schema.hasOwnProperty(\"minimum\") && value < this.schema.minimum) {\n\t\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be greater than or equal to \"+this.schema.minimum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t}\n\n\t\t\tif(this.schema.hasOwnProperty(\"exclusiveMaximum\") && this.schema.hasOwnProperty(\"maximum\") && value >= this.schema.maximum) {\n\t\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be less than \"+this.schema.maximum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t} else if (this.schema.hasOwnProperty(\"maximum\") && value > this.schema.maximum) {\n\t\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be less than or equal to \"+this.schema.maximum)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t}\n\n\t\t\tif(this.schema.hasOwnProperty(\"multipleOf\") && value%this.schema.multipleOf != 0) {\n\t\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be a multiple of \" + this.schema.multipleOf)\n\t\t\t\tvalid = false\n\t\t\t\treturn {valid, error}\n\t\t\t}\n\n\n\t\t\tvalid = true\n\t\t} else {\n\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be of type \"+this.schema.type)\n\t\t}\n\t\treturn {valid, error}\n\t}\n}\n\n\n/**\n * Integer implementation of MField that builds on top of the number field.\n */\nexport class IntegerMField extends NumberMField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tsuper(schema)\n\t\t/**\n\t\t * Override NumberMFields type\n\t\t * @type {String}\n\t\t */\n\t\tthis.type = \"integer\"\n\t}\n\n\t/**\n\t * Method that checks whether the given value is a number, and also an integer.\n\t * \n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\t\tif(valid == true) {\n\t\t\tif(value%1 == 0) {\n\t\t\t\tvalid = true\n\t\t\t} else {\n\t\t\t\tvalid = false\n\t\t\t\terror = new TypeError(\"value assigned to \"+this.type+\"MField must be of type \"+this.schema.type)\n\t\t\t}\n\t\t}\n\t\treturn {valid, error}\n\t}\n}\n\n\n /**\n *\tString implementation of MField.\n */\nexport class StringMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tsuper(\"string\", schema, \"\")\n\t}\n\n\n\t/**\n\t * Method that checks whether the given value is a string. If it is, additonal constraints are checked\n\t * if they are present in this fields schema.\n\t *\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\n\t\tif(!typeof(value) === \"string\") {\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField must be a String\")\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"minLength\") && value.length < this.schema.minLength) {\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField is shorter than the minimum length of \"+this.schema.minLength)\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"maxLength\") && value.length > this.schema.maxLength + exclMax) {\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField is longer than the maximum length of \"+this.schema.maxLength)\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"pattern\") ** value.match(this.schema.pattern) == null) {\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the pattern \"+this.schema.pattern);\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tif(this.schema.hasOwnProperty(\"format\")) {\n\t\t\tif(this.schema.format == \"date-time\") {\n\t\t\t\tif(Date.parse(value) == NaN) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the date-time format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"email\") {\n\t\t\t\tif(/^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the email format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"hostname\") {\n\t\t\t\tif(/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the hostname format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"ipv4\") {\n\t\t\t\tif(/^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the ipv4 format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"ipv6\") {\n\t\t\t\tif(/^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))?$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the ipv6 format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t} else if (this.schema.format == \"uri\") {\n\t\t\t\tif(/^([a-z][a-z0-9+.-]*):(?:\\/\\/((?:(?=((?:[a-z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*))(\\3)@)?(?=(\\[[0-9A-F:.]{2,}\\]|(?:[a-z0-9-._~!$&'()*+,;=]|%[0-9A-F]{2})*))\\5(?::(?=(\\d*))\\6)?)(\\/(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/]|%[0-9A-F]{2})*))\\8)?|(\\/?(?!\\/)(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/]|%[0-9A-F]{2})*))\\10)?)(?:\\?(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/?]|%[0-9A-F]{2})*))\\11)?(?:#(?=((?:[a-z0-9-._~!$&'()*+,;=:@\\/?]|%[0-9A-F]{2})*))\\12)?$/.test(value) == false) {\n\t\t\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField does not match the uri format\")\n\t\t\t\t\treturn {valid, error}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tvalid = true;\n\t\treturn {valid, error}\n\t}\n}\n\n/**\n * Boolean implementation of MField.\n */\nexport class BooleanMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t */ \n\tconstructor(schema) {\n\t\tsuper(\"boolean\", schema, false)\n\t}\n\n\t/**\n\t * Checks if the given value is boolean\n\t *\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet valid, error = super.validate(value)\n\t\tif(value === false || value === true) {\n\t\t\treturn {valid, error}\n\t\t} else {\n\t\t\tvalid = false;\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField must be a Boolean\")\n\t\t\treturn {valid, error}\n\t\t}\n\t}\n}\n\n/**\n * MObject implementation of MField. Besides validating, an MObjectMField also manages relations with other\n * fields \n */\nexport class MObjectMField extends MField {\n\t/**\n\t * @param {Object} schema - A JSON schema that describes this MFields value\n\t * @param {MObject} superKlass - The MObject that this field belongs to\n\t */ \t\n\tconstructor(schema, superKlass) {\n\t\tsuper(\"object\", schema, null)\n\n\t\t/**\n\t\t * The MObject that this OneOfMField belongs to\n\t\t * @type {MObject}\n\t\t */\n\t\tthis.superKlass = superKlass\n\t}\n\n\t/**\n\t * Validates whether the given value is an MObject of a klass matching its schema\n\t *\n\t * @param {*} value - The value that should be validated\n\t *\n\t * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned\n\t */\n\tvalidate(value) {\n\t\tlet {valid, error} = super.validate(value)\n\t\tif(value == null) {\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\t/* Validate that the given value is an MObject and that it is of the right Klass */\n\t\tif(!(value instanceof MObject && value.getKlass() == this.schema.klass)) {\n\t\t\tconsole.log(value, value instanceof MObject, value.getKlass() == this.schema.klass, this.schema)\n\t\t\terror = new TypeError(\"value assigned to \"+this.schema.type+\"MField must be managed data\")\n\t\t\tvalid = false;\n\t\t\treturn {valid, error}\n\t\t}\n\n\t\tvalid = true\n\t\treturn {valid, error}\n\t}\n\n\t/**\n\t * setValue checks if the object has any relations, and if it does this object is added\n\t * to the related object.\n\t *\n\t * @param {MObject} value - An MObject that should be set as value of this MField\n\t */\n\tsetValue(value) {\n\t\tsuper.setValue(value)\n\n\t\tif(value == null) {\n\t\t\treturn\n\t\t}\n\t\tif(this.schema.hasOwnProperty(\"inverseKey\")) {\n\t\t\tif(this.schema.inverseType == \"object\") {\n\t\t\t\tif(this.value[this.schema.inverseKey] != this.superKlass)\n\t\t\t\tvalue[this.schema.inverseKey] = this.superKlass\n\t\t\t} else {\n\t\t\t\tif(!(this.value[this.schema.inverseKey].includes(this.superKlass))) {\n\t\t\t\t\tthis.value[this.schema.inverseKey].push(this.superKlass)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}",
     "static": true,
     "longname": "/home/gebruiker/Documenten/BSc/code/ManagedDataJS/src/js/framework/dataManager/fields/MFieldSingle.js",
     "access": "public",
@@ -4445,8 +4445,8 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/fields/MFieldSingle.js",
     "importStyle": "{NumberMField}",
-    "description": "Number implementation of MField which checks the following constraints:\n\t\t\n\tREQUIRED:\n\t\t\tvalue \t\t\t\t\t\t\t===>\ttypeof(value) == typeof(Number)\n\tOPTIONAL:\n\t\tminimum && exclusiveMinimum \t===> \tvalue > minimum\n\t\tminimum \t\t\t\t\t\t===>\tvalue >= minimum\n\t\tmaximum && exclusiveMaximum\t\t===>\tvalue < maximum\n\t\tmaximum \t\t\t\t\t\t===>\tvalue <= maximum\n\t\tmultipleOf\t\t\t\t\t\t===>\tvalue%multipleOf == 0",
-    "lineNumber": 111,
+    "description": "Number implementation of MField which checks various schema constraint. See validate method.",
+    "lineNumber": 101,
     "interface": false,
     "extends": [
       "MField"
@@ -4463,7 +4463,7 @@
     "longname": "framework/dataManager/fields/MFieldSingle.js~NumberMField#constructor",
     "access": "public",
     "description": "",
-    "lineNumber": 115,
+    "lineNumber": 105,
     "params": [
       {
         "nullable": null,
@@ -4487,8 +4487,8 @@
     "static": false,
     "longname": "framework/dataManager/fields/MFieldSingle.js~NumberMField#validate",
     "access": "public",
-    "description": "",
-    "lineNumber": 128,
+    "description": "Validate checks if the type of the value is a number. If it is, and additional constraints are present within the schema these are checked as well.\nSee the schema reference for more information on the constraints.",
+    "lineNumber": 121,
     "params": [
       {
         "nullable": null,
@@ -4521,8 +4521,8 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/fields/MFieldSingle.js",
     "importStyle": "{IntegerMField}",
-    "description": "Integer implementation of MField which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue \t===>\tvalue%1 == 0",
-    "lineNumber": 178,
+    "description": "Integer implementation of MField that builds on top of the number field.",
+    "lineNumber": 168,
     "interface": false,
     "extends": [
       "NumberMField"
@@ -4539,7 +4539,7 @@
     "longname": "framework/dataManager/fields/MFieldSingle.js~IntegerMField#constructor",
     "access": "public",
     "description": "",
-    "lineNumber": 182,
+    "lineNumber": 172,
     "params": [
       {
         "nullable": null,
@@ -4562,7 +4562,7 @@
     "longname": "framework/dataManager/fields/MFieldSingle.js~IntegerMField#type",
     "access": "public",
     "description": "Override NumberMFields type",
-    "lineNumber": 188,
+    "lineNumber": 178,
     "type": {
       "nullable": null,
       "types": [
@@ -4582,8 +4582,8 @@
     "static": false,
     "longname": "framework/dataManager/fields/MFieldSingle.js~IntegerMField#validate",
     "access": "public",
-    "description": "",
-    "lineNumber": 196,
+    "description": "Method that checks whether the given value is a number, and also an integer.",
+    "lineNumber": 188,
     "params": [
       {
         "nullable": null,
@@ -4616,8 +4616,8 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/fields/MFieldSingle.js",
     "importStyle": "{StringMField}",
-    "description": "String implementation of MField which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue \t\t===>\ttypeof(value) == typeof(String)\n\tOPTIONAL:\n\t\tminLength\t===>\tvalue.length >= minLength\n\t\tmaxLength\t===>\tvalue.length <= maxLength\n\t\tpattern\t\t===>\tvalue matches pattern\n\t\tformat\t\t===>\tvalue is one of:\n\n\t\t\t\t\t\t\t\t\tdate-time\n\t\t\t\t\t\t\t\t\temail\n\t\t\t\t\t\t\t\t\thostname\n\t\t\t\t\t\t\t\t\tipv4\n\t\t\t\t\t\t\t\t\tipv6\n\t\t\t\t\t\t\t\t\turi",
-    "lineNumber": 229,
+    "description": "String implementation of MField.",
+    "lineNumber": 206,
     "interface": false,
     "extends": [
       "MField"
@@ -4634,7 +4634,7 @@
     "longname": "framework/dataManager/fields/MFieldSingle.js~StringMField#constructor",
     "access": "public",
     "description": "",
-    "lineNumber": 233,
+    "lineNumber": 210,
     "params": [
       {
         "nullable": null,
@@ -4658,8 +4658,8 @@
     "static": false,
     "longname": "framework/dataManager/fields/MFieldSingle.js~StringMField#validate",
     "access": "public",
-    "description": "",
-    "lineNumber": 243,
+    "description": "Method that checks whether the given value is a string. If it is, additonal constraints are checked\nif they are present in this fields schema.",
+    "lineNumber": 223,
     "params": [
       {
         "nullable": null,
@@ -4692,8 +4692,8 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/fields/MFieldSingle.js",
     "importStyle": "{BooleanMField}",
-    "description": "Integer implementation of MField which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue \t===>\ttypeof(value) == typeof(Boolean)",
-    "lineNumber": 311,
+    "description": "Boolean implementation of MField.",
+    "lineNumber": 288,
     "interface": false,
     "extends": [
       "MField"
@@ -4710,7 +4710,7 @@
     "longname": "framework/dataManager/fields/MFieldSingle.js~BooleanMField#constructor",
     "access": "public",
     "description": "",
-    "lineNumber": 315,
+    "lineNumber": 292,
     "params": [
       {
         "nullable": null,
@@ -4734,8 +4734,8 @@
     "static": false,
     "longname": "framework/dataManager/fields/MFieldSingle.js~BooleanMField#validate",
     "access": "public",
-    "description": "",
-    "lineNumber": 324,
+    "description": "Checks if the given value is boolean",
+    "lineNumber": 303,
     "params": [
       {
         "nullable": null,
@@ -4768,8 +4768,8 @@
     "export": true,
     "importPath": "ManagedDataJS/framework/dataManager/fields/MFieldSingle.js",
     "importStyle": "{MObjectMField}",
-    "description": "MObject implementation of MField which checks the following constraints:\n\n\tREQUIRED:\n\t\tvalue \t \t\t\t===>\tvalue instanceof MObject && value.klass == schema.klass\n\tOPTIONAL:\n\t\tinverse\t\t \t\t===>\t(value[inverse] == this || value[inverse].includes(this))",
-    "lineNumber": 344,
+    "description": "MObject implementation of MField. Besides validating, an MObjectMField also manages relations with other\nfields ",
+    "lineNumber": 319,
     "interface": false,
     "extends": [
       "MField"
@@ -4786,7 +4786,7 @@
     "longname": "framework/dataManager/fields/MFieldSingle.js~MObjectMField#constructor",
     "access": "public",
     "description": "",
-    "lineNumber": 349,
+    "lineNumber": 324,
     "params": [
       {
         "nullable": null,
@@ -4819,7 +4819,7 @@
     "longname": "framework/dataManager/fields/MFieldSingle.js~MObjectMField#superKlass",
     "access": "public",
     "description": "The MObject that this OneOfMField belongs to",
-    "lineNumber": 356,
+    "lineNumber": 331,
     "type": {
       "nullable": null,
       "types": [
@@ -4832,69 +4832,6 @@
   {
     "__docId__": 211,
     "kind": "method",
-    "name": "addRelatedObject",
-    "memberof": "framework/dataManager/fields/MFieldSingle.js~MObjectMField",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "framework/dataManager/fields/MFieldSingle.js~MObjectMField#addRelatedObject",
-    "access": "public",
-    "description": null,
-    "lineNumber": 359,
-    "undocument": true,
-    "params": [
-      {
-        "name": "other",
-        "types": [
-          "*"
-        ]
-      }
-    ],
-    "return": null
-  },
-  {
-    "__docId__": 212,
-    "kind": "method",
-    "name": "removeRelatedObject",
-    "memberof": "framework/dataManager/fields/MFieldSingle.js~MObjectMField",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "framework/dataManager/fields/MFieldSingle.js~MObjectMField#removeRelatedObject",
-    "access": "public",
-    "description": null,
-    "lineNumber": 363,
-    "undocument": true,
-    "params": [
-      {
-        "name": "other",
-        "types": [
-          "*"
-        ]
-      }
-    ],
-    "return": null
-  },
-  {
-    "__docId__": 213,
-    "kind": "member",
-    "name": "value",
-    "memberof": "framework/dataManager/fields/MFieldSingle.js~MObjectMField",
-    "static": false,
-    "longname": "framework/dataManager/fields/MFieldSingle.js~MObjectMField#value",
-    "access": "public",
-    "description": null,
-    "lineNumber": 365,
-    "undocument": true,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 214,
-    "kind": "method",
     "name": "validate",
     "memberof": "framework/dataManager/fields/MFieldSingle.js~MObjectMField",
     "generator": false,
@@ -4902,8 +4839,8 @@
     "static": false,
     "longname": "framework/dataManager/fields/MFieldSingle.js~MObjectMField#validate",
     "access": "public",
-    "description": "",
-    "lineNumber": 374,
+    "description": "Validates whether the given value is an MObject of a klass matching its schema",
+    "lineNumber": 341,
     "params": [
       {
         "nullable": null,
@@ -4926,7 +4863,7 @@
     }
   },
   {
-    "__docId__": 215,
+    "__docId__": 212,
     "kind": "method",
     "name": "setValue",
     "memberof": "framework/dataManager/fields/MFieldSingle.js~MObjectMField",
@@ -4935,21 +4872,24 @@
     "static": false,
     "longname": "framework/dataManager/fields/MFieldSingle.js~MObjectMField#setValue",
     "access": "public",
-    "description": null,
-    "lineNumber": 392,
-    "undocument": true,
+    "description": "setValue checks if the object has any relations, and if it does this object is added\nto the related object.",
+    "lineNumber": 365,
     "params": [
       {
-        "name": "value",
+        "nullable": null,
         "types": [
-          "*"
-        ]
+          "MObject"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "value",
+        "description": "An MObject that should be set as value of this MField"
       }
     ],
     "return": null
   },
   {
-    "__docId__": 216,
+    "__docId__": 213,
     "kind": "file",
     "name": "framework/mixins/Locking.js",
     "content": "/**\n * A mixin that provides functionality for locking and unlocking MObjects\n * Please refer to source for documentation on this Mixin. The documentation\n * generator does not work properly with mixin definition\n */\nexport let Locking = (superclass) => class extends superclass {\n\t/**\n\t * @param {KlassSchema} schema - A KlassSchema describing this MObject's data\n\t */\n\tconstructor(schema, ...otherArgs) {\n\t\tsuper(schema, ...otherArgs);\n\t\t/**\n\t\t * @type{Boolean} Indicates whether the object is locked. When locked === true the object cannot be modified\n\t\t */\n\t\tthis.locked = false;\n\t}\n\n\t/**\n\t * @param {Symbol, String} propKey - The property key to set in this.data\n\t * @param {*} value - The value to set this.data[propKey] to\n\t * @return {Boolean} True if setting the value was succesfull\n\t * @throws {TypeError}\n\t */\n\tset(propKey, value) {\n\t\tif(this.locked == true) {\n\t\t\tthrow new TypeError(\"object is locked\");\n\t\t}\n\t\treturn super.set(propKey, value);\n\t}\n\n\t/**\n\t * @param {Symbol, String} propKey - The property key to look for in this.data\n\t * @return {Boolean} True if getting the value was succesfull\n\t * @throws {TypeError}\n\t */\n\tget(propKey) {\n\t\treturn super.get(propKey);\n\t}\n\n\t/**\n\t * Sets locked to true\n\t */\n\tlock() {\n\t\tthis.locked = true;\n\t}\n\n\t/**\n\t * @return {Boolean} True if locked, false otherwise\n\t */\n\tisLocked() {\n\t\treturn this.locked;\n\t}\n\n\t/**\n\t * Sets locked to false\n\t */\n\tunlock() {\n\t\tthis.locked = false;\n\t}\n\n\t/**\n\t * @param {String} method - A string representing the name of the method that was called on the managedArray\n\t * @param {Array} args - An array containing the arguments that will be passed to the method\n\t * @param {ManagedArray} array - The array that the method was invoked on\n\t *\n\t * @return {Array} - An array containing the args that were passed to this function. If the args are modified,\n\t * \t\t\t\t\t the invoked array method will execute 'method' with the modified arguments instead.\n\t */\n\tnotifyArray(method, args, array) {\n\t\targs = super.notifyArray(method, args, array)\n\t\tlet methodsWithSideEffects = [\"push\", \"splice\", \"pop\", \"shift\", \"unshift\"]\n\t\t\n\t\tif(this.isLocked() && methodsWithSideEffects.includes(method)) {\n\t\t\tthrow TypeError(\"object is locked\")\n\t\t}\n\t\treturn args\n\t}\n}",
@@ -4960,7 +4900,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 217,
+    "__docId__": 214,
     "kind": "function",
     "name": "Locking",
     "memberof": "framework/mixins/Locking.js",
@@ -4989,7 +4929,7 @@
     }
   },
   {
-    "__docId__": 218,
+    "__docId__": 215,
     "kind": "file",
     "name": "framework/mixins/Logging.js",
     "content": "/**\n * A mixin that logs get, set and array change events\n * Please refer to source for documentation on this Mixin. The documentation\n * generator does not work properly with mixin definition\n */\nexport let Logging = (superclass) => class extends superclass {\n\t/**\n\t * @param {Schema} - A Schema object that represents the data that this managed object has to manage\n\t */\n\tconstructor(schema) {\n\t\tsuper(schema);\n\t}\n\t/**\n\t * Set the value at index 'propKey' to value and log which property is being set, which key it is assigned to \n\t * and which value is being set\n\t * @param {String, Symbol} propKey - The property key of the managed field that we want to access\n\t * @param {*} value - The value that we want to set the managed field to\n\t *\n\t * @return {Boolean} True if setting was succesfull\n\t */\n\tset(propKey, value) {\n\t\tlet result;\n\t\ttry {\n\t\t\tresult = super.set(propKey, value);\n\t\t\tconsole.log(\"set property \"+propKey+\" of klass \"+this.schema.getKlass()+\" to value: \"+ JSON.stringify(value));\n\t\t} catch (err) {\n\t\t\tconsole.log(\"An error occured when setting property \"+propKey+\" of klass \"+this.schema.getKlass()+\" to value: \" + JSON.stringify(value));\n\t\t\tthrow err\n\t\t}\n\t\treturn result;\n\t}\n\n\t/**\n\t * Log which property is being retrieved\n\t *\n\t * @param {String, Symbol} propKey - The property key of the managed field that we want to access\n\t *\n\t * @return {*} The value of the requested property, if it exists.\n\t * @throws {TypeError} An error is thrown if the field does not exist in this MObject's schema\n\t */\n\tget(propKey) {\n\t\tlet result;\n\t\ttry {\n\t\t\tresult = super.get(propKey);\n\t\t\tconsole.log(\"getting property \"+propKey+\" of klass \"+this.schema.getKlass());\n\t\t} catch (err) {\n\t\t\tconsole.log(\"An error occured when getting property \"+propKey+\" of klass \"+this.schema.getKlass())\n\t\t\tthrow err\n\t\t}\n\t\treturn result;\n\t}\n\n\t/**\n\t * Log which array method has been called\n\t *\n\t * @param {String} method - A string representing the name of the method that was called on the managedArray\n\t * @param {Array} args - An array containing the arguments that will be passed to the method\n\t * @param {ManagedArray} array - The array that the method was invoked on\n\t *\n\t * @return {Array} - An array containing the args that were passed to this function. If the args are modified,\n\t * \t\t\t\t\t the invoked array method will execute 'method' with the modified arguments instead.\n\t */\n\tnotifyArray(method, args, array) {\n\t\targs= super.notifyArray(method, args, array)\n\t\tconsole.log(\"invoked \"+method+\" on ManagedArray in object \"+this.schema.getKlass()+\" with arguments \"+args.toString())\n\t\treturn args\n\t}\n}",
@@ -5000,7 +4940,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 219,
+    "__docId__": 216,
     "kind": "function",
     "name": "Logging",
     "memberof": "framework/mixins/Logging.js",
@@ -5029,7 +4969,7 @@
     }
   },
   {
-    "__docId__": 220,
+    "__docId__": 217,
     "kind": "file",
     "name": "framework/mixins/Persistence.js",
     "content": "import {MObject} from \"../dataManager/MObject\";\nimport {MFieldFactory} from \"../dataManager/fields/MFieldFactory\";\nimport {ArrayMField} from \"../dataManager/fields/MFieldMulti\"\n\n/**\n * A persistence mixin that:\n * - serializes this.data\n * - saves all MObjects stored in this.data\n * - saves a serialized verion of itself\n * - loads an earlier state from local storage based on a given \n *\n * Please refer to source for documentation on this Mixin. The documentation\n * generator does not work properly with mixin definition\n */\nexport let Persistence = (superclass) => class extends superclass {\n\t/**\n\t * @param {DataManager} factory - An instance of DataManager that this persistent MObject can use\n\t * to construct new MObjects when loading\n\t */\n\tsetFactory(factory) {\n\t\tthis.factory = factory\n\t}\n\n\t/**\n\t * @param {String} id - An ID used to identify, save and load this MObject. Must be unique\n\t */\n\tsetId(id) {\n\t\tconsole.log(\"setting id:\", id)\n\t\tthis.id = id\n\t}\n\n\t/**\n\t * @param {Symbol, String} propKey - The property key to set in this.data\n\t * @param {*} value - The value to set this.data[propKey] to\n\t * @return {Boolean} True if setting the value was succesfull\n\t * @throws {TypeError}\n\t */\n\tset(propKey, value) {\n\t\tlet result = super.set(propKey, value);\t\n\t\treturn result;\n\t}\n\n\t/**\n\t * @return {String} the id used to save this Persistent MObject\n\t */\n\tgetId() {\n\t\tif(this.hasOwnProperty(\"id\")) {\n\t\t\treturn this.id;\n\t\t} else {\n\t\t\tthrow new TypeError(\"No id has been set for MObject \" + this.toString())\n\t\t}\n\t}\n\n\t/**\n\t * @return {Object} A serialized version of this.data\n\t */\n\tserialize() {\n\t\tlet obj = {}\n\t\tfor(let propKey in this.data) {\n\t\t\tobj[propKey] = this.serializeProp(this.data[propKey])\n\t\t}\n\t\treturn obj\n\t}\n\n\t/**\n\t * @param {MField} prop - An instance of MField to serialize\n\t * @return {*} A serialized version of the given MField\n\t */\n\tserializeProp(prop) {\n\t\tswitch(prop.getType()) {\n\t\t\tcase \"object\": {\n\t\t\t\treturn this.serializeObject(prop.getValue())\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"array\": {\n\t\t\t\treturn this.serializeArray(prop)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tdefault: {\n\t\t\t\treturn prop.getValue()\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\n\t/**\n\t * @param {ArrayMField} prop - An instance of ArrayMField to serialize\n\t * @return {Array} A serialized version of the given array\n\t */\n\tserializeArray(prop) {\n\t\tlet arr = []\n\t\tfor(let item of prop) {\n\t\t\tif(item instanceof MObject) {\n\t\t\t\tarr.push(this.serializeObject(item))\n\t\t\t} else if(item instanceof ArrayMField) {\n\t\t\t\tarr.push(this.serializeArray(item))\n\t\t\t} else {\n\t\t\t\tarr.push(item)\n\t\t\t}\n\t\t}\n\t\treturn arr\n\t}\n\n\t/**\n\t * @param {MObjectMField} prop - An MObjectMField to serialize\n\t * @return {Object} - A serialized version of the MObject\n\t */\n\tserializeObject(prop) {\n\t\treturn {klass: prop.getKlass(), id: prop.getId()}\n\t}\n\n\t/**\n\t * A method that saves this.data\n\t * @param {number} [time] - A timestamp that indicates when saving started\n\t */\n\tsave(time) {\n\t\tconsole.log(\"saving: \", time);\n\t\t/* get current time and set time if not defined */\n\t\tlet now = new Date().getTime();\n\t\tif(time == undefined) {\n\t\t\ttime = now;\n\t\t}\n\n\t\t/* check if this item has been saved already */\n\t\tlet loadedItem = JSON.parse(localStorage.getItem(this.getId()));\n\t\tif(loadedItem && loadedItem.updated_at >= time) {\n\t\t\treturn;\n\t\t}\n\n\t\t/* initialize saveItem and serialize this.data */\n\t\tlet saveItem = this.serialize()\n\t\tsaveItem.updated_at = now\n\n\t\t/* save the item */\n\t\tlocalStorage.setItem(this.getId(), JSON.stringify(saveItem));\n\n\t\t/* go over each property and if its managed data, call that items save function */\n\t\tfor(let prop in this.data) {\n\t\t\tthis.saveProp(this.data[prop], time);\n\t\t}\n\t}\n\n\t/**\n\t * Save the given property if it is an MObject or Array\n\t * @param {MField} prop - The MField to save\n\t * @param {number} [time] - A timestamp that indicates when saving started\n\t */\n\tsaveProp(prop, time) {\n\t\tconsole.log(\"saving prop:\", prop, prop.getType())\n\t\tswitch(prop.getType()) {\n\t\t\tcase \"object\": {\n\t\t\t\tprop.getValue().save(time)\n\t\t\t\tbreak\n\t\t\t}\n\t\t\tcase \"array\": {\n\t\t\t\tthis.saveArray(prop, time); console.log(\"arr\")\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\n\t/**\n\t * Save the MObjects in the given array, if there are any\n\t * @param {ArrayMField} prop - The ArrayMField to save\n\t * @param {number} [time] - A timestamp that indicates when saving started\n\t */\n\tsaveArray(prop, time) {\n\t\tconsole.log(\"saving array:\", prop)\n\t\tfor(let item of prop) {\n\t\t\tif(item instanceof MObject) {\n\t\t\t\titem.save(time)\n\t\t\t} else if (item instanceof ArrayMField) {\n\t\t\t\tthis.saveArray(item, time)\n\t\t\t}\n\t\t}\n\t}\n\n\t/**\n\t * Load an earlier state of this MObject from localStorage\n\t * @param {Array} loadedItems - An array containing all items that were loaded so far\n\t */\n\tload(loadedItems) {\n\t\tif(loadedItems == undefined) {\n\t\t\tloadedItems = []\n\t\t}\n\t\tif(!loadedItems.includes(this.proxy)) {\n\t\t\tloadedItems.push(this.proxy)\n\t\t}\n\n\t\tlet item = JSON.parse(localStorage.getItem(this.getId()))\n\t\tdelete item.updated_at\n\t\tif(item != undefined) {\n\t\t\tfor(let propKey in item) {\n\t\t\t\tthis.proxy[propKey] = this.loadProp(item[propKey], loadedItems)\n\t\t\t}\n\t\t}\n\t}\n\n\t/**\n\t * Loads a single property\n\t * @param {Object} prop - The serialized property to load into this MObject\n\t * @param {Array} loadeditems - An array containing all items that were loaded so far\n\t * @return {Object} The loaded property\n\t */\n\tloadProp(prop, loadedItems) {\n\t\tif (prop.hasOwnProperty(\"klass\")) {\n\t\t\treturn this.loadObject(prop, loadedItems)\n\t\t} else if(prop instanceof Array) {\n\t\t\treturn this.loadArray(prop, loadedItems)\n\t\t} else {\n\t\t\treturn prop\n\t\t}\n\t}\n\n\t/**\n\t * Load an array of properties\n\t * @param {Array} prop - An array of serialized properties\n\t * @param {Array} loadeditems - An array containing all items that were loaded so far\n\t * @return {Array} An array containing the loaded properties\n\t */\n\tloadArray(prop, loadedItems) {\n\t\tlet arr = []\n\t\tfor(let item of prop) {\n\t\t\tif(item.hasOwnProperty(\"klass\")) {\n\t\t\t\tarr.push(this.loadObject(item, loadedItems))\n\t\t\t} else if(prop instanceof Array) {\n\t\t\t\tarr.push(this.loadArray(item, loadedItems))\n\t\t\t} else {\n\t\t\t\tarr.push(item)\n\t\t\t}\n\t\t}\n\t\treturn arr\n\t}\n\n\t/**\n\t * Load an MObject property\n\t * @param {Array} prop - A serialized MObject\n\t * @param {Array} loadeditems - An array containing all items that were loaded so far\n\t * @return {MObject} The loaded MObject \n\t * @throws {TypeError} An error is thrown if no DataManager is set. MObjects cannot be constructed without a DataManager.\n\t */\n\tloadObject(prop, loadedItems) {\n\t\tif(!this.hasOwnProperty(\"factory\")) {\n\t\t\tthrow new TypeError(\"MObjects cannot be loaded from localStorage without a DataManager capable of constructing the saved MObject\")\n\t\t}\n\t\t/* Check if the object was loaded before*/\n\t\tfor(let item of loadedItems) {\n\t\t\tif(item.getId() == prop.id) {\n\t\t\t\treturn item;\n\t\t\t}\n\t\t}\n\n\t\t/* Otherwise: create a simple empty MObject and tell it to load its data*/\n\t\tlet newObj = new this.factory[prop.klass]();\n\t\tnewObj.setFactory(this.factory)\n\t\tnewObj.setId(prop.id)\n\t\tnewObj.load(loadedItems);\n\t\treturn newObj;\n\t}\n}",
@@ -5040,7 +4980,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 221,
+    "__docId__": 218,
     "kind": "function",
     "name": "Persistence",
     "memberof": "framework/mixins/Persistence.js",
@@ -5069,10 +5009,10 @@
     }
   },
   {
-    "__docId__": 222,
+    "__docId__": 219,
     "kind": "file",
     "name": "framework/mixins/index.js",
-    "content": "import {Locking} from \"./Locking\"\nimport {Logging} from \"./Logging\"\nimport {Persistence} from \"./Persistence\"\n\nexport {Locking, Logging, Persistence}",
+    "content": "import {Locking} from \"./Locking\"\nimport {Logging} from \"./Logging\"\nimport {Persistence} from \"./Persistence\"\n\n/**\n * Exports Locking, Logging and Persistence as one module\n */\nexport {Locking, Logging, Persistence}",
     "static": true,
     "longname": "/home/gebruiker/Documenten/BSc/code/ManagedDataJS/src/js/framework/mixins/index.js",
     "access": "public",
@@ -5081,7 +5021,7 @@
   },
   {
     "kind": "index",
-    "content": "# ManagedDataJS\n\n## Installation:\n\nNodejs version: node.js@6.11.2\n\nNPM version: npm@3.10.10\n\n\n\n#### Clean install:\n\ndownload node https://nodejs.org/dist/v6.11.2/\n\nextract and copy the directories [bin, include, lib, share] to /usr/[bin, include, lib, share]\n\n\n#### Replace the broken symbolic link to npm:\n\n$  sudo rm /usr/bin/npm\n\n$  sudo ln -s /usr/lib/node_modules/npm/bin/npm-cli.js /usr/bin/npm\n\n\n#### check node and npm version:\n\n$  node -v\n\nv6.11.2\n\n$  npm -v\n\n3.10.10\n\n\n#### clone repository, install dependencies, compile js and run server:\n\n$  git clone https://github.com/rvanbuijtenen/ManagedDataJS.git\n\n$  cd ManagedDataJS\n\n$  npm install\n\n$  npm run webpack\n\n$  npm run start\n\n#### Open the browser at localhost:8080 to view examples and documentation\n\n",
+    "content": "# ManagedDataJS\n\n## Installation:\n\nNodejs version: node.js@6.11.2\n\nNPM version: npm@3.10.10\n\n\n\n#### Clean install:\n\ndownload node https://nodejs.org/dist/v6.11.2/\nextract and copy the directories [bin, include, lib, share] to /usr/[bin, include, lib, share]\n\n\n#### Replace the broken symbolic link to npm:\n\n```shell\nsudo rm /usr/bin/npm\nsudo ln -s /usr/lib/node_modules/npm/bin/npm-cli.js /usr/bin/npm\n```\n\n#### check node and npm version:\n\n```shell\nnode -v\nv6.11.2\n\nnpm -v\n3.10.10\n```\n\n#### clone repository, install dependencies, compile js and run server:\n\n```shell\ngit clone https://github.com/rvanbuijtenen/ManagedDataJS.git\ncd ManagedDataJS\nnpm install\nnpm run webpack\nnpm run start\n```\n\n#### Open the browser at localhost:8080 to view examples and documentation\n\n",
     "longname": "/home/gebruiker/Documenten/BSc/code/ManagedDataJS/README.md",
     "name": "./README.md",
     "static": true,

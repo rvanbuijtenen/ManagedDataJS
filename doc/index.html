@@ -55,19 +55,23 @@
 
 <div class="content" data-ice="content"><div data-ice="index" class="github-markdown"><h1 id="manageddatajs">ManagedDataJS</h1><h2 id="installation-">Installation:</h2><p>Nodejs version: node.js@6.11.2</p>
 <p>NPM version: npm@3.10.10</p>
-<h4 id="clean-install-">Clean install:</h4><p>download node <a href="https://nodejs.org/dist/v6.11.2/">https://nodejs.org/dist/v6.11.2/</a></p>
-<p>extract and copy the directories [bin, include, lib, share] to /usr/[bin, include, lib, share]</p>
-<h4 id="replace-the-broken-symbolic-link-to-npm-">Replace the broken symbolic link to npm:</h4><p>$  sudo rm /usr/bin/npm</p>
-<p>$  sudo ln -s /usr/lib/node_modules/npm/bin/npm-cli.js /usr/bin/npm</p>
-<h4 id="check-node-and-npm-version-">check node and npm version:</h4><p>$  node -v</p>
-<p>v6.11.2</p>
-<p>$  npm -v</p>
-<p>3.10.10</p>
-<h4 id="clone-repository--install-dependencies--compile-js-and-run-server-">clone repository, install dependencies, compile js and run server:</h4><p>$  git clone <a href="https://github.com/rvanbuijtenen/ManagedDataJS.git">https://github.com/rvanbuijtenen/ManagedDataJS.git</a></p>
-<p>$  cd ManagedDataJS</p>
-<p>$  npm install</p>
-<p>$  npm run webpack</p>
-<p>$  npm run start</p>
+<h4 id="clean-install-">Clean install:</h4><p>download node <a href="https://nodejs.org/dist/v6.11.2/">https://nodejs.org/dist/v6.11.2/</a>
+extract and copy the directories [bin, include, lib, share] to /usr/[bin, include, lib, share]</p>
+<h4 id="replace-the-broken-symbolic-link-to-npm-">Replace the broken symbolic link to npm:</h4><pre><code class="lang-shell"><code class="source-code prettyprint">sudo rm /usr/bin/npm
+sudo ln -s /usr/lib/node_modules/npm/bin/npm-cli.js /usr/bin/npm</code>
+</code></pre>
+<h4 id="check-node-and-npm-version-">check node and npm version:</h4><pre><code class="lang-shell"><code class="source-code prettyprint">node -v
+v6.11.2
+
+npm -v
+3.10.10</code>
+</code></pre>
+<h4 id="clone-repository--install-dependencies--compile-js-and-run-server-">clone repository, install dependencies, compile js and run server:</h4><pre><code class="lang-shell"><code class="source-code prettyprint">git clone https://github.com/rvanbuijtenen/ManagedDataJS.git
+cd ManagedDataJS
+npm install
+npm run webpack
+npm run start</code>
+</code></pre>
 <h4 id="open-the-browser-at-localhost-8080-to-view-examples-and-documentation">Open the browser at localhost:8080 to view examples and documentation</h4></div>
 </div>
 

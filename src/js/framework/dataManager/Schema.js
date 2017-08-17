@@ -123,14 +123,7 @@ export class Schema {
  * is suitable for DataManagers to use to construct MObjects. The parseSchema function does not modify
  * the original schema.
  *
- * A schema:
- *		- must have a "name" property, indicating the main Klass's name
- *		- must have a "properties" property, containing field schemas. Properties can be an empty Object
- *		- can have a "definitions" property, containing extra Klass definitions. A definition is almost
- *				the same as the schema itself, with the exception that it does not have a "name" property.
- * 				A definition also can't contain more nested definitions.
- *
- * @param {Object} schema - A raw JSON schema
+ * @param {Object} schema - An unparsed JSON schema
  * @return {Schema} A parsed JSON schema
  */
 export function parseSchema(schema) {
@@ -171,7 +164,7 @@ export function parseSchema(schema) {
 
 /**
  * @param {Object} definitions - A 'definitions' object from a JSON schema
- * @param {Schema} schema - A Schema where parseDefinitions can store parsed klasses
+ * @param {Schema} schema - A Schema where parseDefinitions can store parsed KlassSchemas
  * @param {Object} paths - An object that maps schema paths to the corresponding klass name
  */
 function parseDefinitions(definitions, schema, paths) {
@@ -209,7 +202,7 @@ function parseKlass(klassSchema, klassName, paths) {
 }
 
 /**
- * @param {Object} schema - A complete (raw) JSON schema
+ * @param {Object} schema - A complete unparsed JSON schema
  * @param {Schema} parsedSchema - A Schema object that contains the parsed Klasses to which relations must be added
  * @param {Object} paths - An object that maps a path of the form "#" or "#/definitions/<klassName>" to the corresponding klassName
  */
@@ -244,6 +237,10 @@ function parseRelations(schema, parsedSchema, paths) {
 function parseRelation(relationType, relations, parsedSchema, klassName, paths) {
 	let fieldsList = []
 	let inversesList = []
+	/**
+	 * Parse all relations of one type. For each relation: 
+	 * build a relation field and inverses and add it to the list
+	 */
 	switch(relationType) {
 		case "oneToOne": {
 			for(let relation of relations) {
@@ -273,6 +270,8 @@ function parseRelation(relationType, relations, parsedSchema, klassName, paths) 
 			throw new TypeError(relationType + "is not a valid relation type. Please use one of [oneToOne, oneToMany, manyToMany]")
 		}
 	}
+
+	/* Loop over all fields and inverse fields and add them to the schema */
 	for(let field of fieldsList) {
 		parsedSchema.klasses[klassName].addFieldSchema(field.key, field.schema, field.type)
 	}
@@ -285,6 +284,12 @@ function parseRelation(relationType, relations, parsedSchema, klassName, paths) 
 }
 
 /**
+ * 
+ * This function validates the relation:
+ *		- if a reference is not defined within the paths object it is invalid
+ *		- if a oneOf keyword is found, each reference within the oneOf is validated against the paths object
+ *		- if neither of the above are present within the schema, the schema is invalid
+ * 
  * @param {Object} schema - A raw JSON schema describing a relation
  * @param {Object} paths - A javascript object that maps schema paths to klass names
  * @Throws {TypeError} A TypeError is thrown when the schema contains an incorrect reference
@@ -304,16 +309,22 @@ function validateRelationSchema(schema, paths) {
 				throw new TypeError("An item in 'oneOf' must have a '$ref' keyword referencing a schema")
 			}
 		}
+	} else {
+		throw new TypeError("A relation must have a reference of oneOf keyword")
 	}
 }
 
 /**
+ * buildOneToOne takes a relation, a kassName which initiates the relation and a paths object that
+ * maps schema paths to klass names. Based on this two or more field schemas are built:
+ *
+ *		- One field belonging to the initiating klass
+ *		- One or more fields that refer to the first field. These fields are stored within an object that has indices representing klassNames that map to the corresponding schema
+ *
  * @param {Object} relation - A single schema describing a relation
  * @param {String} klassName - The klass that this relation belongs to
  * @param {Object} paths - A javascript object that maps schema paths to klass names
- * @return {Object, Object} - buildOneToOne creates the fields required for a one to 
- * one relation. The first object is the field for the klass initiating the relation.
- * The second object contains an inverse field for each other klass involved in the relation.
+ * @return {Object, Object} - The first object contains the field, and the second contains the inverse(s) of that field
  */
 function buildOneToOne(relation, klassName, paths) {
 	validateRelationSchema(relation, paths)
@@ -352,6 +363,12 @@ function buildOneToOne(relation, klassName, paths) {
 }
 
 /**
+ * buildOneToMany takes a relation, a kassName which initiates the relation and a paths object that
+ * maps schema paths to klass names. Based on this two or more field schemas are built:
+ *
+ *		- One field belonging to the initiating klass
+ *		- One or more fields that refer to the first field. These fields are stored within an object that has indices representing klassNames that map to the corresponding schema
+ *
  * @param {Object} relation - A single schema describing a relation
  * @param {String} klassName - The klass that this relation belongs to
  * @param {Object} paths - A javascript object that maps schema paths to klass names
@@ -400,6 +417,12 @@ function buildOneToMany(relation, klassName, paths) {
 }
 
 /**
+ * buildManyToMany takes a relation, a kassName which initiates the relation and a paths object that
+ * maps schema paths to klass names. Based on this two or more field schemas are built:
+ *
+ *		- One field belonging to the initiating klass
+ *		- One or more fields that refer to the first field. These fields are stored within an object that has indices representing klassNames that map to the corresponding schema
+ *
  * @param {Object} relation - A single schema describing a relation
  * @param {String} klassName - The klass that this relation belongs to
  * @param {Object} paths - A javascript object that maps schema paths to klass names
@@ -448,6 +471,9 @@ function buildManyToMany(relation, klassName, paths) {
 }
 
 /**
+ * buildArrayField constructs a schema for an array field based on an inverseKey (used to access the inverse of this field),
+ * a list defining the items that can be stored in the array and the type of the inverse field (either "object" or "array")
+ *
  * @param {String} inverseKey - The property key used to access the inverse field in this fields value
  * @param {Array} items - An object containing the schema for the item that this array field holds.
  * @param {String} inverseType - A string, either "object" or "array". Used to identify the type of the inverse field
@@ -464,6 +490,9 @@ function buildArrayField(inverseKey, items, inverseType) {
 }
 
 /**
+ * buildObjectField constructs a schema for an object field based on the name of the klass contained in the field,
+ * an inverseKey that is used to access the inverse of this field and the type of the inverse field (either "object" or "array")
+ *
  * @param {String} klass - A string representing the klass that this object field must hold
  * @param {String} inverseKey - The property key used to access the inverse field in this fields value
  * @param {String} inverseType - A string, either "object" or "array". Used to identify the type of the inverse field
@@ -479,6 +508,10 @@ function buildObjectField(klass, inverseKey, inverseType) {
 }
 
 /**
+ * parseProperty checks the schema for definitions that can contain references, and if a reference is found
+ * it is replaced with a klass definitoion. The original schema is not modified. It also validates whether
+ * required keywords are present.
+ *
  * @param {Object} property - A JSON schema describing a single property
  * @param {String} type - The type of the property
  * @param {Object} paths - An object that maps schema paths to the corresponding klass name

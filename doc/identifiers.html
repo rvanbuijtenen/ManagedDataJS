@@ -201,7 +201,7 @@ managed object.</p>
       <div>
         
         
-        <div data-ice="description"><p>Schema is a wrapper that provides an addKlass and a getKlassByName method.</p>
+        <div data-ice="description"><p>A schema wraps multiple KlassSchemas together into a single schema.</p>
 </div>
       </div>
     </td>
@@ -230,7 +230,9 @@ managed object.</p>
       <div>
         
         
-        
+        <div data-ice="description"><p>parseSchema takes a raw JSON schema as argument and uses it to construct a Schema instance that is
+is suitable for DataManagers to use to construct MObjects.</p>
+</div>
       </div>
     </td>
     <td>
@@ -268,7 +270,7 @@ managed object.</p>
       <div>
         
         
-        <div data-ice="description"><p>The ArrayHandler ensures that ArrayMfield[idx] returns ArrayMField.value[idx] when idx is an integer</p>
+        <div data-ice="description"><p>The ArrayHanlder implements a get trap for the managed arrays that has two tasks:</p>
 </div>
       </div>
     </td>
@@ -326,7 +328,7 @@ managed object.</p>
       <div>
         
         
-        <div data-ice="description"><p>Enum implementation of MField which checks the following constraints:</p>
+        <div data-ice="description"><p>An enum can contain only one of its schemas values.</p>
 </div>
       </div>
     </td>
@@ -355,7 +357,7 @@ managed object.</p>
       <div>
         
         
-        <div data-ice="description"><p>OneOF implementation of MFIeld which checks the following constraints:</p>
+        <div data-ice="description"><p>A OneOf field can contain at most one of the klasses defined in its schema.</p>
 </div>
       </div>
     </td>
@@ -384,7 +386,7 @@ managed object.</p>
       <div>
         
         
-        <div data-ice="description"><p>Integer implementation of MField which checks the following constraints:</p>
+        <div data-ice="description"><p>Boolean implementation of MField.</p>
 </div>
       </div>
     </td>
@@ -413,7 +415,7 @@ managed object.</p>
       <div>
         
         
-        <div data-ice="description"><p>Integer implementation of MField which checks the following constraints:</p>
+        <div data-ice="description"><p>Integer implementation of MField that builds on top of the number field.</p>
 </div>
       </div>
     </td>
@@ -472,7 +474,7 @@ want to use the MFields values.</p>
       <div>
         
         
-        <div data-ice="description"><p>MObject implementation of MField which checks the following constraints:</p>
+        <div data-ice="description"><p>MObject implementation of MField.</p>
 </div>
       </div>
     </td>
@@ -501,16 +503,8 @@ want to use the MFields values.</p>
       <div>
         
         
-        <div data-ice="description"><p>Number implementation of MField which checks the following constraints:</p>
-<pre><code><code class="source-code prettyprint">REQUIRED:
-        value                             ===&gt;    typeof(value) == typeof(Number)
-OPTIONAL:
-    minimum &amp;&amp; exclusiveMinimum     ===&gt;     value &gt; minimum
-    minimum                         ===&gt;    value &gt;= minimum
-    maximum &amp;&amp; exclusiveMaximum        ===&gt;    value &lt; maximum
-    maximum                         ===&gt;    value &lt;= maximum
-    multipleOf                        ===&gt;    value%multipleOf == 0</code>
-</code></pre></div>
+        <div data-ice="description"><p>Number implementation of MField which checks various schema constraint.</p>
+</div>
       </div>
     </td>
     <td>
@@ -538,7 +532,7 @@ OPTIONAL:
       <div>
         
         
-        <div data-ice="description"><p>String implementation of MField which checks the following constraints:</p>
+        <div data-ice="description"><p>String implementation of MField.</p>
 </div>
       </div>
     </td>

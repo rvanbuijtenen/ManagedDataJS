@@ -211,7 +211,9 @@ based on the given schema:
       <div>
         
         
-        
+        <div data-ice="description"><p>parseSchema takes a raw JSON schema as argument and uses it to construct a Schema instance that is
+is suitable for DataManagers to use to construct MObjects.</p>
+</div>
       </div>
     </td>
     <td>
@@ -384,11 +386,11 @@ generator does not work properly with mixin definition</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldFactory.js.html#lineNumber26">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldFactory.js.html#lineNumber25">source</a></span></span>
     </span>
   </h3>
 
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {MFieldFactory} from &apos;<span><a href="file/framework/dataManager/fields/MFieldFactory.js.html#lineNumber26">ManagedDataJS/framework/dataManager/fields/MFieldFactory.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {MFieldFactory} from &apos;<span><a href="file/framework/dataManager/fields/MFieldFactory.js.html#lineNumber25">ManagedDataJS/framework/dataManager/fields/MFieldFactory.js</a></span>&apos;</code></pre></div>
   
   
   <div data-ice="description"><p>MField is a factory function that returns one of the following managed fields
@@ -401,10 +403,9 @@ based on the given schema:
     ArrayMField
     EnumMField
     OneOfMField</p>
-<p>This function abstracts the MField implementation away from the user
-as all outside functionality is provided by the base MField class
-Note that there is one exception: The array MField, which has some additionional
-Behaviour.</p>
+<p>This function abstracts the MField creation away from the user. It takes a schema and a superKlass
+and uses that to create the correct MField for that schema. The field can then be managed through the
+interface of MField.</p>
 </div>
 
   
@@ -558,14 +559,17 @@ generator does not work properly with mixin definition</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber125">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/Schema.js.html#lineNumber129">source</a></span></span>
     </span>
   </h3>
 
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {parseSchema} from &apos;<span><a href="file/framework/dataManager/Schema.js.html#lineNumber125">ManagedDataJS/framework/dataManager/Schema.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {parseSchema} from &apos;<span><a href="file/framework/dataManager/Schema.js.html#lineNumber129">ManagedDataJS/framework/dataManager/Schema.js</a></span>&apos;</code></pre></div>
   
   
-  
+  <div data-ice="description"><p>parseSchema takes a raw JSON schema as argument and uses it to construct a Schema instance that is
+is suitable for DataManagers to use to construct MObjects. The parseSchema function does not modify
+the original schema.</p>
+</div>
 
   
 
@@ -581,7 +585,7 @@ generator does not work properly with mixin definition</p>
       <td data-ice="name" class="code" data-depth="0">schema</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>A JSON schema</p>
+      <td data-ice="description"><p>An unparsed JSON schema</p>
 </td>
     </tr>
 </tbody>

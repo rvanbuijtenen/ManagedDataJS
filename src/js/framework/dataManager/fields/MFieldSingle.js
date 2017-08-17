@@ -95,17 +95,7 @@ export class MField {
 }
 
 /**
- * Number implementation of MField which checks the following constraints:
- * 		
- *		REQUIRED:
- * 			value 							===>	typeof(value) == typeof(Number)
- *		OPTIONAL:
- *			minimum && exclusiveMinimum 	===> 	value > minimum
- *			minimum 						===>	value >= minimum
- *			maximum && exclusiveMaximum		===>	value < maximum
- *			maximum 						===>	value <= maximum
- *			multipleOf						===>	value%multipleOf == 0
- *
+ * Number implementation of MField which checks various schema constraint. See validate method.
  *
  */
 export class NumberMField extends MField {
@@ -121,6 +111,9 @@ export class NumberMField extends MField {
 	}
 
 	/**
+	 * Validate checks if the type of the value is a number. If it is, and additional constraints are present within the schema these are checked as well.
+	 * See the schema reference for more information on the constraints.
+	 * 
 	 * @param {*} value - The value that should be validated
 	 *
 	 * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned
@@ -170,10 +163,7 @@ export class NumberMField extends MField {
 
 
 /**
- * Integer implementation of MField which checks the following constraints:
- *
- *		REQUIRED:
- *			value 	===>	value%1 == 0
+ * Integer implementation of MField that builds on top of the number field.
  */
 export class IntegerMField extends NumberMField {
 	/**
@@ -189,6 +179,8 @@ export class IntegerMField extends NumberMField {
 	}
 
 	/**
+	 * Method that checks whether the given value is a number, and also an integer.
+	 * 
 	 * @param {*} value - The value that should be validated
 	 *
 	 * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned
@@ -209,22 +201,7 @@ export class IntegerMField extends NumberMField {
 
 
  /**
- *	String implementation of MField which checks the following constraints:
- *
- *		REQUIRED:
- *			value 		===>	typeof(value) == typeof(String)
- *		OPTIONAL:
- *			minLength	===>	value.length >= minLength
- *			maxLength	===>	value.length <= maxLength
- *			pattern		===>	value matches pattern
- *			format		===>	value is one of:
- * 
- * 									date-time
- * 									email
- * 									hostname
- * 									ipv4
- * 									ipv6
- * 									uri
+ *	String implementation of MField.
  */
 export class StringMField extends MField {
 	/**
@@ -236,6 +213,9 @@ export class StringMField extends MField {
 
 
 	/**
+	 * Method that checks whether the given value is a string. If it is, additonal constraints are checked
+	 * if they are present in this fields schema.
+	 *
 	 * @param {*} value - The value that should be validated
 	 *
 	 * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned
@@ -303,10 +283,7 @@ export class StringMField extends MField {
 }
 
 /**
- * Integer implementation of MField which checks the following constraints:
- *
- *		REQUIRED:
- *			value 	===>	typeof(value) == typeof(Boolean)
+ * Boolean implementation of MField.
  */
 export class BooleanMField extends MField {
 	/**
@@ -317,6 +294,8 @@ export class BooleanMField extends MField {
 	}
 
 	/**
+	 * Checks if the given value is boolean
+	 *
 	 * @param {*} value - The value that should be validated
 	 *
 	 * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned
@@ -334,12 +313,8 @@ export class BooleanMField extends MField {
 }
 
 /**
- * MObject implementation of MField which checks the following constraints:
- *
- *		REQUIRED:
- *			value 	 			===>	value instanceof MObject && value.klass == schema.klass
- *		OPTIONAL:
- *			inverse		 		===>	(value[inverse] == this || value[inverse].includes(this))
+ * MObject implementation of MField. Besides validating, an MObjectMField also manages relations with other
+ * fields 
  */
 export class MObjectMField extends MField {
 	/**
@@ -356,17 +331,9 @@ export class MObjectMField extends MField {
 		this.superKlass = superKlass
 	}
 
-	addRelatedObject(other) {
-		this.setValue(other)
-	}
-
-	removeRelatedObject(other) {
-		if(this.value == other) {
-			this.value = null
-		}
-	}
-
 	/**
+	 * Validates whether the given value is an MObject of a klass matching its schema
+	 *
 	 * @param {*} value - The value that should be validated
 	 *
 	 * @return {Boolean, Error} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned
@@ -389,6 +356,12 @@ export class MObjectMField extends MField {
 		return {valid, error}
 	}
 
+	/**
+	 * setValue checks if the object has any relations, and if it does this object is added
+	 * to the related object.
+	 *
+	 * @param {MObject} value - An MObject that should be set as value of this MField
+	 */
 	setValue(value) {
 		super.setValue(value)
 

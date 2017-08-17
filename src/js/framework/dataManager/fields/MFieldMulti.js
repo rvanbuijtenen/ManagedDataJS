@@ -2,7 +2,11 @@ import {MField} from "./MFieldSingle"
 import {MFieldFactory} from "./MFieldFactory"
 
 /**
- * The ArrayHandler ensures that ArrayMfield[idx] returns ArrayMField.value[idx] when idx is an integer
+ * The ArrayHanlder implements a get trap for the managed arrays that has two tasks:
+ *
+ *		- if the property is a number, we treat it as an index of the contained array by invoking "get" on the target
+ *		- if the property is a function we return a function that invokes the notifyArray method on the target's superKlass.
+ *		  It then applies the method with the returned list of arguments.
  */
 export class ArrayHandler {
 	/**
@@ -20,9 +24,11 @@ export class ArrayHandler {
 			let propValue = target[propKey]
 			if(typeof(propValue) == "function" && !(typeof(propKey) == "symbol")) {
 				return function() {
+					/* invoke notifyArray on target's superKlass */
 					let argsArray = [...arguments]
 					argsArray = target.superKlass.notifyArray(propKey, argsArray, target.proxy)
 					
+					/* remove the old arguments, add the new arguments and then apply the original method */
 					while(arguments.length > 0) {
 						Array.shift(arguments)
 					}
@@ -43,10 +49,10 @@ export class ArrayHandler {
  * where neccesary. When the array has been modified, the arrayHasChanged() callback is
  * invoked on the MObject it belongs to.
  *
- *
- * the ArrayMField always returns regular javascript values or managed objects.
- * the ArrayMField always takes regular javascript values as input.
- * the ArrayMField.value only contains objects that are instances of MFields.
+ * We use three simple conventions for managed arrays:
+ *		<ul><li>the ArrayMField never returns a Field when one of its values is returned, except when that field itself is a managedArray.</li>
+ *		<li>the ArrayMField always takes regular javascript values as input, except when the value is a managed array.</li>
+ *		<li>the ArrayMField.value only contains objects that are instances of MFields.</li></ul>
  */
 export class ArrayMField extends MField {
 	/**
@@ -479,10 +485,12 @@ export class ArrayMField extends MField {
 	/**
 	 * @param {Integer} idx - the index to retrieve from this array
 	 *
-	 * @return {*, Boolean} Get either returns the value on the given index or false
+	 * @return {*} Get either returns the value on the given index or false
 	 */
 	get(idx) {
-		console.log(idx, this.value)
+		if(!this.value.hasOwnProperty(idx)) {
+			return undefined
+		}
 		return this.value[idx].getValue()
 	}
 
@@ -494,6 +502,7 @@ export class ArrayMField extends MField {
 	}
 
 	/**
+	 * getValues returns an actual javascript array containing this ArrayMFields values
 	 * @return {Array} A regular JavaScript array containing this ArrayMFields values
 	 */
 	getValues() {
@@ -529,10 +538,7 @@ export class ArrayMField extends MField {
 
 
 /**
- * Enum implementation of MField which checks the following constraints:
- *
- *		REQUIRED:
- *			value		===>	enum.includes(value)
+ * An enum can contain only one of its schemas values. Values defined within an enum can only be primitive types.
  */
 export class EnumMField extends MField {
 	/**
@@ -560,10 +566,8 @@ export class EnumMField extends MField {
 }
 
 /**
- *	OneOF implementation of MFIeld which checks the following constraints:
- *
- *		REQUIRED:
- *			value		===>	value matches at least one schema in schema.oneOf
+ * A OneOf field can contain at most one of the klasses defined in its schema. These klasses
+ * are stored within an MObjectField.  
  */
 export class OneOfMField extends MField {
 	constructor(schema, superKlass) {
@@ -576,7 +580,7 @@ export class OneOfMField extends MField {
 	}	
 
 	/**
-	 * @param {*} value - The value that should be validated
+	 * @param {MObject} value - The value that should be validated
 	 *
 	 * @return {Boolean, Error, MField} Validate returns a boolean indicating whether the field is valid. If it is invalid an error is also returned. If it was valid, the valid MField is returned
 	 */

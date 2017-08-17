@@ -54,13 +54,13 @@
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {OneOfMField} from &apos;<span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber568">ManagedDataJS/framework/dataManager/fields/MFieldMulti.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {OneOfMField} from &apos;<span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber572">ManagedDataJS/framework/dataManager/fields/MFieldMulti.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber568">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber572">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -80,10 +80,9 @@
 
   
   
-  <div class="description" data-ice="description"><p>OneOF implementation of MFIeld which checks the following constraints:</p>
-<pre><code><code class="source-code prettyprint">REQUIRED:
-    value        ===&gt;    value matches at least one schema in schema.oneOf</code>
-</code></pre></div>
+  <div class="description" data-ice="description"><p>A OneOf field can contain at most one of the klasses defined in its schema. These klasses
+are stored within an MObjectField.  </p>
+</div>
   
 
   
@@ -271,7 +270,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html#instance-method-validate">validate</a></span></span><span class="code" data-ice="signature">(value: <span>*</span>): <span>Boolean, Error, MField</span></span>
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html#instance-method-validate">validate</a></span></span><span class="code" data-ice="signature">(value: <span><a href="class/framework/dataManager/MObject.js~MObject.html">MObject</a></span>): <span>Boolean, Error, MField</span></span>
         </p>
       </div>
       <div>
@@ -569,7 +568,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber569">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber573">source</a></span></span>
     </span>
   </h3>
 
@@ -615,7 +614,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber575">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber579">source</a></span></span>
     </span>
   </h3>
 
@@ -659,7 +658,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber614">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber618">source</a></span></span>
     </span>
   </h3>
 
@@ -706,7 +705,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber621">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber625">source</a></span></span>
     </span>
   </h3>
 
@@ -762,7 +761,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber608">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber612">source</a></span></span>
     </span>
   </h3>
 
@@ -820,11 +819,11 @@ this.value to the field returned by the validate method, otherwise we throw the 
     
     
     
-    <span class="code" data-ice="name">validate</span><span class="code" data-ice="signature">(value: <span>*</span>): <span>Boolean, Error, MField</span></span>
+    <span class="code" data-ice="name">validate</span><span class="code" data-ice="signature">(value: <span><a href="class/framework/dataManager/MObject.js~MObject.html">MObject</a></span>): <span>Boolean, Error, MField</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber583">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber587">source</a></span></span>
     </span>
   </h3>
 
@@ -845,7 +844,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
     
     <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">value</td>
-      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="type" class="code"><span><a href="class/framework/dataManager/MObject.js~MObject.html">MObject</a></span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>The value that should be validated</p>
 </td>
