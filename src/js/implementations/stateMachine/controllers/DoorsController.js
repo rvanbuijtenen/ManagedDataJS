@@ -6,6 +6,7 @@ export default class DoorsController extends AbstractController {
 	}
 
 	viewLoaded() {
+		this.view.renderInfo()
 		this.view.renderCurrentState(this.model)
 		this.view.renderMachine(this.model)
 		this.view.renderExecution(["<b>--$: </b>no events have been executed yet"])

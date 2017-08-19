@@ -2,7 +2,8 @@ import AbstractView from "../../AbstractView"
 
 export default class GraphView extends AbstractView {
 	makeCanvas() {
-		this.renderElement.find($("#graph-canvas")).append("<canvas id='graph-draw-canvas' style='width:100%; height:100%;'/>")
+		this.renderElement.find($("#graph-canvas")).append(`
+			<canvas id='graph-draw-canvas' style='width:100%; height:100%;'/>`)
 	}
 
 	getLineParams() {
@@ -16,8 +17,41 @@ export default class GraphView extends AbstractView {
 		return {name, points, width, color}
 	}
 
-	renderGraphName() {
-		this.renderElement.find($("#graph-name")).html(this.model.name)
+	renderInfo() {
+		this.renderElement.find($("#info")).append(`
+			<h1>
+				Graph implementation using MD4JS
+			</h1>
+			<p>
+				The Graph example is a small single-page application that uses ManagedData 
+				to implement its model. It is capable of drawing lines that consist of any combination of:
+				<ul>
+					<li>Linear line segments</li>
+					<li>Quadratic curve segments</li>
+					<li>Bezier curve segments</li>
+				</ul>
+			</p>
+			<p>
+				A new graph can be created by filling in the form and then pressing the 'Add Line' button. If the program's 
+				current graph's name does not match the entered name a new graph will be created for the line, otherwise the line will be added
+				to the existing graph.
+			</p>
+			<p>
+				A line can be created by entering the coordinates of its segments. Coordinates should be enclodes by square brackets [] and separated by commas.
+				When multiple segments are given these should be separated by commas as well. Any other characters like spaces or strings are not allowed. Some example inputs:
+				<ul>
+					<li>Linear line from (0,0) to (1,1):<br>
+						[0,0,1,1]
+					<li>Quadratic curve from (0,0) to (1,1) through the control point (1,0):<br>
+						[0,0,1,0,1,1]
+					<li>Bezier curve from (0,0) to (1,0) through the control points (0,1) and (1,1):<br>
+						[0,0,0,1,1,1,1,0]
+				</ul>
+			</p>`)
+	}
+
+	renderGraphName(name) {
+		this.renderElement.find($("#graph-name")).html(name)
 	}
 
 	draw(graph) {

@@ -90,6 +90,7 @@ export default class LockingPersistentGraphController extends LockingGraphContro
 			return parseInt(line.getId().match(/\d+$/).pop())
 		}).reduce((id, max) => {return id > max ? id : max}, 0) + 1
 
+		this.view.renderGraphName(this.model.name)
 		this.view.draw(this.model)
 	}
 

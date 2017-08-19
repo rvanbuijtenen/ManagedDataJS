@@ -4,6 +4,8 @@ export default class GraphController extends AbstractController {
 	viewLoaded() {
 		super.viewLoaded()
 		this.view.makeCanvas()
+		this.view.renderInfo()
+		this.view.renderGraphName(this.model.name)
 	}
 
 	addLine() {
@@ -18,6 +20,7 @@ export default class GraphController extends AbstractController {
 		points.map(this.addSegment.bind(this,line))
 
 		this.model.lines.push(line)
+		this.view.renderGraphName(this.model.name)
 		this.view.draw(this.model)
 	}
 
@@ -53,6 +56,7 @@ export default class GraphController extends AbstractController {
 
 	reset() {
 		this.model = this.manager.Graph({"name": ""})
+		this.view.renderGraphName(this.model.name)
 		this.view.draw(this.model)
 	}
 }
