@@ -439,7 +439,7 @@ export class ArrayMField extends MField {
 	 */
 	validate(values) {
 		if(values == undefined) {
-			return {true, undefined, undefined}
+			return {valid: true, error: undefined, fields: undefined}
 		}
 
 		let fields = []
