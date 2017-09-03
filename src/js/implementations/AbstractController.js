@@ -6,7 +6,20 @@ export default class AbstractController {
 		this.view.setController(this)
 	}
 
+	paramsReceived() {
+
+	}
+	
 	viewLoaded() {}
 
+	afterUnload() {
+		console.log("after unload")
+	}
+
 	handleLink(to) {}
+
+	setParams(params) {
+		this.params = params
+		this.paramsReceived()
+	}
 }

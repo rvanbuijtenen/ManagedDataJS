@@ -7,7 +7,7 @@ import {parseSchema} from "./Schema";
  * @param {Class} superclass - an ES6 class definition that should be extended with mixins
  * @return {MixinBuilder} An instance of MixinBuilder for the given superclass
  */
-let mix = (superclass) => new MixinBuilder(superclass);
+export let mix = (superclass) => new MixinBuilder(superclass);
 
 /**
  * MixinBuilder is a class that dynamically constructs a prototype chain for the superclass
@@ -50,7 +50,8 @@ class MixinBuilder {
  */
 class FactoryHandler {
 	construct(target, argumentsList, newTarget) {
-		return target.apply(target, null, argumentsList)
+		console.log(argumentsList)
+		return target.apply(target, argumentsList)
 	}
 }
 
@@ -105,6 +106,7 @@ export class DataManager {
 	 * @return MObject - A proxied MObject
 	 */
 	factory(inits) {
+		console.log(inits)
 		let mobjClass = {};
 		if(this.mixins.length > 0) {
 			mobjClass = (class extends mix(MObject).with(...this.mixins){});

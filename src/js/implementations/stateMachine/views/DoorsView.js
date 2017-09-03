@@ -6,7 +6,7 @@ export default class DoorsView extends AbstractView {
 	}
 
 	renderInfo() {
-		this.renderElement.find($("info")).append(`
+		this.renderElement.find($("#info")).append(`
 			<h2>Doors state machine implementation using MD4JS</h2>
 			<p>
 				The doors state machine represents a door that has three states that 
@@ -62,11 +62,11 @@ export default class DoorsView extends AbstractView {
 		this.renderElement.find($("#machine-view")).html(html.join("<br/>"))
 	}
 
-	renderExecution(executionLog) {
-		this.renderElement.find($("#machine-execution")).html(executionLog.join("<br/>"))
+	renderExecution(message) {
+		this.renderElement.find($("#machine-execution")).append("<b>--$</b> "+message+"<br/>")
 	}
 
-	renderError(message) {
-		this.renderElement.find($("#machine-error")).html(message)
+	resetExecution() {
+		this.renderElement.find($("#machine-execution")).html("")
 	}
 }

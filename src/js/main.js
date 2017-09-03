@@ -1,10 +1,10 @@
 import runMachine from "./implementations/stateMachine"
 import runGraph from "./implementations/graph"
 import runDocumentation from "./implementations/documentation"
-
+import runForum from "./implementations/forum"
 
 // http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
-
+runForum($("#forum"))
 
 document.getElementById('graph').addEventListener('click', () => {
     runGraph("graph", $("#content"))

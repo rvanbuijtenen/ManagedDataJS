@@ -84,6 +84,7 @@ export class MObject {
 	 * @param {Object} inits - An object containing the initial values for this MObject
 	 */
 	init(inits) {
+		console.log("inits: ", inits)
 		for(let propKey in this.schema.fields) {
 			/* Initialize an empty MField for each field defined in schema */
 			this.data[propKey] = MFieldFactory(
@@ -189,7 +190,7 @@ export class MObject {
 	}
 
 	/**
-	 * @return {String} A strinng representing the managed object
+	 * @return {String} A string representing the managed object
 	 */
 	[Symbol.toPrimitive]() {
 		return this.toString()

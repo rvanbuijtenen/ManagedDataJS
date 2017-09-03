@@ -3,10 +3,19 @@
 	"type": "object",
 	"properties": {
 		"name": {"type": "string"},
-		"start": {"type": "object", "$ref": "#/definitions/State"}
+		"start": {
+			"type": "object", 
+			"$ref": "#/definitions/State"
+		}
 	},
 	"relations": {
-		"oneToMany": [{"$ref": "#/definitions/State", "referrer": "states", "referred": "machine"}]
+		"oneToMany": [
+			{
+				"$ref": "#/definitions/State", 
+				"referrer": "states", 
+				"referred": "machine"
+			}
+		]
 	},
 	"definitions": {
 		"State": {
@@ -15,8 +24,16 @@
 			},
 			"relations": {
 				"oneToMany": [
-					{"$ref": "#/definitions/Transition", "referrer": "transitions_in", "referred": "to"},
-					{"$ref": "#/definitions/Transition", "referrer": "transitions_out", "referred": "from"}
+					{
+						"$ref": "#/definitions/Transition", 
+						"referrer": "transitions_in", 
+						"referred": "to"
+					},
+					{
+						"$ref": "#/definitions/Transition", 
+						"referrer": "transitions_out", 
+						"referred": "from"
+					}
 				]
 			}
 		},

@@ -5,6 +5,10 @@ export default class GmailValidatorView extends DoorsView {
 		return this.renderElement.find($("#events")).val().split("")
 	}
 
+	getExecutionStatus() {
+		return this.renderElement.find($("#machine-error"))[0].innerHTML == "<b>--$</b> No errors occured while executing<br>"
+	}
+
 	renderInfo() {
 		this.renderElement.find($("#info")).append(`
 			<h1>Gmail validator state machine using MD4JS</h1>

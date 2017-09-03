@@ -6,7 +6,7 @@ import {MObject} from "../MObject"
  *		
  * getValue		returns the internal value of the MField.
  * setValue		used to set the internal value of the MField.
- * getType			returns the type of the value stored in the MField.4
+ * getType		returns the type of the value stored in the MField.4
  * toString		returns a string representing this fields value
  *
  * Each class that extends MField must provide the validate(value) function
@@ -233,7 +233,7 @@ export class StringMField extends MField {
 			return {valid, error}
 		}
 
-		if(this.schema.hasOwnProperty("maxLength") && value.length > this.schema.maxLength + exclMax) {
+		if(this.schema.hasOwnProperty("maxLength") && value.length > this.schema.maxLength) {
 			error = new TypeError("value assigned to "+this.schema.type+"MField is longer than the maximum length of "+this.schema.maxLength)
 			return {valid, error}
 		}
