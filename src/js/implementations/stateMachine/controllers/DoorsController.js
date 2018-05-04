@@ -1,12 +1,52 @@
 import AbstractController from "../../AbstractController"
 
+
 export default class DoorsController extends AbstractController {
 	constructor(model, view, manager) {
 		super(model, view, manager)
         this.originalStart = model.start
         this.eventLog = []
         this.errorCnt = 0
+        this.model = this.makeDoors(manager)
 	}
+
+    makeDoors(manager) {
+        let doors = manager.Machine({"name": "doors"})
+
+        let stateOpened = manager.State({"name": "opened"})
+        let stateClosed = manager.State({"name": "closed"})
+        let stateLocked = manager.State({"name": "locked"})
+
+        doors.start = stateClosed;
+        doors.states.push(stateOpened, stateClosed, stateLocked)
+
+        let transOpen = manager.Transition({
+            "event": ["open"]
+        })
+            
+        let transClose = manager.Transition({
+            "event": ["close"]
+        })
+
+        let transLock = manager.Transition({
+            "event": ["lock"]
+        })
+
+        let transUnlock = manager.Transition({
+            "event": ["unlock"]
+        })
+
+        stateOpened.transitions_in.push(transOpen)
+        stateOpened.transitions_out.push(transClose)
+
+        stateClosed.transitions_in.push(transClose, transUnlock)
+        stateClosed.transitions_out.push(transOpen, transLock)
+
+        stateLocked.transitions_in.push(transLock)
+        stateLocked.transitions_out.push(transUnlock)
+
+        return doors
+    }
 
 	viewLoaded() {
 		this.view.renderInfo()
@@ -14,14 +54,18 @@ export default class DoorsController extends AbstractController {
 		this.view.renderMachine(this.model)
 	}
 
-	execute() {
-		/* Initialize for execution */
+    reinit() {
+        /* Initialize for execution */
         if(this.errorCnt > 0) {
             this.errorCnt = 0
             this.model.start = this.originalStart
             this.eventLog = []
             this.view.resetExecution()
         }
+    }
+
+	execute() {
+        this.reinit()
         let events = this.view.getEvents()
         this.eventLog = this.eventLog.concat(events)
         /* Attempt to execute each event */

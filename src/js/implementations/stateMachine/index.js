@@ -21,7 +21,7 @@ export default function runMachine(type, viewElement) {
 
 			model = makeDoors(manager)
 			view = new DoorsView("stateMachine/doors.html", viewElement)
-			controller = new DoorsController(model, view, manager)
+			controller = new DoorsController({}, view, manager)
 			break;
 		}
 		case "loggingDoors": {
@@ -60,44 +60,6 @@ export default function runMachine(type, viewElement) {
 			throw new TypeError("Unknown machine type: "+type)
 		}
 	}
-}
-
-function makeDoors(manager) {
-	let doors = manager.Machine({"name": "doors"})
-
-	let stateOpened = manager.State({"name": "opened"})
-	let stateClosed = manager.State({"name": "closed"})
-	let stateLocked = manager.State({"name": "locked"})
-
-	doors.start = stateClosed;
-	doors.states.push(stateOpened, stateClosed, stateLocked)
-
-	let transOpen = manager.Transition({
-		"event": ["open"]
-	})
-		
-	let transClose = manager.Transition({
-		"event": ["close"]
-	})
-
-	let transLock = manager.Transition({
-		"event": ["lock"]
-	})
-
-	let transUnlock = manager.Transition({
-		"event": ["unlock"]
-	})
-
-	stateOpened.transitions_in.push(transOpen)
-	stateOpened.transitions_out.push(transClose)
-
-	stateClosed.transitions_in.push(transClose, transUnlock)
-	stateClosed.transitions_out.push(transOpen, transLock)
-
-	stateLocked.transitions_in.push(transLock)
-	stateLocked.transitions_out.push(transUnlock)
-
-	return doors
 }
 
 function makeGmailValidator(manager) {
