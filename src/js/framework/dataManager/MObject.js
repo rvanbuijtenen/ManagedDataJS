@@ -16,6 +16,9 @@ export class MObjectHandler {
 	 * @return {*} Either the value of the requested property or a function that executes the requested property
 	 */
 	get(target, propKey, receiver) {
+		if(typeof(propKey) == 'symbol' || propKey == 'inspect') {
+			return target[propKey]
+		}
 		var propValue = target[propKey];
 		if (typeof propValue != "function"){		
 			/* if the property is not a function: return MObject.__get(propKey) */
@@ -84,7 +87,6 @@ export class MObject {
 	 * @param {Object} inits - An object containing the initial values for this MObject
 	 */
 	init(inits) {
-		console.log("inits: ", inits)
 		for(let propKey in this.schema.fields) {
 			/* Initialize an empty MField for each field defined in schema */
 			this.data[propKey] = MFieldFactory(

@@ -2,10 +2,10 @@
  var webpack = require('webpack');
 
  module.exports = {
-     entry: './src/js/comparison/ManagedStateMachine.js',
+     entry: './src/js/main.js',
      output: {
          path: path.resolve(__dirname, 'build'),
-         filename: 'ManagedStateMachine.bundle.js'
+         filename: 'main.bundle.js'
      },
      module: {
          loaders: [
