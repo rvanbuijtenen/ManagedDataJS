@@ -43,3 +43,6 @@ npm run start
 
 #### Open the browser at localhost:8080 to view examples and documentation
 
+
+#### Reason for slow performance: BABEL
+http://incaseofstairs.com/2015/06/es6-feature-performance/
