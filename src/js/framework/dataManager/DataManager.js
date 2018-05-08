@@ -68,7 +68,7 @@ export class DataManager {
 	 * @param {...Function} [mixin1,mixin...,mixinN] - an arbitrary number of mixins that should be used to extend managed
 	 * objects constructed by the basic data manager
 	 */
-	constructor(schema, ...mixins) {
+	constructor(schema, kwargs, ...mixins) {
 		/**
 		 * An array of mixins for the managed objects created by this data manager
 		 * @type {Array}
@@ -96,7 +96,8 @@ export class DataManager {
 			this[klass] = new Proxy(this.factory.bind({
 				schema: this.schema.getKlassByName(klass),
 				mixins: this.mixins,
-				klass: klass
+				klass: klass,
+				kwargs: kwargs
 			}), new FactoryHandler())
 		}
 	}
@@ -106,7 +107,6 @@ export class DataManager {
 	 * @return MObject - A proxied MObject
 	 */
 	factory(inits) {
-		console.log(inits)
 		let mobjClass = {};
 		if(this.mixins.length > 0) {
 			mobjClass = (class extends mix(MObject).with(...this.mixins){});
@@ -114,7 +114,7 @@ export class DataManager {
 			mobjClass = (class extends MObject {});
 		}
 
-		let mobj = new mobjClass(this.schema);
+		let mobj = new mobjClass(this.schema, kwargs);
 		let mObjProxy = new Proxy(mobj, new MObjectHandler());
 
 		/* The MObject needs a pointer to its own proxy for when an inverse field is found */

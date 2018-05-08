@@ -4,9 +4,8 @@ class Logger {
     constructor() {
         let available_loglevels = {
             "info": 0,
-            "warning": 1,
-            "exception": 2,
-            "none": 3
+            "exception": 1,
+            "none": 2
         }
         if(loglevel in available_loglevels) {
             this.loglevel = available_loglevels[loglevel]
@@ -30,7 +29,7 @@ class Logger {
     }
 
     logException(property, object_type, object_name, message) {
-        if(this.loglevel <= 2) {
+        if(this.loglevel < 2) {
             console.log("exception occurred for property " + property + " in " + object_type + " " + object_name + ":")
             console.log(message)
         }
@@ -40,11 +39,6 @@ class Logger {
 class StateMachine extends Logger {
     constructor(name) {
         super()
-        if(!name) {
-            this.logException("name", "StateMachine", null, "the name attribute is required")
-            throw "the name attribute is required"
-        }
-
         if(!name instanceof String) {
             this.logException("name", "StateMachine", null, "name must be a String")
             throw "name must be a String"
@@ -109,11 +103,6 @@ class StateMachine extends Logger {
 class State extends Logger {
     constructor(name) {
         super()
-        if(!name) {
-            this.logException("name", "State", null, "the name attribute is required")
-            throw "the name attribute is required"
-        }
-
         if(!name instanceof String) {
             this.logException("name", "State", null, "name must be a String")
             throw "name must be a String"

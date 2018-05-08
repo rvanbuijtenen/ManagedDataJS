@@ -51,17 +51,31 @@ let machineSchema = {
 }
 
 let Logging = (superclass) => class extends superclass {
-    constructor(schema) {
-        super(schema);
+    constructor(schema, kwargs) {
+        super(schema, kwargs);
+        let available_loglevels = {
+            "info": 0,
+            "exception": 1,
+            "none": 2
+        }
+        if("loglevel" in kwargs && kwargs.loglevel in available_loglevels) {
+            this.loglevel = available_loglevels[loglevel]
+        } else {
+            this.loglevel = available_loglevels["exception"]
+        }
     }
 
     set(propKey, value) {
         let result;
         try {
             result = super.set(propKey, value);
-            console.log("set property "+propKey+" of klass "+this.schema.getKlass()+" to value: "+ JSON.stringify(value));
+            if(this.loglevel <= 0) {
+                console.log("set property "+propKey+" of klass "+this.schema.getKlass()+" to value: "+ JSON.stringify(value));
+            }
         } catch (err) {
-            console.log("An error occured when setting property "+propKey+" of klass "+this.schema.getKlass()+" to value: " + JSON.stringify(value));
+            if(this.loglevel < 2) {
+                console.log("An error occured when setting property "+propKey+" of klass "+this.schema.getKlass()+" to value: " + JSON.stringify(value));
+            }
             throw err
         }
         return result;
@@ -75,8 +89,8 @@ let Logging = (superclass) => class extends superclass {
 }
 
 let Locking = (superclass) => class extends superclass {
-    constructor(schema, ...otherArgs) {
-        super(schema, ...otherArgs);
+    constructor(schema, kwargs) {
+        super(schema, kwargs);
         this.locked = false;
     }
 

@@ -200,4 +200,11 @@ process.argv.forEach(function (val, index, array) {
     }
 });
 
-main();
+process.argv.forEach(function (val, index, array) {
+  let [k,v] = val.split("=")
+  if (k == "--log-level") {
+    loglevel = v
+  }
+});
+
+main()
