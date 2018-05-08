@@ -18,8 +18,15 @@ export class ArrayHandler {
 	 */
 	get(target, propKey, receiver) {
 		if(!(typeof(propKey)=="symbol") && !isNaN(propKey)) {
-			target.superKlass.notifyArray("get", [propKey], target.proxy)
-			return target.get(parseInt(propKey))
+			target.superKlass.beforeArray(propKey, [], target.proxy)
+			try {
+				result = target.get(parseInt(propKey))
+			} catch (e) {
+				target.superKlass.arrayError(propKey, err)
+				return
+			}
+			target.superKlass.afterArray(propKey, target.proxy)
+			return result
 		} else {
 			let propValue = target[propKey]
 			if(typeof(propValue) == "function" && !(typeof(propKey) == "symbol")) {
@@ -40,6 +47,7 @@ export class ArrayHandler {
 						return result
 					} catch (err) {
 						target.superKlass.arrayError(propKey, err)
+						return
 					}
 				}
 			}
