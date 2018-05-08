@@ -41,6 +41,13 @@ npm run webpack
 npm run start
 ```
 
+#### or run one of the node compatible StateMachine examples:
+```shell
+npm run webpack
+node build/ManagedStateMachine.bundle.js
+node build/RegularStatemachine.bundle.js
+```
+
 #### Open the browser at localhost:8080 to view examples and documentation
 
 
