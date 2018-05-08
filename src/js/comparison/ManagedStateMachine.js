@@ -54,43 +54,68 @@ let Logging = (superclass) => class extends superclass {
     constructor(schema, kwargs) {
         super(schema, kwargs);
         let available_loglevels = {
-            "info": 0,
-            "exception": 1,
-            "none": 2
+            "debug": 0
+            "info": 1,
+            "exception": 2,
+            "none": 3
         }
         if("loglevel" in kwargs && kwargs.loglevel in available_loglevels) {
             this.loglevel = available_loglevels[loglevel]
         } else {
             this.loglevel = available_loglevels["exception"]
         }
+        this.methodsWithSideEffects = ["push", "splice", "pop", "shift", "unshift"]
     }
 
     set(propKey, value) {
         let result;
         try {
             result = super.set(propKey, value);
-            if(this.loglevel <= 0) {
-                console.log("set property "+propKey+" of klass "+this.schema.getKlass()+" to value: "+ JSON.stringify(value));
+            if(this.loglevel < 2) {
+                console.log("set property ${propKey} in <ManagedObject ${this.schema.getKlass()}>");
+                if(this.loglevel == 0) {
+                    console.log("the given value is:\n", value)
+                }
             }
         } catch (err) {
-            if(this.loglevel < 2) {
-                console.log("An error occured when setting property "+propKey+" of klass "+this.schema.getKlass()+" to value: " + JSON.stringify(value));
+            if(this.loglevel < 3) {
+                console.log("An error occured when setting property ${propKey} in <ManagedObject ${this.schema.getKlass()>}");
+                if(this.loglevel == 0) {
+                    e.printStackTrace()
+                }
             }
             throw err
         }
         return result;
     }
 
-    notifyArray(method, args, array) {
-        args= super.notifyArray(method, args, array)
-        //console.log("invoked "+method+" on ManagedArray in object "+this.schema.getKlass()+" with arguments "+args.toString())
-        return args
+    afterArray(property, array) {
+        super.afterArray(property, array)
+        if(this.loglevel < 2 && property in this.methodsWithSideEffects) {
+            console.log("Array changed by ${property} in <ManagedObject ${this.schema.getKlass()}>")
+        }
+    }
+
+    arrayError(property, error, args) {
+        try {
+            super.arrayError(property, error)
+        } catch (e) {
+            if(this.loglevel < 3) {
+                console.log("An error occurred when accessing array attribute ${property} in <ManagedObject ${this.schema.getKlass()}>")
+                if(this.loglevel == 0) {
+                    console.log("Given arguments are:\n", args)
+                    e.printStackTrace()
+                }
+            }
+            throw e
+        }
     }
 }
 
 let Locking = (superclass) => class extends superclass {
     constructor(schema, kwargs) {
         super(schema, kwargs);
+        this.methodsWithSideEffects = ["push", "splice", "pop", "shift", "unshift"]
         this.locked = false;
     }
 
@@ -109,11 +134,9 @@ let Locking = (superclass) => class extends superclass {
         this.locked = false;
     }
 
-    notifyArray(method, args, array) {
-        args = super.notifyArray(method, args, array)
-        let methodsWithSideEffects = ["push", "splice", "pop", "shift", "unshift"]
-        
-        if(this.locked  && methodsWithSideEffects.includes(method)) {
+    beforeArray(property, args, array) {
+        args = super.notifyArray(method, args, array)        
+        if(this.locked  && this.methodsWithSideEffects.includes(property)) {
             throw TypeError("object is locked")
         }
         return args

@@ -173,8 +173,14 @@ export class MObject {
 	 * @return {Array} The arguments given to notifyArray. Mixins can override this method 
 	 * to intercept and possibly modify the arguments.
 	 */
-	notifyArray(method, args, array) {
+	beforeArray(property, args, array) {
 		return args
+	}
+
+	afterArray(property, array) {}
+
+	arrayError(property, error) {
+		throw(error)
 	}
 
 	/**

@@ -26,7 +26,7 @@ export class ArrayHandler {
 				return function() {
 					/* invoke notifyArray on target's superKlass */
 					let argsArray = [...arguments]
-					argsArray = target.superKlass.notifyArray(propKey, argsArray, target.proxy)
+					argsArray = target.superKlass.beforeArray(propKey, argsArray, target.proxy)
 					/* remove the old arguments, add the new arguments and then apply the original method */
 					//while(arguments.length > 0) {
 					//	console.log("length:", arguments.length, arguments)
@@ -34,7 +34,13 @@ export class ArrayHandler {
 					//}
 					
 					//Array.prototype.unshift(arguments, ...argsArray)
-					return propValue.apply(target, argsArray, propKey)
+					try {
+						result = propValue.apply(target, argsArray, propKey)
+						target.afterArray(propKey, target.proxy)
+						return result
+					} catch (err) {
+						target.superKlass.arrayError(propKey, err)
+					}
 				}
 			}
 		}
