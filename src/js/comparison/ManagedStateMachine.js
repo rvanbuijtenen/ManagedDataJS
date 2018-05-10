@@ -67,6 +67,7 @@ let Logging = (superclass) => class extends superclass {
             this.loglevel = available_loglevels["exception"]
         }
         this.properties_to_log = "properties_to_log" in kwargs ? kwargs.properties_to_log : {}
+        console.log(this.properties_to_log)
         this.methodsWithSideEffects = ["push", "splice", "pop", "shift", "unshift"]
     }
 
@@ -148,7 +149,7 @@ let Locking = (superclass) => class extends superclass {
 
 
 function makeDoors(manager) {
-    let doors = new manager.Machine({"name": "doors"})
+    let doors = new manager.Machine({"name": "doors"}, {"properties_to_log": ["name", "start", "states"]})
 
     let stateOpened = new manager.State({"name": "opened"})
     let stateClosed = new manager.State({"name": "closed"})

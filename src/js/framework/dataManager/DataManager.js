@@ -104,14 +104,18 @@ export class DataManager {
 
 	/**
 	 * @param {Object} inits - An object containing initial values for the MObject
+	 * @param {Object} kwargs - An object containing additional keyword arguments for the MObject
 	 * @return MObject - A proxied MObject
 	 */
-	factory(inits) {
+	factory(inits, kwargs) {
 		let mobjClass = {};
 		if(this.mixins.length > 0) {
 			mobjClass = (class extends mix(MObject).with(...this.mixins){});
 		} else {
 			mobjClass = (class extends MObject {});
+		}
+		for(let key in kwargs) {
+			this.kwargs[key] = kwargs[key]
 		}
 
 		let mobj = new mobjClass(this.schema, this.kwargs);
