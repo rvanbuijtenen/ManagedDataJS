@@ -75,7 +75,6 @@ export class ArrayMField extends MField {
 	 */ 	
 	constructor(schema, superKlass, key) {
 		super("array", schema, [])
-		console.log(key)
 
 		/**
 		 * The MObject that this ArrayMField belongs to

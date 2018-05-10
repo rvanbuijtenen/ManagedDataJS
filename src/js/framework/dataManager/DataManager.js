@@ -50,7 +50,6 @@ class MixinBuilder {
  */
 class FactoryHandler {
 	construct(target, argumentsList, newTarget) {
-		console.log(argumentsList)
 		return target.apply(target, argumentsList)
 	}
 }
@@ -68,7 +67,7 @@ export class DataManager {
 	 * @param {...Function} [mixin1,mixin...,mixinN] - an arbitrary number of mixins that should be used to extend managed
 	 * objects constructed by the basic data manager
 	 */
-	constructor(schema, kwargs, ...mixins) {
+	constructor(schema, general_kwargs, klass_kwargs, ...mixins) {
 		/**
 		 * An array of mixins for the managed objects created by this data manager
 		 * @type {Array}
@@ -97,25 +96,26 @@ export class DataManager {
 				schema: this.schema.getKlassByName(klass),
 				mixins: this.mixins,
 				klass: klass,
-				kwargs: kwargs
+				kwargs: general_kwargs,
+				klassKwargs: klass in klass_kwargs ? klass_kwargs[klass] : {}
 			}), new FactoryHandler())
 		}
 	}
 
 	/**
 	 * @param {Object} inits - An object containing initial values for the MObject
-	 * @param {Object} kwargs - An object containing additional keyword arguments for the MObject
 	 * @return MObject - A proxied MObject
 	 */
-	factory(inits, kwargs) {
+	factory(inits) {
 		let mobjClass = {};
 		if(this.mixins.length > 0) {
 			mobjClass = (class extends mix(MObject).with(...this.mixins){});
 		} else {
 			mobjClass = (class extends MObject {});
 		}
-		for(let key in kwargs) {
-			this.kwargs[key] = kwargs[key]
+
+		for(let key in this.klassKwargs) {
+			this.kwargs[key] = this.klassKwargs[key]
 		}
 
 		let mobj = new mobjClass(this.schema, this.kwargs);

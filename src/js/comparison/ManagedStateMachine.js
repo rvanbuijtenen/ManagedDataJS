@@ -67,7 +67,6 @@ let Logging = (superclass) => class extends superclass {
             this.loglevel = available_loglevels["exception"]
         }
         this.properties_to_log = "properties_to_log" in kwargs ? kwargs.properties_to_log : {}
-        console.log(this.properties_to_log)
         this.methodsWithSideEffects = ["push", "splice", "pop", "shift", "unshift"]
     }
 
@@ -149,7 +148,7 @@ let Locking = (superclass) => class extends superclass {
 
 
 function makeDoors(manager) {
-    let doors = new manager.Machine({"name": "doors"}, {"properties_to_log": ["name", "start", "states"]})
+    let doors = new manager.Machine({"name": "doors"})
 
     let stateOpened = new manager.State({"name": "opened"})
     let stateClosed = new manager.State({"name": "closed"})
@@ -210,7 +209,12 @@ function execute(machine, events) {
 
 function main() {
     console.time('Managed StateMachine examples')
-    let doors = makeDoors(new DataManager(machineSchema, {loglevel}, Logging, Locking))
+    let manager = new DataManager(machineSchema, {loglevel}, {
+        "Machine": {"properties_to_log": ["name", "states", "start"]},
+        "State": {"properties_to_log": ["name", "transitions_in", "transitions_out"]},
+        "Transition": {"properties_to_log": ["events", "from", "to"]}
+        }, Logging, Locking)
+    let doors = makeDoors(manager)
     let events = ["open", "close", "lock", "unlock", "open"]
     let initialStart = doors.start
     
@@ -265,11 +269,9 @@ function main() {
 }
 
 process.argv.forEach(function (val, index, array) {
-    console.log("argv")
   let [k,v] = val.split("=")
   if (k == "--log-level") {
     loglevel = v
-    console.log(loglevel)
   }
 });
 
