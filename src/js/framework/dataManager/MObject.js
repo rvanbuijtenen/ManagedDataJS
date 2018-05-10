@@ -91,7 +91,8 @@ export class MObject {
 			/* Initialize an empty MField for each field defined in schema */
 			this.data[propKey] = MFieldFactory(
 									this.schema.getFieldSchema(propKey),
-									this.proxy
+									this.proxy,
+									propKey
 								);
 		}
 
@@ -173,13 +174,13 @@ export class MObject {
 	 * @return {Array} The arguments given to notifyArray. Mixins can override this method 
 	 * to intercept and possibly modify the arguments.
 	 */
-	beforeArray(property, args, array) {
+	beforeArray(method, property, args, array) {
 		return args
 	}
 
-	afterArray(property, array) {}
+	afterArray(method, property, array) {}
 
-	arrayError(property, error) {
+	arrayError(method, property, error) {
 		throw(error)
 	}
 
@@ -187,27 +188,27 @@ export class MObject {
 	 * @return {String} Default short string representing the managed object
 	 */
 	toString() {
-		return "<ManagedObject "+this.schema.getKlass()+">"
+		return `<Managed Object: ${this.getKlass()}>`
 	}
 
 	/**
 	 * @return {String} A string representation of the object with shallow copy of values
 	 */
 	valuesToString() {
-		let o = {}
-		for(field in this.data) {
-			o[field] = String(this.data)
-		}
-		return `<ManagedObject ${this.schema.getKlass()}: ${JSON.stringify(o)}>`
+		return `<ManagedObject ${this.getKlass()}: ${this.toJSON()}>`
 	}
 
 	/**
 	 * @return {String} A shallow JSON String representation of the object
 	 */
 	toJSON() {
-		o = {}
-		for(field in this.data) {
-			o[field] = String(this.data)
+		let o = {}
+		for(let field in this.data) {
+			if(this.data[field].getType() == 'array') {
+				o[field] = `<ManagedArray [${this.data[field].length}]>`
+			} else {
+				o[field] = String(this.data[field].getValue())
+			}
 		}
 		return JSON.stringify(o)
 	}

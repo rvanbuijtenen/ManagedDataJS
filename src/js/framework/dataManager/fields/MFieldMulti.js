@@ -18,14 +18,14 @@ export class ArrayHandler {
 	 */
 	get(target, propKey, receiver) {
 		if(!(typeof(propKey)=="symbol") && !isNaN(propKey)) {
-			target.superKlass.beforeArray(propKey, [], target.proxy)
+			target.superKlass.beforeArray(propKey, target.key, [], target.proxy)
 			try {
 				let result = target.get(parseInt(propKey))
 			} catch (e) {
-				target.superKlass.arrayError(propKey, err)
+				target.superKlass.arrayError(propKey, target.key, err)
 				return
 			}
-			target.superKlass.afterArray(propKey, target.proxy)
+			target.superKlass.afterArray(propKey, target.key, target.proxy)
 			return result
 		} else {
 			let propValue = target[propKey]
@@ -33,7 +33,7 @@ export class ArrayHandler {
 				return function() {
 					/* invoke notifyArray on target's superKlass */
 					let argsArray = [...arguments]
-					argsArray = target.superKlass.beforeArray(propKey, argsArray, target.proxy)
+					argsArray = target.superKlass.beforeArray(propKey, target.key, argsArray, target.proxy)
 					/* remove the old arguments, add the new arguments and then apply the original method */
 					//while(arguments.length > 0) {
 					//	console.log("length:", arguments.length, arguments)
@@ -43,10 +43,10 @@ export class ArrayHandler {
 					//Array.prototype.unshift(arguments, ...argsArray)
 					try {
 						let result = propValue.apply(target, argsArray, propKey)
-						target.superKlass.afterArray(propKey, target.proxy)
+						target.superKlass.afterArray(propKey, target.key, target.proxy)
 						return result
 					} catch (err) {
-						target.superKlass.arrayError(propKey, err)
+						target.superKlass.arrayError(propKey, target.key, err)
 						return
 					}
 				}
@@ -73,8 +73,9 @@ export class ArrayMField extends MField {
 	 * @param {Object} schema - A JSON schema that describes this MFields value
 	 * @param {MObject} superKlass - The MObject that this field belongs to
 	 */ 	
-	constructor(schema, superKlass) {
+	constructor(schema, superKlass, key) {
 		super("array", schema, [])
+		console.log(key)
 
 		/**
 		 * The MObject that this ArrayMField belongs to
@@ -99,6 +100,11 @@ export class ArrayMField extends MField {
 		 * Override this[Symbol.iterator]
 		 */
 		this[Symbol.iterator] = this.iterator
+
+		/**
+		 * The key that is used to access this managed array from the MObject
+		 */
+		this.key = key
 	}
 
 	setThisProxy(proxy) {
@@ -464,7 +470,7 @@ export class ArrayMField extends MField {
 		if(this.schema.items instanceof Array) {
 			let tmpItemsIdx = this.itemsIdx
 			for(let value of values) {
-				field = MFieldFactory(this.schema.items[tmpItemsIdx], this.superKlass)
+				field = MFieldFactory(this.schema.items[tmpItemsIdx], this.superKlass, this.key)
 				tmpItemsIdx++;
 
 				try { 
@@ -479,7 +485,7 @@ export class ArrayMField extends MField {
 			}
 		} else {
 			for(let value of values) {
-				field = MFieldFactory(this.schema.items, this.superKlass)
+				field = MFieldFactory(this.schema.items, this.superKlass, this.key)
 				try { 
 					field.setValue(value)
 				} catch (err) {
@@ -584,13 +590,18 @@ export class EnumMField extends MField {
  * are stored within an MObjectField.  
  */
 export class OneOfMField extends MField {
-	constructor(schema, superKlass) {
+	constructor(schema, superKlass, key) {
 		super("oneOf", schema, schema.oneOf[0].klass)
 		/**
 		 * The MObject that this OneOfMField belongs to
 		 * @type {MObject}
 		 */
 		this.superKlass = superKlass
+
+		/**
+		 * The key that is used to access this oneOf mfield
+		 */
+		this.key = key
 	}	
 
 	/**
@@ -604,7 +615,7 @@ export class OneOfMField extends MField {
 
 		for(let schema of this.schema.oneOf) {
 			try{
-				field = MFieldFactory(schema, this.superKlass)
+				field = MFieldFactory(schema, this.superKlass, this.key)
 				field.setValue(value)
 				valid = true
 				return {valid, error, field}
