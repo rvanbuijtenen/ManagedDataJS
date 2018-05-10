@@ -114,7 +114,7 @@ export class DataManager {
 			mobjClass = (class extends MObject {});
 		}
 
-		let mobj = new mobjClass(this.schema, kwargs);
+		let mobj = new mobjClass(this.schema, this.kwargs);
 		let mObjProxy = new Proxy(mobj, new MObjectHandler());
 
 		/* The MObject needs a pointer to its own proxy for when an inverse field is found */

@@ -20,7 +20,7 @@ export class ArrayHandler {
 		if(!(typeof(propKey)=="symbol") && !isNaN(propKey)) {
 			target.superKlass.beforeArray(propKey, [], target.proxy)
 			try {
-				result = target.get(parseInt(propKey))
+				let result = target.get(parseInt(propKey))
 			} catch (e) {
 				target.superKlass.arrayError(propKey, err)
 				return
@@ -42,8 +42,8 @@ export class ArrayHandler {
 					
 					//Array.prototype.unshift(arguments, ...argsArray)
 					try {
-						result = propValue.apply(target, argsArray, propKey)
-						target.afterArray(propKey, target.proxy)
+						let result = propValue.apply(target, argsArray, propKey)
+						target.superKlass.afterArray(propKey, target.proxy)
 						return result
 					} catch (err) {
 						target.superKlass.arrayError(propKey, err)

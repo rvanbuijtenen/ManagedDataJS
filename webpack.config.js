@@ -2,6 +2,7 @@
  var webpack = require('webpack');
 
  module.exports = {
+    target: 'node',
     entry : {
         ManagedStateMachine: './src/js/comparison/ManagedStateMachine.js',
         RegularStateMachine: './src/js/comparison/RegularStateMachine.js',

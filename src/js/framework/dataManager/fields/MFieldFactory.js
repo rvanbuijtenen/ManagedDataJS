@@ -22,40 +22,40 @@ import {ArrayHandler, ArrayMField, EnumMField, OneOfMField} from "./MFieldMulti"
  *
  * @return {MField} An MField that ensures its value property matches the given schema
  */
-export function MFieldFactory(schema, superKlass) {
+export function MFieldFactory(schema, superKlass, propKey) {
 	if(schema.hasOwnProperty("enum")) {
-		return new EnumMField(schema)
+		return new EnumMField(schema, propKey)
 	}
 
 	if(schema.hasOwnProperty("oneOf")) {
 		console.log("building oneOf field")
-		return new OneOfMField(schema, superKlass)
+		return new OneOfMField(schema, propKey, superKlass)
 	}
 
 	if(schema.hasOwnProperty("type")) {
 		switch(schema.type) {
 			case "integer": {
-				return new IntegerMField(schema)
+				return new IntegerMField(schema, propKey)
 				break
 			}
 			case "number": {
-				return new NumberMField(schema)
+				return new NumberMField(schema, propKey)
 				break
 			}
 			case "string": {
-				return new StringMField(schema)
+				return new StringMField(schema, propKey)
 				break
 			}
 			case "boolean": {
-				return new BooleanMField(schema)
+				return new BooleanMField(schema, propKey)
 				break 
 			}
 			case "object": {
-				return new MObjectMField(schema, superKlass)
+				return new MObjectMField(schema, propKey, superKlass)
 				break
 			}
 			case "array": {
-				let array = new Proxy(new ArrayMField(schema, superKlass), new ArrayHandler())
+				let array = new Proxy(new ArrayMField(schema, propKey, superKlass), new ArrayHandler())
 				array.setThisProxy(array)
 				return array
 				break

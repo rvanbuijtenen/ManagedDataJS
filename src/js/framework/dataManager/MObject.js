@@ -184,17 +184,32 @@ export class MObject {
 	}
 
 	/**
-	 * @return {String} A string representing the managed object
+	 * @return {String} Default short string representing the managed object
 	 */
 	toString() {
-		return "[managedObject "+this.schema.getKlass()+"]"
+		return "<ManagedObject "+this.schema.getKlass()+">"
 	}
 
 	/**
-	 * @return {String} A string representing the managed object
+	 * @return {String} A string representation of the object with shallow copy of values
+	 */
+	valuesToString() {
+		let o = {}
+		for(field in this.data) {
+			o[field] = String(this.data)
+		}
+		return `<ManagedObject ${this.schema.getKlass()}: ${JSON.stringify(o)}>`
+	}
+
+	/**
+	 * @return {String} A shallow JSON String representation of the object
 	 */
 	toJSON() {
-		return this.toString()
+		o = {}
+		for(field in this.data) {
+			o[field] = String(this.data)
+		}
+		return JSON.stringify(o)
 	}
 
 	/**
