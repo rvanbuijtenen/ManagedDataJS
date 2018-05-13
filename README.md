@@ -31,7 +31,7 @@ npm -v
 3.10.10
 ```
 
-#### clone repository, install dependencies, compile js and run server:
+#### clone repository, install dependencies, compile js and run server for a (browser) example:
 
 ```shell
 git clone https://github.com/rvanbuijtenen/ManagedDataJS.git
@@ -41,11 +41,13 @@ npm run webpack
 npm run start
 ```
 
-#### or run one of the node compatible StateMachine examples:
+#### or run the node example that compares two stateMachine implementations:
+
+the log-level option can be one of [debug, info, exception, none].
+
+the --long option can be given to run a long sequence of events for more accurate timing results.
 ```shell
-npm run webpack
-node build/ManagedStateMachine.bundle.js
-node build/RegularStatemachine.bundle.js
+npm run statemachine -- --log-level=info
 ```
 
 #### Open the browser at localhost:8080 to view examples and documentation

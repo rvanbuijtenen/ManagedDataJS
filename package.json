@@ -9,6 +9,7 @@
     "start": "./node_modules/.bin/http-server -p 8080",
     "test": "echo \"Error: no test specified\" && exit 1",
     "webpack": "./node_modules/.bin/webpack",
+    "statemachine": "./node_modules/.bin/webpack && node build/stateMachine.bundle.js",
     "doc": "./node_modules/.bin/esdoc"
   },
   "repository": {

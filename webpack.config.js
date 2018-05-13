@@ -4,8 +4,7 @@
  module.exports = {
     target: 'node',
     entry : {
-        ManagedStateMachine: './src/js/comparison/ManagedStateMachine.js',
-        RegularStateMachine: './src/js/comparison/RegularStateMachine.js',
+        stateMachine: './src/js/comparison/index.js',
         main: './src/js/main.js'
     },
     output: {
