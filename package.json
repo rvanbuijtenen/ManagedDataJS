@@ -35,6 +35,7 @@
     "esdoc-standard-plugin": "^1.0.0",
     "esdoc-undocumented-identifier-plugin": "^1.0.0",
     "http-server": "^0.10.0",
+    "sloc": "^0.2.0",
     "webpack": "^2.5.0"
   }
 }
