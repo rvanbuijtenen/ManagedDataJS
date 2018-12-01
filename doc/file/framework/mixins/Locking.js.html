@@ -34,6 +34,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObjectHandler.html">MObjectHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~Schema.html">Schema</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-mix">mix</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSchema">parseSchema</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#datamanager-fields">dataManager/fields</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html">ArrayHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html">ArrayMField</a></span></span></li>
@@ -46,9 +47,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html">NumberMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~StringMField.html">StringMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-MFieldFactory">MFieldFactory</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-ApiSynchronizer">ApiSynchronizer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Logging">Logging</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Persistence">Persistence</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Serializer">Serializer</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -65,6 +68,7 @@ export let Locking = (superclass) =&gt; class extends superclass {
 	 */
 	constructor(schema, ...otherArgs) {
 		super(schema, ...otherArgs);
+		this.arrayMethodsWithSideEffects = [&quot;push&quot;, &quot;splice&quot;, &quot;pop&quot;, &quot;shift&quot;, &quot;unshift&quot;]
 		/**
 		 * @type{Boolean} Indicates whether the object is locked. When locked === true the object cannot be modified
 		 */
@@ -114,29 +118,18 @@ export let Locking = (superclass) =&gt; class extends superclass {
 		this.locked = false;
 	}
 
-	/**
-	 * @param {String} method - A string representing the name of the method that was called on the managedArray
-	 * @param {Array} args - An array containing the arguments that will be passed to the method
-	 * @param {ManagedArray} array - The array that the method was invoked on
-	 *
-	 * @return {Array} - An array containing the args that were passed to this function. If the args are modified,
-	 * 					 the invoked array method will execute &apos;method&apos; with the modified arguments instead.
-	 */
-	notifyArray(method, args, array) {
-		args = super.notifyArray(method, args, array)
-		let methodsWithSideEffects = [&quot;push&quot;, &quot;splice&quot;, &quot;pop&quot;, &quot;shift&quot;, &quot;unshift&quot;]
-		
-		if(this.isLocked() &amp;&amp; methodsWithSideEffects.includes(method)) {
-			throw TypeError(&quot;object is locked&quot;)
+	beforeArray(method, arrayName, argsArray, targetProxy) {
+		if(this.locked == true &amp;&amp; this.arrayMethodsWithSideEffects.includes(method)) {
+			throw new TypeError(&quot;object is locked&quot;);
 		}
-		return args
+		return super.beforeArray(method, arrayName, argsArray, targetProxy)
 	}
 }</code></pre>
 
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.0.1)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
 </footer>
 
 <script src="script/search_index.js"></script>

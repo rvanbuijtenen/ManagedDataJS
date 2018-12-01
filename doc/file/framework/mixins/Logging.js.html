@@ -34,6 +34,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObjectHandler.html">MObjectHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~Schema.html">Schema</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-mix">mix</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSchema">parseSchema</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#datamanager-fields">dataManager/fields</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html">ArrayHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html">ArrayMField</a></span></span></li>
@@ -46,9 +47,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html">NumberMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~StringMField.html">StringMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-MFieldFactory">MFieldFactory</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-ApiSynchronizer">ApiSynchronizer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Logging">Logging</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Persistence">Persistence</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Serializer">Serializer</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -78,9 +81,10 @@ export let Logging = (superclass) =&gt; class extends superclass {
 		let result;
 		try {
 			result = super.set(propKey, value);
-			console.log(&quot;set property &quot;+propKey+&quot; of klass &quot;+this.schema.getKlass()+&quot; to value: &quot;+ JSON.stringify(value));
+			console.log(&quot;set property &quot;+propKey+&quot; of klass &quot;+this.schema.getKlass()+&quot; to value: &quot;+ value);
 		} catch (err) {
-			console.log(&quot;An error occured when setting property &quot;+propKey+&quot; of klass &quot;+this.schema.getKlass()+&quot; to value: &quot; + JSON.stringify(value));
+			console.log(&quot;An error occured when setting property &quot;+propKey+&quot; of klass &quot;+this.schema.getKlass()+&quot; to value: &quot; + value);
+			console.log(`${err}`)
 			throw err
 		}
 		return result;
@@ -98,9 +102,9 @@ export let Logging = (superclass) =&gt; class extends superclass {
 		let result;
 		try {
 			result = super.get(propKey);
-			console.log(&quot;getting property &quot;+propKey+&quot; of klass &quot;+this.schema.getKlass());
+			//console.log(&quot;getting property &quot;+propKey+&quot; of klass &quot;+this.schema.getKlass());
 		} catch (err) {
-			console.log(&quot;An error occured when getting property &quot;+propKey+&quot; of klass &quot;+this.schema.getKlass())
+			//console.log(&quot;An error occured when getting property &quot;+propKey+&quot; of klass &quot;+this.schema.getKlass())
 			throw err
 		}
 		return result;
@@ -118,7 +122,7 @@ export let Logging = (superclass) =&gt; class extends superclass {
 	 */
 	notifyArray(method, args, array) {
 		args= super.notifyArray(method, args, array)
-		console.log(&quot;invoked &quot;+method+&quot; on ManagedArray in object &quot;+this.schema.getKlass()+&quot; with arguments &quot;+args.toString())
+		//console.log(&quot;invoked &quot;+method+&quot; on ManagedArray in object &quot;+this.schema.getKlass()+&quot; with arguments &quot;+args.toString())
 		return args
 	}
 }</code></pre>
@@ -126,7 +130,7 @@ export let Logging = (superclass) =&gt; class extends superclass {
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.0.1)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
 </footer>
 
 <script src="script/search_index.js"></script>

@@ -484,6 +484,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -503,7 +504,6 @@
                           "name": "setFactory",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -694,6 +694,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -713,7 +714,6 @@
                           "name": "setId",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -1023,6 +1023,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -1042,7 +1043,6 @@
                           "name": "set",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -1335,6 +1335,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -1354,7 +1355,6 @@
                           "name": "getId",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -1779,6 +1779,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -1798,7 +1799,6 @@
                           "name": "serialize",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -2332,6 +2332,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -2351,7 +2352,6 @@
                           "name": "serializeProp",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -3047,6 +3047,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -3066,7 +3067,6 @@
                           "name": "serializeArray",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -3971,6 +3971,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -3990,7 +3991,6 @@
                           "name": "serializeObject",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -4319,6 +4319,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -4338,7 +4339,6 @@
                           "name": "save",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -6196,6 +6196,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -6215,7 +6216,6 @@
                           "name": "saveProp",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -7101,6 +7101,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -7120,7 +7121,6 @@
                           "name": "saveArray",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -7832,6 +7832,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -7851,7 +7852,6 @@
                           "name": "load",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -9155,6 +9155,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -9174,7 +9175,6 @@
                           "name": "loadProp",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -9767,6 +9767,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -9786,7 +9787,6 @@
                           "name": "loadArray",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -10779,6 +10779,7 @@
                             "column": 2
                           }
                         },
+                        "static": false,
                         "computed": false,
                         "key": {
                           "type": "Identifier",
@@ -10798,7 +10799,6 @@
                           "name": "loadObject",
                           "leadingComments": null
                         },
-                        "static": false,
                         "kind": "method",
                         "id": null,
                         "generator": false,
@@ -12462,7 +12462,7 @@
         "label": "import",
         "keyword": "import",
         "beforeExpr": false,
-        "startsExpr": false,
+        "startsExpr": true,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,
@@ -12645,7 +12645,7 @@
         "label": "import",
         "keyword": "import",
         "beforeExpr": false,
-        "startsExpr": false,
+        "startsExpr": true,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,
@@ -12828,7 +12828,7 @@
         "label": "import",
         "keyword": "import",
         "beforeExpr": false,
-        "startsExpr": false,
+        "startsExpr": true,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,

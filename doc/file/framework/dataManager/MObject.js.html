@@ -34,6 +34,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObjectHandler.html">MObjectHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~Schema.html">Schema</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-mix">mix</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSchema">parseSchema</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#datamanager-fields">dataManager/fields</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html">ArrayHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html">ArrayMField</a></span></span></li>
@@ -46,9 +47,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html">NumberMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~StringMField.html">StringMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-MFieldFactory">MFieldFactory</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-ApiSynchronizer">ApiSynchronizer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Logging">Logging</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Persistence">Persistence</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Serializer">Serializer</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -72,6 +75,9 @@ export class MObjectHandler {
 	 * @return {*} Either the value of the requested property or a function that executes the requested property
 	 */
 	get(target, propKey, receiver) {
+		if(typeof(propKey) == &apos;symbol&apos; || propKey == &apos;inspect&apos;) {
+			return target[propKey]
+		}
 		var propValue = target[propKey];
 		if (typeof propValue != &quot;function&quot;){		
 			/* if the property is not a function: return MObject.__get(propKey) */
@@ -144,7 +150,8 @@ export class MObject {
 			/* Initialize an empty MField for each field defined in schema */
 			this.data[propKey] = MFieldFactory(
 									this.schema.getFieldSchema(propKey),
-									this.proxy
+									this.proxy,
+									propKey
 								);
 		}
 
@@ -226,26 +233,47 @@ export class MObject {
 	 * @return {Array} The arguments given to notifyArray. Mixins can override this method 
 	 * to intercept and possibly modify the arguments.
 	 */
-	notifyArray(method, args, array) {
+	beforeArray(method, property, args, array) {
 		return args
 	}
 
+	afterArray(method, property, array) {}
+
+	arrayError(method, property, error) {
+		throw(error)
+	}
+
 	/**
-	 * @return {String} A string representing the managed object
+	 * @return {String} Default short string representing the managed object
 	 */
 	toString() {
-		return &quot;[managedObject &quot;+this.schema.getKlass()+&quot;]&quot;
+		return `&lt;Managed Object: ${this.getKlass()}&gt;`
+	}
+
+	/**
+	 * @return {String} A string representation of the object with shallow copy of values
+	 */
+	valuesToString() {
+		return `&lt;ManagedObject ${this.getKlass()}: ${this.toJSON()}&gt;`
+	}
+
+	/**
+	 * @return {String} A shallow JSON String representation of the object
+	 */
+	toJSON() {
+		let o = {}
+		for(let field in this.data) {
+			if(this.data[field].getType() == &apos;array&apos;) {
+				o[field] = `&lt;ManagedArray [${this.data[field].length}]&gt;`
+			} else {
+				o[field] = String(this.data[field].getValue())
+			}
+		}
+		return JSON.stringify(o)
 	}
 
 	/**
 	 * @return {String} A string representing the managed object
-	 */
-	toJSON() {
-		return this.toString()
-	}
-
-	/**
-	 * @return {String} A strinng representing the managed object
 	 */
 	[Symbol.toPrimitive]() {
 		return this.toString()
@@ -266,7 +294,7 @@ export class MObject {
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.0.1)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
 </footer>
 
 <script src="script/search_index.js"></script>

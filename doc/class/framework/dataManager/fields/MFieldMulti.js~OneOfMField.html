@@ -34,6 +34,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObjectHandler.html">MObjectHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~Schema.html">Schema</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-mix">mix</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSchema">parseSchema</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#datamanager-fields">dataManager/fields</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html">ArrayHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html">ArrayMField</a></span></span></li>
@@ -46,21 +47,23 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html">NumberMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~StringMField.html">StringMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-MFieldFactory">MFieldFactory</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-ApiSynchronizer">ApiSynchronizer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Logging">Logging</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Persistence">Persistence</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Serializer">Serializer</a></span></span></li>
 </ul>
 </div>
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {OneOfMField} from &apos;<span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber572">ManagedDataJS/framework/dataManager/fields/MFieldMulti.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {OneOfMField} from &apos;<span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber584">ManagedDataJS/framework/dataManager/fields/MFieldMulti.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber572">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber584">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -136,6 +139,35 @@ are stored within an MObjectField.  </p>
   <tbody>
   
   <tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html#instance-member-key">key</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The key that is used to access this oneOf mfield</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
     <td>
       <span class="access" data-ice="access">public</span>
       
@@ -568,7 +600,7 @@ are stored within an MObjectField.  </p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber573">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber585">source</a></span></span>
     </span>
   </h3>
 
@@ -603,6 +635,50 @@ are stored within an MObjectField.  </p>
 <div data-ice="memberDetails"><h2 data-ice="title">Public Members</h2>
 
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-key">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">key</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber596">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>The key that is used to access this oneOf mfield</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-member-superKlass">
     <span class="access" data-ice="access">public</span>
     
@@ -614,7 +690,7 @@ are stored within an MObjectField.  </p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber579">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber591">source</a></span></span>
     </span>
   </h3>
 
@@ -658,7 +734,7 @@ are stored within an MObjectField.  </p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber618">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber635">source</a></span></span>
     </span>
   </h3>
 
@@ -705,7 +781,7 @@ are stored within an MObjectField.  </p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber625">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber642">source</a></span></span>
     </span>
   </h3>
 
@@ -761,7 +837,7 @@ are stored within an MObjectField.  </p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber612">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber629">source</a></span></span>
     </span>
   </h3>
 
@@ -823,7 +899,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber587">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber604">source</a></span></span>
     </span>
   </h3>
 
@@ -888,7 +964,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.0.1)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
 </footer>
 
 <script src="script/search_index.js"></script>

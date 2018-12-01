@@ -1,29 +1,29 @@
 {
   "type": "File",
   "start": 0,
-  "end": 215,
+  "end": 334,
   "loc": {
     "start": {
       "line": 1,
       "column": 0
     },
     "end": {
-      "line": 8,
-      "column": 38
+      "line": 10,
+      "column": 67
     }
   },
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 215,
+    "end": 334,
     "loc": {
       "start": {
         "line": 1,
         "column": 0
       },
       "end": {
-        "line": 8,
-        "column": 38
+        "line": 10,
+        "column": 67
       }
     },
     "sourceType": "module",
@@ -283,7 +283,179 @@
             "rawValue": "./Persistence",
             "raw": "\"./Persistence\""
           },
-          "value": "./Persistence",
+          "value": "./Persistence"
+        }
+      },
+      {
+        "type": "ImportDeclaration",
+        "start": 110,
+        "end": 149,
+        "loc": {
+          "start": {
+            "line": 4,
+            "column": 0
+          },
+          "end": {
+            "line": 4,
+            "column": 39
+          }
+        },
+        "specifiers": [
+          {
+            "type": "ImportSpecifier",
+            "start": 118,
+            "end": 128,
+            "loc": {
+              "start": {
+                "line": 4,
+                "column": 8
+              },
+              "end": {
+                "line": 4,
+                "column": 18
+              }
+            },
+            "imported": {
+              "type": "Identifier",
+              "start": 118,
+              "end": 128,
+              "loc": {
+                "start": {
+                  "line": 4,
+                  "column": 8
+                },
+                "end": {
+                  "line": 4,
+                  "column": 18
+                },
+                "identifierName": "Serializer"
+              },
+              "name": "Serializer"
+            },
+            "local": {
+              "type": "Identifier",
+              "start": 118,
+              "end": 128,
+              "loc": {
+                "start": {
+                  "line": 4,
+                  "column": 8
+                },
+                "end": {
+                  "line": 4,
+                  "column": 18
+                },
+                "identifierName": "Serializer"
+              },
+              "name": "Serializer"
+            }
+          }
+        ],
+        "source": {
+          "type": "StringLiteral",
+          "start": 135,
+          "end": 149,
+          "loc": {
+            "start": {
+              "line": 4,
+              "column": 25
+            },
+            "end": {
+              "line": 4,
+              "column": 39
+            }
+          },
+          "extra": {
+            "rawValue": "./Serializer",
+            "raw": "\"./Serializer\""
+          },
+          "value": "./Serializer"
+        }
+      },
+      {
+        "type": "ImportDeclaration",
+        "start": 150,
+        "end": 199,
+        "loc": {
+          "start": {
+            "line": 5,
+            "column": 0
+          },
+          "end": {
+            "line": 5,
+            "column": 49
+          }
+        },
+        "specifiers": [
+          {
+            "type": "ImportSpecifier",
+            "start": 158,
+            "end": 173,
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 8
+              },
+              "end": {
+                "line": 5,
+                "column": 23
+              }
+            },
+            "imported": {
+              "type": "Identifier",
+              "start": 158,
+              "end": 173,
+              "loc": {
+                "start": {
+                  "line": 5,
+                  "column": 8
+                },
+                "end": {
+                  "line": 5,
+                  "column": 23
+                },
+                "identifierName": "ApiSynchronizer"
+              },
+              "name": "ApiSynchronizer"
+            },
+            "local": {
+              "type": "Identifier",
+              "start": 158,
+              "end": 173,
+              "loc": {
+                "start": {
+                  "line": 5,
+                  "column": 8
+                },
+                "end": {
+                  "line": 5,
+                  "column": 23
+                },
+                "identifierName": "ApiSynchronizer"
+              },
+              "name": "ApiSynchronizer"
+            }
+          }
+        ],
+        "source": {
+          "type": "StringLiteral",
+          "start": 180,
+          "end": 199,
+          "loc": {
+            "start": {
+              "line": 5,
+              "column": 30
+            },
+            "end": {
+              "line": 5,
+              "column": 49
+            }
+          },
+          "extra": {
+            "rawValue": "./ApiSynchronizer",
+            "raw": "\"./ApiSynchronizer\""
+          },
+          "value": "./ApiSynchronizer",
           "leadingComments": null,
           "trailingComments": null
         },
@@ -291,15 +463,15 @@
           {
             "type": "CommentBlock",
             "value": "*\n * Exports Locking, Logging and Persistence as one module\n ",
-            "start": 111,
-            "end": 176,
+            "start": 201,
+            "end": 266,
             "loc": {
               "start": {
-                "line": 5,
+                "line": 7,
                 "column": 0
               },
               "end": {
-                "line": 7,
+                "line": 9,
                 "column": 3
               }
             }
@@ -308,45 +480,45 @@
       },
       {
         "type": "ExportNamedDeclaration",
-        "start": 177,
-        "end": 215,
+        "start": 267,
+        "end": 334,
         "loc": {
           "start": {
-            "line": 8,
+            "line": 10,
             "column": 0
           },
           "end": {
-            "line": 8,
-            "column": 38
+            "line": 10,
+            "column": 67
           }
         },
         "declaration": null,
         "specifiers": [
           {
             "type": "ExportSpecifier",
-            "start": 185,
-            "end": 192,
+            "start": 275,
+            "end": 282,
             "loc": {
               "start": {
-                "line": 8,
+                "line": 10,
                 "column": 8
               },
               "end": {
-                "line": 8,
+                "line": 10,
                 "column": 15
               }
             },
             "local": {
               "type": "Identifier",
-              "start": 185,
-              "end": 192,
+              "start": 275,
+              "end": 282,
               "loc": {
                 "start": {
-                  "line": 8,
+                  "line": 10,
                   "column": 8
                 },
                 "end": {
-                  "line": 8,
+                  "line": 10,
                   "column": 15
                 },
                 "identifierName": "Locking"
@@ -356,15 +528,15 @@
             },
             "exported": {
               "type": "Identifier",
-              "start": 185,
-              "end": 192,
+              "start": 275,
+              "end": 282,
               "loc": {
                 "start": {
-                  "line": 8,
+                  "line": 10,
                   "column": 8
                 },
                 "end": {
-                  "line": 8,
+                  "line": 10,
                   "column": 15
                 },
                 "identifierName": "Locking"
@@ -375,29 +547,29 @@
           },
           {
             "type": "ExportSpecifier",
-            "start": 194,
-            "end": 201,
+            "start": 284,
+            "end": 291,
             "loc": {
               "start": {
-                "line": 8,
+                "line": 10,
                 "column": 17
               },
               "end": {
-                "line": 8,
+                "line": 10,
                 "column": 24
               }
             },
             "local": {
               "type": "Identifier",
-              "start": 194,
-              "end": 201,
+              "start": 284,
+              "end": 291,
               "loc": {
                 "start": {
-                  "line": 8,
+                  "line": 10,
                   "column": 17
                 },
                 "end": {
-                  "line": 8,
+                  "line": 10,
                   "column": 24
                 },
                 "identifierName": "Logging"
@@ -406,15 +578,15 @@
             },
             "exported": {
               "type": "Identifier",
-              "start": 194,
-              "end": 201,
+              "start": 284,
+              "end": 291,
               "loc": {
                 "start": {
-                  "line": 8,
+                  "line": 10,
                   "column": 17
                 },
                 "end": {
-                  "line": 8,
+                  "line": 10,
                   "column": 24
                 },
                 "identifierName": "Logging"
@@ -424,29 +596,29 @@
           },
           {
             "type": "ExportSpecifier",
-            "start": 203,
-            "end": 214,
+            "start": 293,
+            "end": 304,
             "loc": {
               "start": {
-                "line": 8,
+                "line": 10,
                 "column": 26
               },
               "end": {
-                "line": 8,
+                "line": 10,
                 "column": 37
               }
             },
             "local": {
               "type": "Identifier",
-              "start": 203,
-              "end": 214,
+              "start": 293,
+              "end": 304,
               "loc": {
                 "start": {
-                  "line": 8,
+                  "line": 10,
                   "column": 26
                 },
                 "end": {
-                  "line": 8,
+                  "line": 10,
                   "column": 37
                 },
                 "identifierName": "Persistence"
@@ -455,20 +627,118 @@
             },
             "exported": {
               "type": "Identifier",
-              "start": 203,
-              "end": 214,
+              "start": 293,
+              "end": 304,
               "loc": {
                 "start": {
-                  "line": 8,
+                  "line": 10,
                   "column": 26
                 },
                 "end": {
-                  "line": 8,
+                  "line": 10,
                   "column": 37
                 },
                 "identifierName": "Persistence"
               },
               "name": "Persistence"
+            }
+          },
+          {
+            "type": "ExportSpecifier",
+            "start": 306,
+            "end": 316,
+            "loc": {
+              "start": {
+                "line": 10,
+                "column": 39
+              },
+              "end": {
+                "line": 10,
+                "column": 49
+              }
+            },
+            "local": {
+              "type": "Identifier",
+              "start": 306,
+              "end": 316,
+              "loc": {
+                "start": {
+                  "line": 10,
+                  "column": 39
+                },
+                "end": {
+                  "line": 10,
+                  "column": 49
+                },
+                "identifierName": "Serializer"
+              },
+              "name": "Serializer"
+            },
+            "exported": {
+              "type": "Identifier",
+              "start": 306,
+              "end": 316,
+              "loc": {
+                "start": {
+                  "line": 10,
+                  "column": 39
+                },
+                "end": {
+                  "line": 10,
+                  "column": 49
+                },
+                "identifierName": "Serializer"
+              },
+              "name": "Serializer"
+            }
+          },
+          {
+            "type": "ExportSpecifier",
+            "start": 318,
+            "end": 333,
+            "loc": {
+              "start": {
+                "line": 10,
+                "column": 51
+              },
+              "end": {
+                "line": 10,
+                "column": 66
+              }
+            },
+            "local": {
+              "type": "Identifier",
+              "start": 318,
+              "end": 333,
+              "loc": {
+                "start": {
+                  "line": 10,
+                  "column": 51
+                },
+                "end": {
+                  "line": 10,
+                  "column": 66
+                },
+                "identifierName": "ApiSynchronizer"
+              },
+              "name": "ApiSynchronizer"
+            },
+            "exported": {
+              "type": "Identifier",
+              "start": 318,
+              "end": 333,
+              "loc": {
+                "start": {
+                  "line": 10,
+                  "column": 51
+                },
+                "end": {
+                  "line": 10,
+                  "column": 66
+                },
+                "identifierName": "ApiSynchronizer"
+              },
+              "name": "ApiSynchronizer"
             }
           }
         ],
@@ -477,15 +747,15 @@
           {
             "type": "CommentBlock",
             "value": "*\n * Exports Locking, Logging and Persistence as one module\n ",
-            "start": 111,
-            "end": 176,
+            "start": 201,
+            "end": 266,
             "loc": {
               "start": {
-                "line": 5,
+                "line": 7,
                 "column": 0
               },
               "end": {
-                "line": 7,
+                "line": 9,
                 "column": 3
               }
             }
@@ -499,15 +769,15 @@
     {
       "type": "CommentBlock",
       "value": "*\n * Exports Locking, Logging and Persistence as one module\n ",
-      "start": 111,
-      "end": 176,
+      "start": 201,
+      "end": 266,
       "loc": {
         "start": {
-          "line": 5,
+          "line": 7,
           "column": 0
         },
         "end": {
-          "line": 7,
+          "line": 9,
           "column": 3
         }
       }
@@ -519,7 +789,7 @@
         "label": "import",
         "keyword": "import",
         "beforeExpr": false,
-        "startsExpr": false,
+        "startsExpr": true,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,
@@ -676,7 +946,7 @@
         "label": "import",
         "keyword": "import",
         "beforeExpr": false,
-        "startsExpr": false,
+        "startsExpr": true,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,
@@ -833,7 +1103,7 @@
         "label": "import",
         "keyword": "import",
         "beforeExpr": false,
-        "startsExpr": false,
+        "startsExpr": true,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,
@@ -986,17 +1256,331 @@
       }
     },
     {
-      "type": "CommentBlock",
-      "value": "*\n * Exports Locking, Logging and Persistence as one module\n ",
-      "start": 111,
-      "end": 176,
+      "type": {
+        "label": "import",
+        "keyword": "import",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "value": "import",
+      "start": 110,
+      "end": 116,
+      "loc": {
+        "start": {
+          "line": 4,
+          "column": 0
+        },
+        "end": {
+          "line": 4,
+          "column": 6
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "{",
+        "beforeExpr": true,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 117,
+      "end": 118,
+      "loc": {
+        "start": {
+          "line": 4,
+          "column": 7
+        },
+        "end": {
+          "line": 4,
+          "column": 8
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "name",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "value": "Serializer",
+      "start": 118,
+      "end": 128,
+      "loc": {
+        "start": {
+          "line": 4,
+          "column": 8
+        },
+        "end": {
+          "line": 4,
+          "column": 18
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "}",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 128,
+      "end": 129,
+      "loc": {
+        "start": {
+          "line": 4,
+          "column": 18
+        },
+        "end": {
+          "line": 4,
+          "column": 19
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "name",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "value": "from",
+      "start": 130,
+      "end": 134,
+      "loc": {
+        "start": {
+          "line": 4,
+          "column": 20
+        },
+        "end": {
+          "line": 4,
+          "column": 24
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "string",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "value": "./Serializer",
+      "start": 135,
+      "end": 149,
+      "loc": {
+        "start": {
+          "line": 4,
+          "column": 25
+        },
+        "end": {
+          "line": 4,
+          "column": 39
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "import",
+        "keyword": "import",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "value": "import",
+      "start": 150,
+      "end": 156,
       "loc": {
         "start": {
           "line": 5,
           "column": 0
         },
         "end": {
+          "line": 5,
+          "column": 6
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "{",
+        "beforeExpr": true,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 157,
+      "end": 158,
+      "loc": {
+        "start": {
+          "line": 5,
+          "column": 7
+        },
+        "end": {
+          "line": 5,
+          "column": 8
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "name",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "value": "ApiSynchronizer",
+      "start": 158,
+      "end": 173,
+      "loc": {
+        "start": {
+          "line": 5,
+          "column": 8
+        },
+        "end": {
+          "line": 5,
+          "column": 23
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "}",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 173,
+      "end": 174,
+      "loc": {
+        "start": {
+          "line": 5,
+          "column": 23
+        },
+        "end": {
+          "line": 5,
+          "column": 24
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "name",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "value": "from",
+      "start": 175,
+      "end": 179,
+      "loc": {
+        "start": {
+          "line": 5,
+          "column": 25
+        },
+        "end": {
+          "line": 5,
+          "column": 29
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "string",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "value": "./ApiSynchronizer",
+      "start": 180,
+      "end": 199,
+      "loc": {
+        "start": {
+          "line": 5,
+          "column": 30
+        },
+        "end": {
+          "line": 5,
+          "column": 49
+        }
+      }
+    },
+    {
+      "type": "CommentBlock",
+      "value": "*\n * Exports Locking, Logging and Persistence as one module\n ",
+      "start": 201,
+      "end": 266,
+      "loc": {
+        "start": {
           "line": 7,
+          "column": 0
+        },
+        "end": {
+          "line": 9,
           "column": 3
         }
       }
@@ -1016,15 +1600,15 @@
         "updateContext": null
       },
       "value": "export",
-      "start": 177,
-      "end": 183,
+      "start": 267,
+      "end": 273,
       "loc": {
         "start": {
-          "line": 8,
+          "line": 10,
           "column": 0
         },
         "end": {
-          "line": 8,
+          "line": 10,
           "column": 6
         }
       }
@@ -1041,15 +1625,15 @@
         "postfix": false,
         "binop": null
       },
-      "start": 184,
-      "end": 185,
+      "start": 274,
+      "end": 275,
       "loc": {
         "start": {
-          "line": 8,
+          "line": 10,
           "column": 7
         },
         "end": {
-          "line": 8,
+          "line": 10,
           "column": 8
         }
       }
@@ -1067,15 +1651,15 @@
         "binop": null
       },
       "value": "Locking",
-      "start": 185,
-      "end": 192,
+      "start": 275,
+      "end": 282,
       "loc": {
         "start": {
-          "line": 8,
+          "line": 10,
           "column": 8
         },
         "end": {
-          "line": 8,
+          "line": 10,
           "column": 15
         }
       }
@@ -1093,15 +1677,15 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 192,
-      "end": 193,
+      "start": 282,
+      "end": 283,
       "loc": {
         "start": {
-          "line": 8,
+          "line": 10,
           "column": 15
         },
         "end": {
-          "line": 8,
+          "line": 10,
           "column": 16
         }
       }
@@ -1119,15 +1703,15 @@
         "binop": null
       },
       "value": "Logging",
-      "start": 194,
-      "end": 201,
+      "start": 284,
+      "end": 291,
       "loc": {
         "start": {
-          "line": 8,
+          "line": 10,
           "column": 17
         },
         "end": {
-          "line": 8,
+          "line": 10,
           "column": 24
         }
       }
@@ -1145,15 +1729,15 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 201,
-      "end": 202,
+      "start": 291,
+      "end": 292,
       "loc": {
         "start": {
-          "line": 8,
+          "line": 10,
           "column": 24
         },
         "end": {
-          "line": 8,
+          "line": 10,
           "column": 25
         }
       }
@@ -1171,16 +1755,120 @@
         "binop": null
       },
       "value": "Persistence",
-      "start": 203,
-      "end": 214,
+      "start": 293,
+      "end": 304,
       "loc": {
         "start": {
-          "line": 8,
+          "line": 10,
           "column": 26
         },
         "end": {
-          "line": 8,
+          "line": 10,
           "column": 37
+        }
+      }
+    },
+    {
+      "type": {
+        "label": ",",
+        "beforeExpr": true,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "start": 304,
+      "end": 305,
+      "loc": {
+        "start": {
+          "line": 10,
+          "column": 37
+        },
+        "end": {
+          "line": 10,
+          "column": 38
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "name",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "value": "Serializer",
+      "start": 306,
+      "end": 316,
+      "loc": {
+        "start": {
+          "line": 10,
+          "column": 39
+        },
+        "end": {
+          "line": 10,
+          "column": 49
+        }
+      }
+    },
+    {
+      "type": {
+        "label": ",",
+        "beforeExpr": true,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "start": 316,
+      "end": 317,
+      "loc": {
+        "start": {
+          "line": 10,
+          "column": 49
+        },
+        "end": {
+          "line": 10,
+          "column": 50
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "name",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "value": "ApiSynchronizer",
+      "start": 318,
+      "end": 333,
+      "loc": {
+        "start": {
+          "line": 10,
+          "column": 51
+        },
+        "end": {
+          "line": 10,
+          "column": 66
         }
       }
     },
@@ -1196,16 +1884,16 @@
         "postfix": false,
         "binop": null
       },
-      "start": 214,
-      "end": 215,
+      "start": 333,
+      "end": 334,
       "loc": {
         "start": {
-          "line": 8,
-          "column": 37
+          "line": 10,
+          "column": 66
         },
         "end": {
-          "line": 8,
-          "column": 38
+          "line": 10,
+          "column": 67
         }
       }
     },
@@ -1222,16 +1910,16 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 215,
-      "end": 215,
+      "start": 334,
+      "end": 334,
       "loc": {
         "start": {
-          "line": 8,
-          "column": 38
+          "line": 10,
+          "column": 67
         },
         "end": {
-          "line": 8,
-          "column": 38
+          "line": 10,
+          "column": 67
         }
       }
     }

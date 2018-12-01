@@ -34,6 +34,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObjectHandler.html">MObjectHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~Schema.html">Schema</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-mix">mix</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSchema">parseSchema</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#datamanager-fields">dataManager/fields</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html">ArrayHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html">ArrayMField</a></span></span></li>
@@ -46,21 +47,23 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html">NumberMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~StringMField.html">StringMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-MFieldFactory">MFieldFactory</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-ApiSynchronizer">ApiSynchronizer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Logging">Logging</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Persistence">Persistence</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Serializer">Serializer</a></span></span></li>
 </ul>
 </div>
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {ArrayMField} from &apos;<span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber57">ManagedDataJS/framework/dataManager/fields/MFieldMulti.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import {ArrayMField} from &apos;<span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber64">ManagedDataJS/framework/dataManager/fields/MFieldMulti.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber57">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber64">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -193,6 +196,35 @@ invoked on the MObject it belongs to.</p>
         
         <div data-ice="description"><p>If we have a list of items, this parameter keeps track of which item
 we need to use to validate the next element</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-key">key</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The key that is used to access this managed array from the MObject</p>
 </div>
       </div>
     </td>
@@ -1643,7 +1675,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber62">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber69">source</a></span></span>
     </span>
   </h3>
 
@@ -1713,7 +1745,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber87">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber94">source</a></span></span>
     </span>
   </h3>
 
@@ -1757,7 +1789,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber76">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber83">source</a></span></span>
     </span>
   </h3>
 
@@ -1766,6 +1798,50 @@ we need to use to validate the next element</p>
   
   <div data-ice="description"><p>If we have a list of items, this parameter keeps track of which item
 we need to use to validate the next element</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-key">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">key</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber99">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>The key that is used to access this managed array from the MObject</p>
 </div>
 
   
@@ -1802,7 +1878,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber82">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber89">source</a></span></span>
     </span>
   </h3>
 
@@ -1846,7 +1922,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber91">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber103">source</a></span></span>
     </span>
   </h3>
 
@@ -1889,7 +1965,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber69">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber76">source</a></span></span>
     </span>
   </h3>
 
@@ -1933,7 +2009,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber137">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber149">source</a></span></span>
     </span>
   </h3>
 
@@ -1980,7 +2056,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber422">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber434">source</a></span></span>
     </span>
   </h3>
 
@@ -2039,7 +2115,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber96">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber108">source</a></span></span>
     </span>
   </h3>
 
@@ -2099,7 +2175,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber109">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber121">source</a></span></span>
     </span>
   </h3>
 
@@ -2183,7 +2259,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber116">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber128">source</a></span></span>
     </span>
   </h3>
 
@@ -2239,7 +2315,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber123">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber135">source</a></span></span>
     </span>
   </h3>
 
@@ -2317,7 +2393,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber130">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber142">source</a></span></span>
     </span>
   </h3>
 
@@ -2401,7 +2477,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber145">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber157">source</a></span></span>
     </span>
   </h3>
 
@@ -2479,7 +2555,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber152">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber164">source</a></span></span>
     </span>
   </h3>
 
@@ -2557,7 +2633,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber159">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber171">source</a></span></span>
     </span>
   </h3>
 
@@ -2635,7 +2711,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber166">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber178">source</a></span></span>
     </span>
   </h3>
 
@@ -2701,7 +2777,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber490">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber502">source</a></span></span>
     </span>
   </h3>
 
@@ -2774,7 +2850,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber519">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber531">source</a></span></span>
     </span>
   </h3>
 
@@ -2830,7 +2906,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber508">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber520">source</a></span></span>
     </span>
   </h3>
 
@@ -2887,7 +2963,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber181">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber193">source</a></span></span>
     </span>
   </h3>
 
@@ -2966,7 +3042,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber188">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber200">source</a></span></span>
     </span>
   </h3>
 
@@ -3044,7 +3120,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber418">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber430">source</a></span></span>
     </span>
   </h3>
 
@@ -3100,7 +3176,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber199">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber211">source</a></span></span>
     </span>
   </h3>
 
@@ -3172,7 +3248,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber206">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber218">source</a></span></span>
     </span>
   </h3>
 
@@ -3228,7 +3304,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber213">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber225">source</a></span></span>
     </span>
   </h3>
 
@@ -3306,7 +3382,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber224">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber236">source</a></span></span>
     </span>
   </h3>
 
@@ -3384,7 +3460,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber232">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber244">source</a></span></span>
     </span>
   </h3>
 
@@ -3440,7 +3516,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber248">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber260">source</a></span></span>
     </span>
   </h3>
 
@@ -3500,7 +3576,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber277">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber289">source</a></span></span>
     </span>
   </h3>
 
@@ -3578,7 +3654,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber284">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber296">source</a></span></span>
     </span>
   </h3>
 
@@ -3656,7 +3732,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber426">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber438">source</a></span></span>
     </span>
   </h3>
 
@@ -3715,7 +3791,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber291">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber303">source</a></span></span>
     </span>
   </h3>
 
@@ -3771,7 +3847,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber90">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber102">source</a></span></span>
     </span>
   </h3>
 
@@ -3830,7 +3906,7 @@ we need to use to validate the next element</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber529">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber541">source</a></span></span>
     </span>
   </h3>
 
@@ -3892,7 +3968,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber299">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber311">source</a></span></span>
     </span>
   </h3>
 
@@ -3948,7 +4024,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber316">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber328">source</a></span></span>
     </span>
   </h3>
 
@@ -4026,7 +4102,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber323">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber335">source</a></span></span>
     </span>
   </h3>
 
@@ -4104,7 +4180,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber330">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber342">source</a></span></span>
     </span>
   </h3>
 
@@ -4164,7 +4240,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber344">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber356">source</a></span></span>
     </span>
   </h3>
 
@@ -4237,7 +4313,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber500">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber512">source</a></span></span>
     </span>
   </h3>
 
@@ -4293,7 +4369,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber389">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber401">source</a></span></span>
     </span>
   </h3>
 
@@ -4353,7 +4429,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber440">source</a></span></span>
+      <span data-ice="source"><span><a href="file/framework/dataManager/fields/MFieldMulti.js.html#lineNumber452">source</a></span></span>
     </span>
   </h3>
 
@@ -4419,7 +4495,7 @@ this.value to the field returned by the validate method, otherwise we throw the 
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.0.1)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
 </footer>
 
 <script src="script/search_index.js"></script>

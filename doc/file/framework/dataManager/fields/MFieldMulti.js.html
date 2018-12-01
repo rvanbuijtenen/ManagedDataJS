@@ -34,6 +34,7 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/MObject.js~MObjectHandler.html">MObjectHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~KlassSchema.html">KlassSchema</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/Schema.js~Schema.html">Schema</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-mix">mix</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSchema">parseSchema</a></span></span></li>
 <li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#datamanager-fields">dataManager/fields</a><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html">ArrayHandler</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html">ArrayMField</a></span></span></li>
@@ -46,9 +47,11 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~NumberMField.html">NumberMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/framework/dataManager/fields/MFieldSingle.js~StringMField.html">StringMField</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-MFieldFactory">MFieldFactory</a></span></span></li>
-<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
+<li data-ice="doc"><a data-ice="dirPath" class="nav-dir-path" href="identifiers.html#mixins">mixins</a><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-ApiSynchronizer">ApiSynchronizer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Locking">Locking</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Logging">Logging</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Persistence">Persistence</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-Serializer">Serializer</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -74,23 +77,30 @@ export class ArrayHandler {
 	 */
 	get(target, propKey, receiver) {
 		if(!(typeof(propKey)==&quot;symbol&quot;) &amp;&amp; !isNaN(propKey)) {
-			target.superKlass.notifyArray(&quot;get&quot;, [propKey], target.proxy)
-			return target.get(parseInt(propKey))
+			target.superKlass.beforeArray(propKey, target.key, [], target.proxy)
+			try {
+				var result = target.get(parseInt(propKey))
+			} catch (e) {
+				target.superKlass.arrayError(propKey, target.key, e)
+				return
+			}
+			target.superKlass.afterArray(propKey, target.key, target.proxy)
+			return result
 		} else {
 			let propValue = target[propKey]
 			if(typeof(propValue) == &quot;function&quot; &amp;&amp; !(typeof(propKey) == &quot;symbol&quot;)) {
 				return function() {
 					/* invoke notifyArray on target&apos;s superKlass */
 					let argsArray = [...arguments]
-					argsArray = target.superKlass.notifyArray(propKey, argsArray, target.proxy)
-					
-					/* remove the old arguments, add the new arguments and then apply the original method */
-					while(arguments.length &gt; 0) {
-						Array.shift(arguments)
+					argsArray = target.superKlass.beforeArray(propKey, target.key, argsArray, target.proxy)
+					try {
+						let result = propValue.apply(target, argsArray, propKey)
+						target.superKlass.afterArray(propKey, target.key, target.proxy)
+						return result
+					} catch (err) {
+						target.superKlass.arrayError(propKey, target.key, err)
+						return
 					}
-					
-					Array.unshift(arguments, ...argsArray)
-					return propValue.apply(target, arguments, propKey)
 				}
 			}
 		}
@@ -115,7 +125,7 @@ export class ArrayMField extends MField {
 	 * @param {Object} schema - A JSON schema that describes this MFields value
 	 * @param {MObject} superKlass - The MObject that this field belongs to
 	 */ 	
-	constructor(schema, superKlass) {
+	constructor(schema, superKlass, key) {
 		super(&quot;array&quot;, schema, [])
 
 		/**
@@ -141,6 +151,11 @@ export class ArrayMField extends MField {
 		 * Override this[Symbol.iterator]
 		 */
 		this[Symbol.iterator] = this.iterator
+
+		/**
+		 * The key that is used to access this managed array from the MObject
+		 */
+		this.key = key
 	}
 
 	setThisProxy(proxy) {
@@ -495,7 +510,7 @@ export class ArrayMField extends MField {
 	 */
 	validate(values) {
 		if(values == undefined) {
-			return {true, undefined, undefined}
+			return {valid: true, error: undefined, fields: undefined}
 		}
 
 		let fields = []
@@ -506,7 +521,7 @@ export class ArrayMField extends MField {
 		if(this.schema.items instanceof Array) {
 			let tmpItemsIdx = this.itemsIdx
 			for(let value of values) {
-				field = MFieldFactory(this.schema.items[tmpItemsIdx], this.superKlass)
+				field = MFieldFactory(this.schema.items[tmpItemsIdx], this.superKlass, this.key)
 				tmpItemsIdx++;
 
 				try { 
@@ -521,7 +536,7 @@ export class ArrayMField extends MField {
 			}
 		} else {
 			for(let value of values) {
-				field = MFieldFactory(this.schema.items, this.superKlass)
+				field = MFieldFactory(this.schema.items, this.superKlass, this.key)
 				try { 
 					field.setValue(value)
 				} catch (err) {
@@ -626,13 +641,18 @@ export class EnumMField extends MField {
  * are stored within an MObjectField.  
  */
 export class OneOfMField extends MField {
-	constructor(schema, superKlass) {
+	constructor(schema, superKlass, key) {
 		super(&quot;oneOf&quot;, schema, schema.oneOf[0].klass)
 		/**
 		 * The MObject that this OneOfMField belongs to
 		 * @type {MObject}
 		 */
 		this.superKlass = superKlass
+
+		/**
+		 * The key that is used to access this oneOf mfield
+		 */
+		this.key = key
 	}	
 
 	/**
@@ -646,7 +666,7 @@ export class OneOfMField extends MField {
 
 		for(let schema of this.schema.oneOf) {
 			try{
-				field = MFieldFactory(schema, this.superKlass)
+				field = MFieldFactory(schema, this.superKlass, this.key)
 				field.setValue(value)
 				valid = true
 				return {valid, error, field}
@@ -686,7 +706,7 @@ export class OneOfMField extends MField {
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.0.1)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
 </footer>
 
 <script src="script/search_index.js"></script>

@@ -1,5 +1,11 @@
 window.esdocSearchIndex = [
   [
+    "manageddatajs/framework/mixins/apisynchronizer.js~apisynchronizer",
+    "function/index.html#static-function-ApiSynchronizer",
+    "<span>ApiSynchronizer</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/mixins/ApiSynchronizer.js</span>",
+    "function"
+  ],
+  [
     "manageddatajs/framework/datamanager/fields/mfieldmulti.js~arrayhandler",
     "class/framework/dataManager/fields/MFieldMulti.js~ArrayHandler.html",
     "<span>ArrayHandler</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldMulti.js</span>",
@@ -108,10 +114,22 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "manageddatajs/framework/mixins/serializer.js~serializer",
+    "function/index.html#static-function-Serializer",
+    "<span>Serializer</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/mixins/Serializer.js</span>",
+    "function"
+  ],
+  [
     "manageddatajs/framework/datamanager/fields/mfieldsingle.js~stringmfield",
     "class/framework/dataManager/fields/MFieldSingle.js~StringMField.html",
     "<span>StringMField</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/fields/MFieldSingle.js</span>",
     "class"
+  ],
+  [
+    "manageddatajs/framework/datamanager/datamanager.js~mix",
+    "function/index.html#static-function-mix",
+    "<span>mix</span> <span class=\"search-result-import-path\">ManagedDataJS/framework/dataManager/DataManager.js</span>",
+    "function"
   ],
   [
     "manageddatajs/framework/datamanager/schema.js~parseschema",
@@ -456,6 +474,24 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "framework/datamanager/mobject.js~mobject#afterarray",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-afterArray",
+    "framework/dataManager/MObject.js~MObject#afterArray",
+    "method"
+  ],
+  [
+    "framework/datamanager/mobject.js~mobject#arrayerror",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-arrayError",
+    "framework/dataManager/MObject.js~MObject#arrayError",
+    "method"
+  ],
+  [
+    "framework/datamanager/mobject.js~mobject#beforearray",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-beforeArray",
+    "framework/dataManager/MObject.js~MObject#beforeArray",
+    "method"
+  ],
+  [
     "framework/datamanager/mobject.js~mobject#constructor",
     "class/framework/dataManager/MObject.js~MObject.html#instance-constructor-constructor",
     "framework/dataManager/MObject.js~MObject#constructor",
@@ -492,12 +528,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "framework/datamanager/mobject.js~mobject#notifyarray",
-    "class/framework/dataManager/MObject.js~MObject.html#instance-method-notifyArray",
-    "framework/dataManager/MObject.js~MObject#notifyArray",
-    "method"
-  ],
-  [
     "framework/datamanager/mobject.js~mobject#proxy",
     "class/framework/dataManager/MObject.js~MObject.html#instance-member-proxy",
     "framework/dataManager/MObject.js~MObject#proxy",
@@ -531,6 +561,12 @@ window.esdocSearchIndex = [
     "framework/datamanager/mobject.js~mobject#tostring",
     "class/framework/dataManager/MObject.js~MObject.html#instance-method-toString",
     "framework/dataManager/MObject.js~MObject#toString",
+    "method"
+  ],
+  [
+    "framework/datamanager/mobject.js~mobject#valuestostring",
+    "class/framework/dataManager/MObject.js~MObject.html#instance-method-valuesToString",
+    "framework/dataManager/MObject.js~MObject#valuesToString",
     "method"
   ],
   [
@@ -768,6 +804,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "framework/datamanager/fields/mfieldmulti.js~arraymfield#key",
+    "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-member-key",
+    "framework/dataManager/fields/MFieldMulti.js~ArrayMField#key",
+    "member"
+  ],
+  [
     "framework/datamanager/fields/mfieldmulti.js~arraymfield#keys",
     "class/framework/dataManager/fields/MFieldMulti.js~ArrayMField.html#instance-method-keys",
     "framework/dataManager/fields/MFieldMulti.js~ArrayMField#keys",
@@ -928,6 +970,12 @@ window.esdocSearchIndex = [
     "class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html#instance-method-getValue",
     "framework/dataManager/fields/MFieldMulti.js~OneOfMField#getValue",
     "method"
+  ],
+  [
+    "framework/datamanager/fields/mfieldmulti.js~oneofmfield#key",
+    "class/framework/dataManager/fields/MFieldMulti.js~OneOfMField.html#instance-member-key",
+    "framework/dataManager/fields/MFieldMulti.js~OneOfMField#key",
+    "member"
   ],
   [
     "framework/datamanager/fields/mfieldmulti.js~oneofmfield#setvalue",
@@ -1098,6 +1146,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "framework/mixins/apisynchronizer.js",
+    "file/framework/mixins/ApiSynchronizer.js.html",
+    "framework/mixins/ApiSynchronizer.js",
+    "file"
+  ],
+  [
     "framework/mixins/locking.js",
     "file/framework/mixins/Locking.js.html",
     "framework/mixins/Locking.js",
@@ -1113,6 +1167,12 @@ window.esdocSearchIndex = [
     "framework/mixins/persistence.js",
     "file/framework/mixins/Persistence.js.html",
     "framework/mixins/Persistence.js",
+    "file"
+  ],
+  [
+    "framework/mixins/serializer.js",
+    "file/framework/mixins/Serializer.js.html",
+    "framework/mixins/Serializer.js",
     "file"
   ],
   [

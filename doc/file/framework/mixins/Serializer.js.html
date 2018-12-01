@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <base data-ice="baseUrl" href="../../../">
-  <title data-ice="title">framework/mixins/index.js | ManagedDataJS</title>
+  <title data-ice="title">framework/mixins/Serializer.js | ManagedDataJS</title>
   <link type="text/css" rel="stylesheet" href="css/style.css">
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
@@ -56,17 +56,16 @@
 </div>
 </nav>
 
-<div class="content" data-ice="content"><h1 data-ice="title">framework/mixins/index.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import {Locking} from &quot;./Locking&quot;
-import {Logging} from &quot;./Logging&quot;
-import {Persistence} from &quot;./Persistence&quot;
-import {Serializer} from &quot;./Serializer&quot;
-import {ApiSynchronizer} from &quot;./ApiSynchronizer&quot;
+<div class="content" data-ice="content"><h1 data-ice="title">framework/mixins/Serializer.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">export let Serializer = (superclass) =&gt; class extends superclass {
+	serialize() {
+		console.log(&quot;Serialize&quot;)
+	}
 
-/**
- * Exports Locking, Logging and Persistence as one module
- */
-export {Locking, Logging, Persistence, Serializer, ApiSynchronizer}</code></pre>
+	deserialize() {
+		console.log(&quot;deserialize&quot;)
+	}
+}</code></pre>
 
 </div>
 

@@ -41,7 +41,7 @@ the log-level option can be one of [debug, info, exception, none].
 
 the --long option can be given to run a long sequence of events for more accurate timing results.
 ```shell
-npm run statemachine -- --log-level=debug|info|exception|none
+npm run statemachine -- --log-level=info
 ```
 
 #### Open the browser at localhost:8080 to view examples and documentation
@@ -49,3 +49,8 @@ npm run statemachine -- --log-level=debug|info|exception|none
 
 #### Reason for slow performance: BABEL
 http://incaseofstairs.com/2015/06/es6-feature-performance/
+
+#### Regenerate documention for web ui:
+```shell
+npm run doc
+```

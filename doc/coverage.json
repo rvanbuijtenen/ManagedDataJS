@@ -1,7 +1,7 @@
 {
-  "coverage": "93.33%",
-  "expectCount": 150,
-  "actualCount": 140,
+  "coverage": "91.08%",
+  "expectCount": 157,
+  "actualCount": 143,
   "files": {
     "framework/dataManager/DataManager.js": {
       "expectCount": 13,
@@ -11,9 +11,12 @@
       ]
     },
     "framework/dataManager/MObject.js": {
-      "expectCount": 19,
-      "actualCount": 19,
-      "undocumentLines": []
+      "expectCount": 22,
+      "actualCount": 20,
+      "undocumentLines": [
+        181,
+        183
+      ]
     },
     "framework/dataManager/Schema.js": {
       "expectCount": 29,
@@ -26,16 +29,16 @@
       "undocumentLines": []
     },
     "framework/dataManager/fields/MFieldMulti.js": {
-      "expectCount": 56,
-      "actualCount": 49,
+      "expectCount": 58,
+      "actualCount": 51,
       "undocumentLines": [
-        90,
-        91,
-        137,
-        422,
-        426,
-        573,
-        618
+        102,
+        103,
+        149,
+        434,
+        438,
+        585,
+        635
       ]
     },
     "framework/dataManager/fields/MFieldSingle.js": {
@@ -44,6 +47,13 @@
       "undocumentLines": [
         77,
         88
+      ]
+    },
+    "framework/mixins/ApiSynchronizer.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        4
       ]
     },
     "framework/mixins/Locking.js": {
@@ -60,6 +70,13 @@
       "expectCount": 1,
       "actualCount": 1,
       "undocumentLines": []
+    },
+    "framework/mixins/Serializer.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        1
+      ]
     }
   }
 }
