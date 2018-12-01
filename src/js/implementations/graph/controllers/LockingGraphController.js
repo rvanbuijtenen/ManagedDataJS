@@ -11,13 +11,33 @@ export default class LockingGraphController extends GraphController {
 		this.view.renderLock(this.model.isLocked())
 	}
 
+	addLine() {
+		try {
+			super.addLine()
+		} catch (e) {
+			console.log(e)
+		}
+	}
+
+	addSegment(line, coordinates) {
+		try {
+			super.addSegment(line, coordinates)
+		} catch (e) {
+			console.log(e)
+		}
+	}
+
 	unlock() {
 		this.model.unlock()
 		this.view.renderLock(this.model.isLocked())
 	}
 
 	reset() {
-		super.reset()
-		this.view.renderLock(this.model.isLocked())
+		try {	
+			super.reset()
+			this.view.renderLock(this.model.isLocked())
+		} catch (e) {
+			console.log(e)
+		}
 	}
 }

@@ -24,7 +24,7 @@ export default function runMachine(type, viewElement) {
 			break;
 		}
 		case "loggingGraph": {
-			manager = new DataManager(schema, Logging)
+			manager = new DataManager(schema, {}, {}, Logging)
 
 			model = makeGraph(manager)
 			view = new GraphView("graph/graph.html", viewElement)
@@ -32,7 +32,7 @@ export default function runMachine(type, viewElement) {
 			break;
 		}
 		case "lockingGraph": {
-			manager = new DataManager(schema, Locking)
+			manager = new DataManager(schema, {}, {}, Locking)
 
 			model = makeGraph(manager)
 			view = new LockingGraphView("graph/lockingGraph.html", viewElement)
@@ -40,7 +40,7 @@ export default function runMachine(type, viewElement) {
 			break;
 		}
 		case "loggingLockingGraph": {
-			manager = new DataManager(schema, Logging, Locking)
+			manager = new DataManager(schema, {}, {}, Logging, Locking)
 
 			model = makeGraph(manager)
 			view = new LockingGraphView("graph/lockingGraph.html", viewElement)
@@ -48,7 +48,7 @@ export default function runMachine(type, viewElement) {
 			break;
 		}
 		case "loggingLockingPersistentGraph": {
-			manager = new DataManager(schema, Logging, Locking, Persistence)
+			manager = new DataManager(schema, {}, {}, Logging, Locking, Persistence)
 
 			model = makePersistentGraph(manager)
 			view = new LockingPersistentGraphView("graph/lockingPersistentGraph.html", viewElement)

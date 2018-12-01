@@ -67,7 +67,7 @@ export default class GraphView extends AbstractView {
 		
 		graph.lines.map((line) => {		
 			line.segments.map((segment) => {
-				context.beginPath();
+				context.beginPath()
 				context.strokeStyle = segment.belongs_to.color
 				context.lineWidth = segment.belongs_to.width
 				context.moveTo(segment.from.x*scale_x, canvas.height-segment.from.y*scale_y)
@@ -98,6 +98,7 @@ export default class GraphView extends AbstractView {
 					}
 				}
 				context.stroke()
+				context.closePath()
 			})
 		})
 	}
