@@ -20,9 +20,9 @@ export class ArrayHandler {
 		if(!(typeof(propKey)=="symbol") && !isNaN(propKey)) {
 			target.superKlass.beforeArray(propKey, target.key, [], target.proxy)
 			try {
-				let result = target.get(parseInt(propKey))
+				var result = target.get(parseInt(propKey))
 			} catch (e) {
-				target.superKlass.arrayError(propKey, target.key, err)
+				target.superKlass.arrayError(propKey, target.key, e)
 				return
 			}
 			target.superKlass.afterArray(propKey, target.key, target.proxy)
@@ -34,13 +34,6 @@ export class ArrayHandler {
 					/* invoke notifyArray on target's superKlass */
 					let argsArray = [...arguments]
 					argsArray = target.superKlass.beforeArray(propKey, target.key, argsArray, target.proxy)
-					/* remove the old arguments, add the new arguments and then apply the original method */
-					//while(arguments.length > 0) {
-					//	console.log("length:", arguments.length, arguments)
-					//	Array.prototype.shift(arguments)
-					//}
-					
-					//Array.prototype.unshift(arguments, ...argsArray)
 					try {
 						let result = propValue.apply(target, argsArray, propKey)
 						target.superKlass.afterArray(propKey, target.key, target.proxy)

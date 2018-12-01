@@ -9,6 +9,7 @@ export let Locking = (superclass) => class extends superclass {
 	 */
 	constructor(schema, ...otherArgs) {
 		super(schema, ...otherArgs);
+		this.arrayMethodsWithSideEffects = ["push", "splice", "pop", "shift", "unshift"]
 		/**
 		 * @type{Boolean} Indicates whether the object is locked. When locked === true the object cannot be modified
 		 */
@@ -58,21 +59,10 @@ export let Locking = (superclass) => class extends superclass {
 		this.locked = false;
 	}
 
-	/**
-	 * @param {String} method - A string representing the name of the method that was called on the managedArray
-	 * @param {Array} args - An array containing the arguments that will be passed to the method
-	 * @param {ManagedArray} array - The array that the method was invoked on
-	 *
-	 * @return {Array} - An array containing the args that were passed to this function. If the args are modified,
-	 * 					 the invoked array method will execute 'method' with the modified arguments instead.
-	 */
-	notifyArray(method, args, array) {
-		args = super.notifyArray(method, args, array)
-		let methodsWithSideEffects = ["push", "splice", "pop", "shift", "unshift"]
-		
-		if(this.isLocked() && methodsWithSideEffects.includes(method)) {
-			throw TypeError("object is locked")
+	beforeArray(method, arrayName, argsArray, targetProxy) {
+		if(this.locked == true && this.arrayMethodsWithSideEffects.includes(method)) {
+			throw new TypeError("object is locked");
 		}
-		return args
+		return super.beforeArray(method, arrayName, argsArray, targetProxy)
 	}
 }
