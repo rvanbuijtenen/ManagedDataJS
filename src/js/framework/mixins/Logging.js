@@ -22,9 +22,10 @@ export let Logging = (superclass) => class extends superclass {
 		let result;
 		try {
 			result = super.set(propKey, value);
-			console.log("set property "+propKey+" of klass "+this.schema.getKlass()+" to value: "+ JSON.stringify(value));
+			console.log("set property "+propKey+" of klass "+this.schema.getKlass()+" to value: "+ value);
 		} catch (err) {
-			console.log("An error occured when setting property "+propKey+" of klass "+this.schema.getKlass()+" to value: " + JSON.stringify(value));
+			console.log("An error occured when setting property "+propKey+" of klass "+this.schema.getKlass()+" to value: " + value);
+			console.log(`${err}`)
 			throw err
 		}
 		return result;
@@ -42,9 +43,9 @@ export let Logging = (superclass) => class extends superclass {
 		let result;
 		try {
 			result = super.get(propKey);
-			console.log("getting property "+propKey+" of klass "+this.schema.getKlass());
+			//console.log("getting property "+propKey+" of klass "+this.schema.getKlass());
 		} catch (err) {
-			console.log("An error occured when getting property "+propKey+" of klass "+this.schema.getKlass())
+			//console.log("An error occured when getting property "+propKey+" of klass "+this.schema.getKlass())
 			throw err
 		}
 		return result;
@@ -62,7 +63,7 @@ export let Logging = (superclass) => class extends superclass {
 	 */
 	notifyArray(method, args, array) {
 		args= super.notifyArray(method, args, array)
-		console.log("invoked "+method+" on ManagedArray in object "+this.schema.getKlass()+" with arguments "+args.toString())
+		//console.log("invoked "+method+" on ManagedArray in object "+this.schema.getKlass()+" with arguments "+args.toString())
 		return args
 	}
 }

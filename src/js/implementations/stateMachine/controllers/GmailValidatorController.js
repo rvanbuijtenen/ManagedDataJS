@@ -4,13 +4,12 @@ export default class GmailValidatorController extends DoorsController {
 	execute() {
 		super.execute()
 
-		console.log("start name:", this.model.start.name)
-		if(this.model.start.name == "mExtension") {
-			this.view.renderValidation(
-				this.eventLog.join(''), 
-				this.errorCnt == 0)
-			this.model.start = this.originalStart
-			this.eventLog = []
+		var message = 'is not a gmail address'
+		if(this.path[this.path.length - 1] == 'mExtension' && this.model.start.name == 'mExtension') {
+			message = 'is a gmail address'
 		}
+		this.view.renderValidation(
+			this.view.getEvents().join(''), 
+			message)
 	}
 }

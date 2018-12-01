@@ -1,6 +1,5 @@
 export default class AbstractView {
 	constructor(templateName, renderElement) {
-		console.log("abstract view:", renderElement)
 		$.ajaxSetup ({cache: false});
 		this.renderElement = renderElement
 
@@ -32,20 +31,8 @@ export default class AbstractView {
 	initActions() {
 		this.renderElement.find($(".action")).each((idx, element) => {
 			element.addEventListener("click", () => {
-				console.log($("#"+element.id).attr("event"))
 				this.controller[$("#"+element.id).attr("event")]()
 			})
 		})
 	}
-	/*
-	initLinks() {
-		this.renderElement.find($(".link")).each((idx, element) => {
-			element.addEventListener("click", () => {
-				this.renderElement.find($(".active")).removeClass("active")
-				console.log(element)
-				this.controller["handleLink"](element.textContent)
-				element.className += " active"
-			})
-		})
-	}*/
 }

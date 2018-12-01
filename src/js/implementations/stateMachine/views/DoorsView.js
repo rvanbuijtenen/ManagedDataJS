@@ -62,8 +62,8 @@ export default class DoorsView extends AbstractView {
 		this.renderElement.find($("#machine-view")).html(html.join("<br/>"))
 	}
 
-	renderExecution(message) {
-		this.renderElement.find($("#machine-execution")).append("<b>--$</b> "+message+"<br/>")
+	renderExecution(messages) {
+		this.renderElement.find($("#machine-execution")).append(messages.join(' ---> ') + "<br/>")
 	}
 
 	resetExecution() {

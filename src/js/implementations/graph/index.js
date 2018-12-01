@@ -10,8 +10,8 @@ import {DataManager} from "../../framework/dataManager/DataManager"
 import {Logging,Locking, Persistence} from "../../framework/mixins"
 
 export default function runMachine(type, viewElement) {
+	viewElement.html('')
 	let manager, model, view, controller
-
 	let schema = require("./schemas/graphSchema")
 
 	switch(type) {

@@ -67,7 +67,7 @@ export class DataManager {
 	 * @param {...Function} [mixin1,mixin...,mixinN] - an arbitrary number of mixins that should be used to extend managed
 	 * objects constructed by the basic data manager
 	 */
-	constructor(schema, general_kwargs, klass_kwargs, ...mixins) {
+	constructor(schema, general_kwargs = {}, klass_kwargs = {}, ...mixins) {
 		/**
 		 * An array of mixins for the managed objects created by this data manager
 		 * @type {Array}

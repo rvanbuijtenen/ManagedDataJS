@@ -11,6 +11,16 @@ export default class LockingDoorsController extends DoorsController {
 		this.view.renderLock(this.model.isLocked())
 	}
 
+	reinit() {
+		let lock = this.model.isLocked()
+		this.model.unlock()
+		super.reinit()
+		if(lock) {
+			this.model.lock()
+		}
+
+	}
+
 	unlock() {
 		this.model.unlock()
 		this.view.renderLock(this.model.isLocked())

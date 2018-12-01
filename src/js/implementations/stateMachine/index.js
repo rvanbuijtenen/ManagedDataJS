@@ -11,8 +11,9 @@ import {DataManager} from "../../framework/dataManager/DataManager"
 import {Logging,Locking} from "../../framework/mixins"
 
 export default function runMachine(type, viewElement) {
-	let manager, model, view, controller
+    viewElement.html('')
 
+	let manager, model, view, controller
 	let schema = require("./schemas/machineSchema")
 
 	switch(type) {
@@ -21,11 +22,11 @@ export default function runMachine(type, viewElement) {
 
 			model = makeDoors(manager)
 			view = new DoorsView("stateMachine/doors.html", viewElement)
-			controller = new DoorsController({}, view, manager)
+			controller = new DoorsController(model, view, manager)
 			break;
 		}
 		case "loggingDoors": {
-			manager = new DataManager(schema, Logging)
+			manager = new DataManager(schema, {}, {}, Logging)
 
 			model = makeDoors(manager)
 			view = new DoorsView("stateMachine/doors.html", viewElement)
@@ -33,15 +34,14 @@ export default function runMachine(type, viewElement) {
 			break;
 		}
 		case "lockingDoors": {
-			manager = new DataManager(schema, Locking)
-
+			manager = new DataManager(schema, {}, {}, Locking)
 			model = makeDoors(manager)
 			view = new LockingDoorsView("stateMachine/lockingDoors.html", viewElement)
 			controller = new LockingDoorsController(model, view, manager)
 			break;
 		}
 		case "loggingLockingDoors": {
-			manager = new DataManager(schema, Logging, Locking)
+			manager = new DataManager(schema, {}, {}, Locking, Logging)
 
 			model = makeDoors(manager)
 			view = new LockingDoorsView("stateMachine/lockingDoors.html", viewElement)
@@ -49,7 +49,7 @@ export default function runMachine(type, viewElement) {
 			break;
 		}
 		case "gmailValidator": {
-			manager = new DataManager(schema, Logging)
+			manager = new DataManager(schema, {}, {}, Logging)
 
 			model = makeGmailValidator(manager)
 			view = new GmailValidatorView("stateMachine/gmailValidator.html", viewElement)
@@ -60,6 +60,30 @@ export default function runMachine(type, viewElement) {
 			throw new TypeError("Unknown machine type: "+type)
 		}
 	}
+}
+
+function makeDoors(manager) {
+    let doors = manager.Machine({"name": "doors"})
+
+    let stateOpened = manager.State({"machine": doors, "name": "opened"})
+    let stateClosed = manager.State({"machine": doors, "name": "closed"})
+    let stateLocked = manager.State({"machine": doors, "name": "locked"})
+
+    doors.start = stateClosed;
+
+    let transOpen = manager.Transition({
+        "from": stateClosed, "to": stateOpened, "event": ["open"]
+    })           
+    let transClose = manager.Transition({
+        "from": stateOpened, "to": stateClosed, "event": ["close"]
+    })
+    let transLock = manager.Transition({
+        "from": stateClosed, "to": stateLocked, "event": ["lock"]
+    })
+    let transUnlock = manager.Transition({
+        "from": stateLocked, "to": stateClosed, "event": ["unlock"]
+    })
+    return doors
 }
 
 function makeGmailValidator(manager) {
@@ -182,4 +206,33 @@ function addPersistentParameters(manager, gmailValidator, baseId) {
 		}
 		i++
 	}
+}
+
+
+export function executeMachine(machine, events) {
+	var path = [machine.start.name]
+    // Using events.some will terminate execution if true is returned
+	events.some((event, idx) => {
+        // return 1 if transition is allowed, 0 otherwise. Transition is
+        // successful if sum(transitions) > 0
+        let success = machine.start.transitions_out.map((transition) => {
+            if(transition.event.includes(event)) {
+                try {
+                    machine.start = transition.to
+                    path.push(transition.to.name)
+                    return 1
+                } catch (e) {
+                    path.push(e)
+                }
+            }
+            return 0
+        }).reduce((a, b) => {return a + b}, 0)
+
+        // no succes: append an error message to the path
+        if(success == 0) {
+            path.push("error: &lt;State: " + machine.start.name + "&gt; has no outgoing transition: " + event)
+            return true;
+        }
+    })
+    return path
 }
