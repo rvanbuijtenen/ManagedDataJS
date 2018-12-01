@@ -1,6 +1,6 @@
 {
   "name": "ManagedDataJS",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "An implementation of Managed Data in Javascript using ES6 proxies",
   "main": "index.js",
   "scripts": {
